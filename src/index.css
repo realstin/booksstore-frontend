@@ -1,0 +1,31 @@
+:root {
+  --ink: #0f1419;
+  --clay: #8b6f47;
+  --cream: #f5f1ed;
+  --cream-muted: #e8e3dd;
+  --error: #a85a5a;
+  --success: #6d8659;
+
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Work Sans', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
