@@ -1,6 +1,6 @@
 .coming-soon {
   min-height: 100vh;
-  padding: 3rem 2rem;
+  padding: 2rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,41 +19,41 @@
   width: 3px;
   height: 40px;
   background: var(--clay);
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   border-radius: 2px;
 }
 
 .coming-soon__label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--clay);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   display: block;
   font-weight: 600;
 }
 
 .coming-soon__title {
   font-family: var(--font-serif);
-  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-size: clamp(2.8rem, 7vw, 3.8rem);
   font-weight: 500;
-  line-height: 1.2;
-  margin-bottom: 1.75rem;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
   color: var(--ink);
   letter-spacing: -0.01em;
 }
 
 .coming-soon__subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.15rem);
-  line-height: 1.7;
+  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  line-height: 1.65;
   color: var(--ink);
   opacity: 0.7;
-  margin-bottom: 3.5rem;
+  margin-bottom: 2rem;
 }
 
 .coming-soon__footer {
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid rgba(11, 20, 25, 0.08);
 }
 
@@ -61,7 +61,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--ink);
   opacity: 0.8;
   transition: opacity 0.3s ease;
@@ -120,15 +120,15 @@
 
 @media (max-width: 640px) {
   .coming-soon {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.25rem;
   }
 
   .coming-soon__title {
-    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-size: clamp(2rem, 6vw, 2.6rem);
   }
 
   .coming-soon__subtitle {
-    font-size: clamp(0.9rem, 2vw, 1rem);
+    font-size: clamp(0.95rem, 2.5vw, 1.05rem);
   }
 }
 
