@@ -25,7 +25,7 @@
 
 .coming-soon__label {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--clay);
@@ -36,7 +36,7 @@
 
 .coming-soon__title {
   font-family: 'Poppins', sans-serif;
-  font-size: clamp(2.6rem, 6vw, 3.6rem);
+  font-size: clamp(2.8rem, 7vw, 3.8rem);
   font-weight: 500;
   line-height: 1.15;
   margin-bottom: 1.25rem;
@@ -46,10 +46,10 @@
 
 .coming-soon__subtitle {
   font-family: 'Poppins', sans-serif;
-  font-size: clamp(1rem, 1.3vw, 1.2rem);
-  line-height: 1.3;
+  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  line-height: 1.65;
   color: var(--ink);
-  opacity: 0.5;
+  opacity: 0.7;
   margin-bottom: 2rem;
 }
 
