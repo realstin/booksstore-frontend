@@ -1,13 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 :root {
   --ink: #0f1419;
-  --clay: #8b6f47;
-  --cream: #f5f1ed;
-  --cream-muted: #e8e3dd;
-  --error: #a85a5a;
-  --success: #6d8659;
+  --cream: #fff;
+  --cream-muted: #fff;
+
 
   --font-serif: 'Fraunces', serif;
-  --font-sans: 'Work Sans', sans-serif;
+  --font-sans: 'Poppins', sans-serif;
 }
 
 * {
