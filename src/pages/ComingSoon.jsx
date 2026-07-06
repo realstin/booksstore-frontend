@@ -14,22 +14,34 @@ function ComingSoon() {
   return (
     <main className="coming-soon">
       <div className="coming-soon__wrapper">
+
+        {/* Real logo from public folder */}
+        <div className="coming-soon__logo">
+          <img
+            src="/bookstorelogo.svg"
+            alt="BooksStore logo"
+            className="coming-soon__logo-icon"
+          />
+          <span className="coming-soon__logo-name">BooksStore</span>
+        </div>
+
         <div className="coming-soon__accent" />
-        
-        <span className="coming-soon__label">BooksStore</span>
 
         <h1 className="coming-soon__title">
-          Building your library.
+          Building your<br />library.
         </h1>
 
         <p className="coming-soon__subtitle">
-          A space to discover, read, and keep real books. Something good 
-          deserves care. Thank you for your patience.
+          A space to discover, read, and keep real books.
+          We believe the best gift we can give is a book.
         </p>
+
+        <p className="coming-soon__motto">Read · Learn · Rest · Grow</p>
 
         <footer className="coming-soon__footer">
           <StatusBadge status={status} />
         </footer>
+
       </div>
     </main>
   );

@@ -2,8 +2,15 @@
 :root {
   --ink: #0f1419;
   --cream: #fff;
-  --cream-muted: #fff;
+  --cream-muted: #faf7f4;
 
+  --clay: #b5703a;
+  --clay-light: #f5ede3;
+  --success: #6d8659;
+  --error: #a85a5a;
+
+  --border: rgba(15, 20, 25, 0.12);
+  --border-focus: #0f1419;
 
   --font-serif: 'Fraunces', serif;
   --font-sans: 'Poppins', sans-serif;
