@@ -1,10 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-
 // ========== SESSION HELPERS ==========
-// The JWT token is no longer stored in localStorage.
-// The backend stores it inside an HTTP-only cookie.
-//
+// The backend stores The JWT token  it inside an HTTP-only cookie.
 // The browser manages the cookie automatically.
 // React only stores safe user information for UI purposes.
 
@@ -22,14 +19,9 @@ export function clearSession() {
   localStorage.removeItem('bookstowa_user');
 }
 
-
 // ========== BACKEND STATUS CHECK ==========
 // Protected routes use the HTTP-only cookie automatically.
-// We do not manually attach Authorization headers anymore.
-//
-// credentials: "include" tells the browser:
-// "Include cookies with this request."
-
+// credentials: "include" tells the browser:  "Include cookies with this request."
 export async function checkBackendStatus() {
   try {
     const response = await fetch(`${API_URL}/api/books`, {
@@ -47,9 +39,7 @@ export async function checkBackendStatus() {
   }
 }
 
-
 // ========== AUTH ==========
-
 async function authRequest(path, body) {
 
   const response = await fetch(`${API_URL}/api/auth/${path}`, {
@@ -65,9 +55,7 @@ async function authRequest(path, body) {
     body: JSON.stringify(body),
   });
 
-
   const data = await response.json().catch(() => ({}));
-
 
   if (!response.ok) {
 
@@ -80,13 +68,10 @@ async function authRequest(path, body) {
     );
   }
 
-
   return data;
 }
 
-
 // ========== REGISTER ==========
-
 export function registerUser({ name, email, password }) {
   return authRequest(
     'register',
@@ -98,9 +83,7 @@ export function registerUser({ name, email, password }) {
   );
 }
 
-
 // ========== LOGIN ==========
-
 export function loginUser({ email, password }) {
   return authRequest(
     'login',
@@ -112,7 +95,6 @@ export function loginUser({ email, password }) {
 }
 
 // ========== LOGOUT ==========
-
 export async function logoutUser() {
 
   const response = await fetch(`${API_URL}/api/auth/logout`, {
@@ -120,13 +102,9 @@ export async function logoutUser() {
     credentials: "include",
   });
 
-
   const data = await response.json().catch(() => ({}));
-
 
   // Remove user information stored for the UI
   clearSession();
-
-
   return data;
 }
