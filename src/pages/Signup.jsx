@@ -135,17 +135,23 @@ function Signup() {
           </div>
 
           <label className="auth-split__terms">
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className="auth-split__checkbox"
-            />
-            <span>
-              I agree to the{' '}
-              <a href="#" className="auth-split__terms-link">terms of service</a>.
+           <input
+             type="checkbox"
+             checked={agreed}
+             onChange={(e) => setAgreed(e.target.checked)}
+             className="auth-split__checkbox"
+           />
+           <span>
+            I agree to the{' '}
+            <Link to="/" className="auth-split__terms-link">
+            Terms of Service
+            </Link>
+            {' '}and{' '}
+            <Link to="/" className="auth-split__terms-link">
+            Privacy Policy
+            </Link>.
             </span>
-          </label>
+            </label>
 
           <div className="auth-split__actions">
             <button
