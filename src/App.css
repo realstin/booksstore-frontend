@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background: linear-gradient(135deg, #fcfbfb 0%, #faf7f7 100%);
+  background: linear-gradient(135deg, #fff 0%, #fff 100%);
 }
 
 .coming-soon__wrapper {
@@ -71,7 +71,7 @@
 .coming-soon__accent {
   width: 3px;
   height: 40px;
-  background: var(--clay);
+  background: var(--white);
   margin-bottom: -4rem;
   border-radius: 2px;
 }
@@ -424,7 +424,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: #fafaf9;
+  background: #fff;
   border-left: 1px solid #ebebeb;
   overflow: hidden;
 }
