@@ -1,9 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 // ========== SESSION HELPERS ==========
-// The backend stores The JWT token  it inside an HTTP-only cookie.
-// The browser manages the cookie automatically.
-// React only stores safe user information for UI purposes.
+// Backend store the token in HTTP-only cookie and the browser manage the cookie automatically react only access safe user information for UI purpose 
 
 export function saveSession({ user }) {
   localStorage.setItem('bookstowa_user', JSON.stringify(user));
@@ -14,14 +12,12 @@ export function getUser() {
   return raw ? JSON.parse(raw) : null;
 }
 
-
 export function clearSession() {
   localStorage.removeItem('bookstowa_user');
 }
 
 // ========== BACKEND STATUS CHECK ==========
-// Protected routes use the HTTP-only cookie automatically.
-// credentials: "include" tells the browser:  "Include cookies with this request."
+// Protected routes use the HTTP-only cookie automatically. credentials: "include" tells the browser:  "Include cookies with this request."
 export async function checkBackendStatus() {
   try {
     const response = await fetch(`${API_URL}/api/books`, {
