@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser, saveSession } from '../services/api';
-import { IconEye, IconEyeOff } from '../components/Icons'; 
-
+import { IconEye, IconEyeOff } from '../components/Icons';
+import { AUTH_MESSAGES } from '../constants/messages';
 
 function Login() {
   const navigate = useNavigate();
@@ -43,8 +43,8 @@ function Login() {
         </Link>
 
         <div className="auth-split__header">
-          <h1 className="auth-split__title">Log In</h1>
-          <p className="auth-split__sub">Welcome back — your library is waiting.</p>
+          <h1 className="auth-split__title">{AUTH_MESSAGES.LOGIN_TITLE}</h1>
+          <p className="auth-split__sub">{AUTH_MESSAGES.LOGIN_SUBTITLE}</p>
         </div>
 
         {error && (
@@ -61,11 +61,11 @@ function Login() {
         <form className="auth-split__form" onSubmit={handleSubmit} noValidate>
 
           <div className="auth-split__field">
-            <span className="auth-split__field-label">Email</span>
+            <span className="auth-split__field-label">{AUTH_MESSAGES.LOGIN_EMAIL_LABEL}</span>
             <input
               name="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={AUTH_MESSAGES.LOGIN_EMAIL_PLACEHOLDER}
               value={form.email}
               onChange={handleChange}
               className="auth-split__input"
@@ -75,11 +75,11 @@ function Login() {
           </div>
 
           <div className="auth-split__field">
-            <span className="auth-split__field-label">Password</span>
+            <span className="auth-split__field-label">{AUTH_MESSAGES.LOGIN_PASSWORD_LABEL}</span>
             <input
               name="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
+              placeholder={AUTH_MESSAGES.LOGIN_PASSWORD_PLACEHOLDER}
               value={form.password}
               onChange={handleChange}
               className="auth-split__input"
@@ -102,7 +102,7 @@ function Login() {
               className="auth-split__btn auth-split__btn--primary"
               disabled={loading}
             >
-              {loading ? 'Signing in…' : 'Log In'}
+              {loading ? AUTH_MESSAGES.LOGIN_SIGNING_IN : AUTH_MESSAGES.LOGIN_BUTTON}
             </button>
             <Link to="/signup" className="auth-split__btn auth-split__btn--outline">
               Sign Up
@@ -110,7 +110,7 @@ function Login() {
           </div>
         </form>
 
-        <p className="auth-split__motto">Read · Learn · Rest · Grow</p>
+        <p className="auth-split__motto">{AUTH_MESSAGES.MOTTO}</p>
       </div>
 
       {/* ══ RIGHT ══ */}

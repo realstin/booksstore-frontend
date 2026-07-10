@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
-
-
+import { AUTH_MESSAGES } from '../constants/messages';
 
 function Signup() {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ function Signup() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!agreed) {
-      setError('Please agree to the terms of service to continue.');
+      setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR);
       return;
     }
     setError('');
@@ -48,8 +47,8 @@ function Signup() {
         </Link>
 
         <div className="auth-split__header">
-          <h1 className="auth-split__title">Sign Up</h1>
-          <p className="auth-split__sub">You are a step away from something great!</p>
+          <h1 className="auth-split__title">{AUTH_MESSAGES.SIGNUP_TITLE}</h1>
+          <p className="auth-split__sub">{AUTH_MESSAGES.SIGNUP_SUBTITLE}</p>
         </div>
 
         {error && (
@@ -66,11 +65,11 @@ function Signup() {
         <form className="auth-split__form" onSubmit={handleSubmit} noValidate>
 
           <div className="auth-split__field">
-            <span className="auth-split__field-label">Name</span>
+            <span className="auth-split__field-label">{AUTH_MESSAGES.SIGNUP_NAME_LABEL}</span>
             <input
               name="name"
               type="text"
-              placeholder="Your full name"
+              placeholder={AUTH_MESSAGES.SIGNUP_NAME_PLACEHOLDER}
               value={form.name}
               onChange={handleChange}
               className="auth-split__input"
@@ -80,11 +79,11 @@ function Signup() {
           </div>
 
           <div className="auth-split__field">
-            <span className="auth-split__field-label">Email</span>
+            <span className="auth-split__field-label">{AUTH_MESSAGES.SIGNUP_EMAIL_LABEL}</span>
             <input
               name="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={AUTH_MESSAGES.SIGNUP_EMAIL_PLACEHOLDER}
               value={form.email}
               onChange={handleChange}
               className="auth-split__input"
@@ -94,11 +93,11 @@ function Signup() {
           </div>
 
           <div className="auth-split__field">
-            <span className="auth-split__field-label">Password</span>
+            <span className="auth-split__field-label">{AUTH_MESSAGES.SIGNUP_PASSWORD_LABEL}</span>
             <input
               name="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Min. 6 characters"
+              placeholder={AUTH_MESSAGES.SIGNUP_PASSWORD_PLACEHOLDER}
               value={form.password}
               onChange={handleChange}
               className="auth-split__input"
@@ -117,23 +116,23 @@ function Signup() {
           </div>
 
           <label className="auth-split__terms">
-           <input
-             type="checkbox"
-             checked={agreed}
-             onChange={(e) => setAgreed(e.target.checked)}
-             className="auth-split__checkbox"
-           />
-           <span>
-            I agree to the{' '}
-            <Link to="/" className="auth-split__terms-link">
-            Terms of Service
-            </Link>
-            {' '}and{' '}
-            <Link to="/" className="auth-split__terms-link">
-            Privacy Policy
-            </Link>.
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="auth-split__checkbox"
+            />
+            <span>
+              {AUTH_MESSAGES.SIGNUP_TERMS}{' '}
+              <Link to="/" className="auth-split__terms-link">
+                {AUTH_MESSAGES.SIGNUP_TERMS_SERVICE}
+              </Link>
+              {' '}and{' '}
+              <Link to="/" className="auth-split__terms-link">
+                {AUTH_MESSAGES.SIGNUP_PRIVACY}
+              </Link>.
             </span>
-            </label>
+          </label>
 
           <div className="auth-split__actions">
             <button
@@ -141,7 +140,7 @@ function Signup() {
               className="auth-split__btn auth-split__btn--primary"
               disabled={loading}
             >
-              {loading ? 'Creating account…' : 'Sign Up'}
+              {loading ? AUTH_MESSAGES.SIGNUP_CREATING : AUTH_MESSAGES.SIGNUP_BUTTON}
             </button>
             <Link to="/login" className="auth-split__btn auth-split__btn--outline">
               Log in
@@ -149,7 +148,7 @@ function Signup() {
           </div>
         </form>
 
-        <p className="auth-split__motto">Read · Learn · Rest · Grow</p>
+        <p className="auth-split__motto">{AUTH_MESSAGES.MOTTO}</p>
       </div>
 
       {/* ══ RIGHT ══ */}
