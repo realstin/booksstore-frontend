@@ -1,12 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 // ========== SESSION HELPERS ==========
-// Backend store the token in HTTP-only cookie and the browser manage the cookie automatically react only access safe user information for UI purpose 
-
-export function saveSession({ user }) {
-  localStorage.setItem('bookstowa_user', JSON.stringify(user));
-}
-
 export function getUser() {
   const raw = localStorage.getItem('bookstowa_user');
   return raw ? JSON.parse(raw) : null;
@@ -17,7 +11,6 @@ export function clearSession() {
 }
 
 // ========== BACKEND STATUS CHECK ==========
-// Protected routes use the HTTP-only cookie automatically. credentials: "include" tells the browser:  "Include cookies with this request."
 export async function checkBackendStatus() {
   try {
     const response = await fetch(`${API_URL}/api/books`, {
@@ -45,7 +38,6 @@ async function authRequest(path, body) {
       'Content-Type': 'application/json',
     },
 
-    // Allows browser to receive/send HTTP-only cookies
     credentials: "include",
 
     body: JSON.stringify(body),
@@ -100,7 +92,6 @@ export async function logoutUser() {
 
   const data = await response.json().catch(() => ({}));
 
-  // Remove user information stored for the UI
   clearSession();
   return data;
 }

@@ -1,32 +1,33 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logoutUser } from "../services/api";
+import { logoutUser } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 function Logout() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     const handleLogout = async () => {
       try {
-        // Call the logout function from api.js
-        // This will:
-        // 1. Send POST to /api/auth/logout
-        // 2. Backend clears HTTP-only cookie
-        // 3. Frontend clears localStorage
+        // Call backend logout
         await logoutUser();
         
-        // After successful logout, redirect to login page
+        // Clear context
+        logout();
+        
+        // Redirect to login
         navigate('/login');
       } catch (error) {
         console.error('Logout failed:', error);
-        // Even if logout fails, clear local data and redirect
+        // Even if logout fails, clear local state
+        logout();
         navigate('/login');
       }
     };
 
-    // Call logout as soon as this page loads
     handleLogout();
-  }, [navigate]);
+  }, [navigate, logout]);
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>

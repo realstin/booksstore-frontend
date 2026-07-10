@@ -1,13 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser, saveSession } from '../services/api';
+import { loginUser } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateLoginForm } from '../utils/validation';
 import { useForm } from '../hooks/useForm';
+import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
@@ -22,7 +24,7 @@ function Login() {
 
       // Login
       const data = await loginUser(formData);
-      saveSession(data);
+      login(data);
       navigate('/');
     }
   );
