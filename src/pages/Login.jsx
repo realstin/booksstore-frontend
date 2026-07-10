@@ -1,44 +1,31 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser, saveSession } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateLoginForm } from '../utils/validation';
+import { useForm } from '../hooks/useForm';
+import { useState } from 'react';
 
 function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (error) setError('');
-  }
+  const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
+    { email: '', password: '' },
+    async (formData) => {
+      // Validate form
+      const validation = validateLoginForm(formData.email, formData.password);
+      if (!validation.valid) {
+        setError(validation.error);
+        return;
+      }
 
- async function handleSubmit(e) {
-  e.preventDefault();
-  setError('');
-  
-  // ========== VALIDATE FORM ==========
-  const validation = validateLoginForm(form.email, form.password);
-  if (!validation.valid) {
-    setError(validation.error);
-    return;
-  }
-  
-  setLoading(true);
-  try {
-    const data = await loginUser(form);
-    saveSession(data);
-    navigate('/');
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}
+      // Login
+      const data = await loginUser(formData);
+      saveSession(data);
+      navigate('/');
+    }
+  );
 
   return (
     <div className="auth-split">

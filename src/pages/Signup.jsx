@@ -1,51 +1,37 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateSignupForm } from '../utils/validation';
+import { useForm } from '../hooks/useForm';
+import { useState } from 'react';
 
 function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (error) setError('');
-  }
+  const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
+    { name: '', email: '', password: '' },
+    async (formData) => {
+      // Check if user agreed
+      if (!agreed) {
+        setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR);
+        return;
+      }
 
-async function handleSubmit(e) {
-  e.preventDefault();
-  
-  // ========== CHECK IF USER AGREED ==========
-  if (!agreed) {
-    setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR);
-    return;
-  }
-  
-  setError('');
-  
-  // ========== VALIDATE FORM ==========
-  const validation = validateSignupForm(form.name, form.email, form.password);
-  if (!validation.valid) {
-    setError(validation.error);
-    return;
-  }
-  
-  setLoading(true);
-  try {
-    await registerUser(form);
-    navigate('/login');
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}
+      // Validate form
+      const validation = validateSignupForm(formData.name, formData.email, formData.password);
+      if (!validation.valid) {
+        setError(validation.error);
+        return;
+      }
+
+      // Register
+      await registerUser(formData);
+      navigate('/login');
+    }
+  );
 
   return (
     <div className="auth-split">
