@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { loginUser, saveSession } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
+import { validateLoginForm } from '../utils/validation';
 
 function Login() {
   const navigate = useNavigate();
@@ -16,20 +17,28 @@ function Login() {
     if (error) setError('');
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const data = await loginUser(form);
-      saveSession(data);
-      navigate('/');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+ async function handleSubmit(e) {
+  e.preventDefault();
+  setError('');
+  
+  // ========== VALIDATE FORM ==========
+  const validation = validateLoginForm(form.email, form.password);
+  if (!validation.valid) {
+    setError(validation.error);
+    return;
   }
+  
+  setLoading(true);
+  try {
+    const data = await loginUser(form);
+    saveSession(data);
+    navigate('/');
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <div className="auth-split">

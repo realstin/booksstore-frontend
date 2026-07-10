@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
+import { validateSignupForm } from '../utils/validation';
 
 function Signup() {
   const navigate = useNavigate();
@@ -17,23 +18,34 @@ function Signup() {
     if (error) setError('');
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!agreed) {
-      setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR);
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      await registerUser(form);
-      navigate('/login');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+async function handleSubmit(e) {
+  e.preventDefault();
+  
+  // ========== CHECK IF USER AGREED ==========
+  if (!agreed) {
+    setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR);
+    return;
   }
+  
+  setError('');
+  
+  // ========== VALIDATE FORM ==========
+  const validation = validateSignupForm(form.name, form.email, form.password);
+  if (!validation.valid) {
+    setError(validation.error);
+    return;
+  }
+  
+  setLoading(true);
+  try {
+    await registerUser(form);
+    navigate('/login');
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <div className="auth-split">
