@@ -1,6 +1,4 @@
-/* =============================================
-   STATUS BADGE DOT COLORS
-   ============================================= */
+/*STATUS BADGE DOT COLORS */ 
 
 .status-badge__dot {
   width: 8px;
@@ -23,9 +21,7 @@
   background: var(--error);
 }
 
-/* =============================================
-   COMING SOON PAGE
-   ============================================= */
+/* COMING SOON PAGE */
 
 .coming-soon {
   height: 100vh;
@@ -146,9 +142,7 @@
   .status-badge--checking .status-badge__dot { animation: none; }
 }
 
-/* =============================================
-   AUTH PAGES — no-scroll split layout
-   ============================================= */
+/*  AUTH PAGES — no-scroll split layout */
 
 .auth-split {
   width: 100%;
@@ -159,7 +153,7 @@
   overflow: hidden;
 }
 
-/* ══ LEFT panel ══ */
+/* LEFT panel */
 
 .auth-split__left {
   height: 100vh;
