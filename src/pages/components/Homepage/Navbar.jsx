@@ -63,7 +63,7 @@ function Navbar() {
             <span className={logoTextClass}>BookStore</span>
           </Link>
 
-          <div className="hidden items-center gap-10 lg:flex">
+          <div className="hidden items-center gap-12 lg:flex">
             {navLinks.map((link) => (
               <a key={link.name} href={link.href} className={linkClass}>
                 {link.name}
@@ -71,7 +71,7 @@ function Navbar() {
             ))}
           </div>
 
-          <div className="hidden items-center gap-6 lg:flex">
+          <div className="hidden items-center gap-8 lg:flex">
             <Link to="/login" className="text-[14.5px] font-medium text-neutral-600 transition-colors duration-200 hover:text-neutral-950">
               Log in
             </Link>

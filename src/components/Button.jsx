@@ -13,15 +13,15 @@ function Button({
   };
 
   const sizes = {
-    sm: "h-10 px-5 text-[16px]",
-    md: "h-20 px-20 text-[14px]",
-    lg: "h-14 px-8 text-base",
+    sm: "h-12 px-9 text-[14.5px]",
+    md: "h-12 px-8 text-[15px]",
+    lg: "h-14 px-10 text-base",
   };
 
   return (
     <button
       className={clsx(
-        "inline-flex items-center justify-center rounded-full font-semibold tracking-tight transition-all duration-300 hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-full font-semibold tracking-tight transition-all duration-300 hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2",
         variants[variant],
         sizes[size],
         className
