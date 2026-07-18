@@ -122,7 +122,7 @@ function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden border-t border-neutral-100 bg-white lg:hidden"
           >
             <Container className="flex flex-col gap-1 py-6">
@@ -149,7 +149,7 @@ function Navbar() {
                   Log in
                 </Link>
                 <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full">Get Started</Button>
+                  <Button className="w-full"> Get Started </Button>
                 </Link>
               </div>
             </Container>

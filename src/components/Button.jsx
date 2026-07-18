@@ -13,8 +13,8 @@ function Button({
   };
 
   const sizes = {
-    sm: "h-10 px-5 text-[13px]",
-    md: "h-11 px-6 text-[14px]",
+    sm: "h-10 px-5 text-[16px]",
+    md: "h-20 px-20 text-[14px]",
     lg: "h-14 px-8 text-base",
   };
 
