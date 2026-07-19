@@ -257,12 +257,6 @@ function Hero() {
               className="mb-8 inline-flex self-start"
             >
               <span className="group inline-flex cursor-default items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition-all duration-300 hover:border-neutral-300 hover:shadow-md">
-                <span
-                  className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-100 text-[13px] transition-transform duration-300 group-hover:scale-110"
-                  aria-hidden="true"
-                >
-                  📚
-                </span>
                 Verified Learning Resources
               </span>
             </motion.div>
