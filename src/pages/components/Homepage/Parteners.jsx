@@ -19,8 +19,6 @@ const partners = [
   { name: "Duolingo",             label: "Duolingo" },
   { name: "ALU",                  label: "ALU" },
   { name: "Rwanda Coding Academy",label: "RCA" },
-  { name: "Google Developers",    label: "Google Dev" },
-  { name: "GitHub",               label: "GitHub" },
 ];
 
 /* ─────────────────────────────────────────
