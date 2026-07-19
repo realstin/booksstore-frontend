@@ -2,6 +2,7 @@ import Navbar from './components/Homepage/Navbar';
 import Hero from './components/Homepage/Hero';
 import Statistics from './components/Homepage/Statistics';
 import WhyBookStore from './components/Homepage/WhyBookStore';
+import Features from './components/Homepage/Features';
 
 function Homepage() {
   return (
@@ -10,6 +11,7 @@ function Homepage() {
       <Hero />
       <Statistics />
       <WhyBookStore />
+      <Features />
     </>
   );
 }
