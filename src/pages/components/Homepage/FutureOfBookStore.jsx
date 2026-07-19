@@ -13,21 +13,18 @@ const ease = [0.22, 1, 0.36, 1];
 const roadmap = [
   {
     number: "01",
-    phase: "Today",
     title: "Today",
     description:
       "Trusted, carefully selected books organized in one clean platform.",
   },
   {
     number: "02",
-    phase: "Next",
     title: "Next",
     description:
       "Personal libraries, smarter discovery, reading progress and richer organization.",
   },
   {
     number: "03",
-    phase: "Future",
     title: "Future",
     description:
       "Community recommendations, expert collections and even more ways to discover quality learning resources.",
