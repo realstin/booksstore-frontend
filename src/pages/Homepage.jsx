@@ -5,6 +5,8 @@ import WhyBookStore from './components/Homepage/WhyBookStore';
 import Features from './components/Homepage/Features';
 import ReadingExperience from './components/Homepage/ReadingExperience';
 import CommunityFavorites from './components/Homepage/CommunityFavorites';
+import FutureOfBookStore from './components/Homepage/FutureOfBookStore';
+import Partners from './components/Homepage/Parteners';
 
 function Homepage() {
   return (
@@ -16,6 +18,8 @@ function Homepage() {
       <Features />
       <ReadingExperience />
       <CommunityFavorites />
+      <FutureOfBookStore />
+      <Partners />
     </>
   );
 }
