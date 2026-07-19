@@ -12,19 +12,16 @@ const columns = [
     heading: "Product",
     links: [
       { label: "Books",          href: "#" },
-      { label: "Categories",     href: "#" },
-      { label: "Downloads",      href: "#" },
-      { label: "Favorites",      href: "#" },
-      { label: "Reading Online", href: "#" },
     ],
   },
   {
     heading: "Company",
     links: [
       { label: "About",   href: "#" },
+      { label: "Team",   href: "#" },
+      { label: "Careers", href: "#" },
       { label: "Contact", href: "#" },
       { label: "News",    href: "#" },
-      { label: "Careers", href: "#" },
     ],
   },
   {
