@@ -7,6 +7,8 @@ import ReadingExperience from './components/Homepage/ReadingExperience';
 import CommunityFavorites from './components/Homepage/CommunityFavorites';
 import FutureOfBookStore from './components/Homepage/FutureOfBookStore';
 import Partners from './components/Homepage/Parteners';
+import CTA from './components/Homepage/CTA';
+import Footer from './components/Homepage/Footer';
 
 function Homepage() {
   return (
@@ -20,6 +22,8 @@ function Homepage() {
       <CommunityFavorites />
       <FutureOfBookStore />
       <Partners />
+      <CTA />
+      <Footer />
     </>
   );
 }
