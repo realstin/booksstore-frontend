@@ -475,8 +475,8 @@ function CommunityFavorites() {
       </svg>
 
       {/* Edge hairlines */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
 
       <Container>
 
@@ -494,14 +494,14 @@ function CommunityFavorites() {
           </p>
           <h2
             id="community-heading"
-            className="mb-5 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}
           >
             Trusted by readers.
             <br className="hidden sm:block" />
             Chosen by the community.
           </h2>
-          <p className="mx-auto max-w-[640px] text-[1.0625rem] leading-[1.75] text-neutral-500">
+          <p className="mx-auto max-w-160 text-[1.0625rem] leading-[1.75] text-neutral-500">
             Thousands of learners are discovering, saving and recommending books every day.
             Instead of searching endlessly, discover books other learners have already found valuable.
             Community favorites help you quickly identify trusted resources worth your time.

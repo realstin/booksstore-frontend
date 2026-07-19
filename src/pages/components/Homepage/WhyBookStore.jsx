@@ -148,11 +148,11 @@ function WhyBookStore() {
       {/* Very faint top edge divider */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
 
       <Container>
@@ -171,14 +171,14 @@ function WhyBookStore() {
           {/* Heading */}
           <h2
             id="why-heading"
-            className="mb-5 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}
           >
             Why Choose BookStore?
           </h2>
 
           {/* Description */}
-          <p className="mx-auto max-w-[680px] text-[1.0625rem] leading-[1.75] text-neutral-500">
+          <p className="mx-auto max-w-170 text-[1.0625rem] leading-[1.75] text-neutral-500">
             Finding trustworthy technology books shouldn&apos;t be difficult.
             BookStore carefully organizes verified and up-to-date books so you
             can spend less time searching and more time learning.

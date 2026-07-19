@@ -51,7 +51,7 @@ function RoadmapItem({ item, index, inView, isLast }) {
         <motion.div
           whileHover={{ scale: 1.08 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
-          className="relative z-10 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+          className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
           aria-hidden="true"
         >
           <span className="text-[12px] font-bold tracking-tight text-neutral-900">
@@ -63,7 +63,7 @@ function RoadmapItem({ item, index, inView, isLast }) {
         {!isLast && (
           <div
             aria-hidden="true"
-            className="mt-2 w-px flex-1 bg-gradient-to-b from-neutral-300 to-transparent"
+            className="mt-2 w-px flex-1 bg-linear-to-b from-neutral-300 to-transparent"
           />
         )}
       </div>
@@ -132,11 +132,11 @@ function FutureOfBookStore() {
       {/* Edge hairlines */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
 
       <Container>
@@ -160,7 +160,7 @@ function FutureOfBookStore() {
               initial={{ opacity: 0, y: 22 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.72, delay: 0.1, ease }}
-              className="mb-7 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
+              className="mb-7 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}
             >
               Books are only
@@ -172,7 +172,7 @@ function FutureOfBookStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.2, ease }}
-              className="max-w-[440px] space-y-4 text-[1.0625rem] leading-[1.78] text-neutral-500"
+              className="max-w-110 space-y-4 text-[1.0625rem] leading-[1.78] text-neutral-500"
             >
               <p>
                 BookStore starts with carefully selected, trusted books for

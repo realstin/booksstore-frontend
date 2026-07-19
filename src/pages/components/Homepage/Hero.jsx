@@ -90,7 +90,7 @@ function BookshelfIllustration() {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Illustration of a modern digital bookshelf with books, search, and reading progress features"
       role="img"
-      className="w-full max-w-[500px]"
+      className="w-full max-w-125"
     >
       {/* ── Background card ── */}
       <rect x="20" y="20" width="440" height="480" rx="24" fill="#f9f9f9" stroke="#e5e5e5" strokeWidth="1.5" />
@@ -290,7 +290,7 @@ function Hero() {
               initial="hidden"
               animate="show"
               transition={transition(0.28, 0.7)}
-              className="mb-10 max-w-[440px] text-[1.0625rem] leading-[1.75] text-neutral-500"
+              className="mb-10 max-w-110 text-[1.0625rem] leading-[1.75] text-neutral-500"
             >
               BookStore is the world&apos;s most trusted platform for discovering
               up-to-date, carefully selected technology books that help learners

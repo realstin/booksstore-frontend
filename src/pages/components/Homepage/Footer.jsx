@@ -80,7 +80,7 @@ function NewsletterForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-6 flex w-full max-w-[280px] flex-col gap-2.5"
+      className="mt-6 flex w-full max-w-70 flex-col gap-2.5"
       aria-label="Newsletter subscription"
     >
       {sent ? (
@@ -154,7 +154,7 @@ function Footer() {
             </Link>
 
             {/* Description */}
-            <p className="max-w-[240px] text-[13.5px] leading-[1.75] text-neutral-500">
+            <p className="max-w-60 text-[13.5px] leading-[1.75] text-neutral-500">
               Building the future of trusted learning through carefully selected books.
             </p>
 

@@ -98,7 +98,7 @@ function FeatureCard({ icon: Icon, title, description }) {
       <motion.span
         whileHover={{ scale: 1.05, rotate: 6 }}
         transition={{ duration: 0.28, ease: "easeOut" }}
-        className="inline-flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+        className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
         aria-hidden="true"
       >
         <Icon size={22} strokeWidth={1.75} />
@@ -156,11 +156,11 @@ function Features() {
       {/* Section edge hairlines */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent"
       />
 
       <Container>
@@ -179,7 +179,7 @@ function Features() {
           {/* Heading */}
           <h2
             id="features-heading"
-            className="mb-5 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}
           >
             Everything you need to build
@@ -187,7 +187,7 @@ function Features() {
           </h2>
 
           {/* Supporting paragraph */}
-          <p className="mx-auto max-w-[650px] text-[1.0625rem] leading-[1.75] text-neutral-500">
+          <p className="mx-auto max-w-162.5 text-[1.0625rem] leading-[1.75] text-neutral-500">
             A calm, focused toolkit for readers who care about what they read.
           </p>
         </motion.div>

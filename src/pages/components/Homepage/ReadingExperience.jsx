@@ -66,7 +66,7 @@ function ReadingIllustration() {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Illustration of a person reading comfortably on a tablet with floating book pages"
       role="img"
-      className="w-full max-w-[420px]"
+      className="w-full max-w-105"
     >
       {/* ── Background card ── */}
       <rect x="16" y="16" width="388" height="428" rx="28" fill="#f9f9f9" stroke="#e8e8e8" strokeWidth="1.5" />
@@ -171,7 +171,7 @@ function BulletItem({ icon: Icon, label, index, inView }) {
       className="group flex cursor-default items-center gap-4"
     >
       {/* Black circle icon */}
-      <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-neutral-950 text-white shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-200 group-hover:scale-110">
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-950 text-white shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-200 group-hover:scale-110">
         <Icon size={15} strokeWidth={2} aria-hidden="true" />
       </span>
       <span className="text-[15px] font-medium text-neutral-700 transition-colors duration-200 group-hover:text-neutral-950">
@@ -388,8 +388,8 @@ function ReadingExperience() {
       </svg>
 
       {/* Edge hairlines */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
 
       <Container>
 
@@ -440,7 +440,7 @@ function ReadingExperience() {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.12, ease }}
-              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}
             >
               A reading experience
@@ -452,7 +452,7 @@ function ReadingExperience() {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.22, ease }}
-              className="mb-10 max-w-[500px] space-y-4 text-[15.5px] leading-[1.8] text-neutral-500"
+              className="mb-10 max-w-125 space-y-4 text-[15.5px] leading-[1.8] text-neutral-500"
             >
               <p>
                 Learning shouldn&apos;t feel exhausting. Many online documents are
