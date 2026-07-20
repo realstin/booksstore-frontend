@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { checkBackendStatus } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
+import bookstoreLogo from '../assets/bookstorelogo.svg';
 
 function ComingSoon() {
   const [status, setStatus] = useState('checking');
@@ -18,7 +19,7 @@ function ComingSoon() {
         {/* Real logo from public folder */}
         <div className="coming-soon__logo">
           <img
-            src="/bookstorelogo.svg"
+            src={bookstoreLogo}
             alt="BooksStore logo"
             className="coming-soon__logo-icon"
           />

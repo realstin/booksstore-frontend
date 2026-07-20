@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Container from "../../../components/Container";
 import Button from "../../../components/Button";
+import bookstoreLogo from '../../../assets/bookstorelogo.svg';
 
 const navLinks = [
   { name: "Explore", href: "#explore" },
@@ -59,7 +60,7 @@ function Navbar() {
       <Container>
         <nav className={navClass}>
           <Link to="/homepage" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-            <img src="/bookstorelogo.svg" alt="BookStore Logo" className={logoImgClass} />
+            <img src={bookstoreLogo} alt="BookStore Logo" className={logoImgClass} />
             <span className={logoTextClass}>BookStore</span>
           </Link>
 

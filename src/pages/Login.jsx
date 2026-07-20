@@ -6,6 +6,8 @@ import { validateLoginForm } from '../utils/validation';
 import { useForm } from '../hooks/useForm';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
+import bookstoreLogo from '../assets/bookstorelogo.svg';
+import libraryImage from '../assets/library.svg';
 
 function Login() {
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ function Login() {
       <div className="auth-split__left">
 
         <Link to="/" className="auth-split__logo">
-          <img src="/bookstorelogo.svg" alt="BooksStore" className="auth-split__logo-img" />
+          <img src={bookstoreLogo} alt="BooksStore" className="auth-split__logo-img" />
           <span className="auth-split__logo-text">BooksStore</span>
         </Link>
 
@@ -113,7 +115,7 @@ function Login() {
 
       {/* ══ RIGHT ══ */}
       <div className="auth-split__right" aria-hidden="true">
-        <img src="/library.svg" alt="" className="auth-split__illustration" />
+        <img src={libraryImage} alt="" className="auth-split__illustration" />
       </div>
 
     </div>
