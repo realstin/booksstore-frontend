@@ -343,11 +343,9 @@ function Hero() {
                 No advertisements
               </span>
               <span className="text-neutral-300" aria-hidden="true">·</span>
-              <span>Read online</span>
-              <span className="text-neutral-300" aria-hidden="true">·</span>
-              <span>Download offline</span>
-              <span className="text-neutral-300" aria-hidden="true">·</span>
               <span>Save your own library</span>
+              <span className="text-neutral-300" aria-hidden="true">·</span>
+              <span>Learn and Grow</span>
             </motion.p>
           </div>
 
