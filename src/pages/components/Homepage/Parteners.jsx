@@ -90,6 +90,26 @@ const partners = [
       </svg>
     ),
   },
+  {
+    name: "LeetCode",
+    Icon: () => (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
+        <rect x="4" y="5" width="3" height="8" rx="1" fill="currentColor" />
+        <rect x="9"  y="5" width="5" height="2" rx="1" fill="currentColor" />
+        <rect x="9"  y="9" width="4" height="2" rx="1" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    name: "CodeChef",
+    Icon: () => (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M7 6.5l5 2.5-5 2.5V6.5z" fill="currentColor" />
+      </svg>
+    ),
+  },    
 ];
 
 /* ─────────────────────────────────────────
@@ -244,7 +264,7 @@ function Partners() {
             id="partners-heading"
             className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
           >
-            Trusted Learning Ecosystem
+            INSPIRATION
           </h2>
           <p className="text-[14.5px] leading-relaxed text-neutral-400">
             Inspired by the world&apos;s leading learning institutions and educational platforms.
