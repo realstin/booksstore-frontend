@@ -36,10 +36,10 @@ const columns = [
   {
     heading: "Community",
     links: [
-      { label: "GitHub",      href: "#" },
-      { label: "Discord",     href: "#" },
-      { label: "LinkedIn",    href: "#" },
-      { label: "X (Twitter)", href: "#" },
+      { label: "GitHub",      href: "https://github.com/realstin" },
+      { label: "Discord",     href: "https://discord.com/users/1528631236824928326" },
+      { label: "LinkedIn",    href: "https://www.linkedin.com/in/iratuzi-justin-400a55405/" },
+      { label: "X (Twitter)", href: "https://x.com/irmjustin" },
     ],
   },
 ];
