@@ -9,14 +9,14 @@ import Container from "../../../components/Container";
 const stats = [
   {
     icon: BookOpen,
-    value: 1200,
+    value: 12,
     suffix: "+",
     label: "Books Available",
     description: "Carefully selected and verified books.",
   },
   {
     icon: Users,
-    value: 58000,
+    value: 58,
     suffix: "+",
     label: "Active Learners",
     description: "People building their skills every day.",
@@ -30,7 +30,7 @@ const stats = [
   },
   {
     icon: Bookmark,
-    value: 312000,
+    value: 312,
     suffix: "+",
     label: "Books Saved",
     description: "Personal libraries created by our community.",
