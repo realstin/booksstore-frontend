@@ -13,17 +13,17 @@ const columns = [
     heading: "Product",
     links: [
       { label: "Books",          href: "#" },
-      { label: "Reader",          href: "#" },
+      { label: "Reader",         href: "#" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "About",   href: "#" },
-      { label: "Team",   href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Contact", href: "#" },
-      { label: "News",    href: "#" },
+      { label: "About",    href: "#" },
+      { label: "Team",     href: "/team",    internal: true },
+      { label: "Careers",  href: "#" },
+      { label: "Contact",  href: "/contact", internal: true },
+      { label: "News",     href: "#" },
     ],
   },
   {
@@ -48,14 +48,29 @@ const columns = [
 
 /* ─────────────────────────────────────────
    Animated footer link
+   — uses <Link> for internal routes,
+     <a> for external/anchor hrefs
 ───────────────────────────────────────── */
-function FooterLink({ label, href }) {
+function FooterLink({ label, href, internal }) {
+  const baseClass =
+    "block text-[14px] leading-relaxed text-neutral-500 transition-colors duration-200 hover:text-neutral-950 focus:outline-none focus-visible:text-neutral-950";
+
+  if (internal) {
+    return (
+      <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.18, ease: "easeOut" }}>
+        <Link to={href} className={baseClass}>
+          {label}
+        </Link>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.a
       href={href}
       whileHover={{ y: -2 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="block text-[14px] leading-relaxed text-neutral-500 transition-colors duration-200 hover:text-neutral-950 focus:outline-none focus-visible:text-neutral-950"
+      className={baseClass}
     >
       {label}
     </motion.a>
@@ -171,7 +186,7 @@ function Footer() {
                 <ul className="flex flex-col gap-3" role="list">
                   {col.links.map((link) => (
                     <li key={link.label}>
-                      <FooterLink label={link.label} href={link.href} />
+                      <FooterLink label={link.label} href={link.href} internal={link.internal} />
                     </li>
                   ))}
                 </ul>
