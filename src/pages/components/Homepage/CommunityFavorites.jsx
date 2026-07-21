@@ -1125,50 +1125,6 @@ function CommunityFavorites() {
         </div>
 
         {/* ══════════════════════════════════════
-            ZONE 5 — Trending book
-        ══════════════════════════════════════ */}
-
-        {featuredBook && (
-          <div
-            ref={featRef}
-            className="mb-20"
-          >
-            <motion.div
-              initial={{
-                opacity: 0,
-                y: 14,
-              }}
-              animate={
-                featInView
-                  ? {
-                      opacity: 1,
-                      y: 0,
-                    }
-                  : {}
-              }
-              transition={{
-                duration: 0.55,
-                ease,
-              }}
-              className="mb-10 text-center"
-            >
-              <p className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-                Trending Now
-              </p>
-
-              <h3 className="text-[clamp(1.4rem,2.5vw,2rem)] font-bold tracking-[-0.02em] text-neutral-950">
-                A book readers are discovering
-              </h3>
-            </motion.div>
-
-            <FeaturedCard
-              featured={featuredBook}
-              inView={featInView}
-            />
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════
             ZONE 6 — Social proof
         ══════════════════════════════════════ */}
 
