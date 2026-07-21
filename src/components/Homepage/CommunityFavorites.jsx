@@ -903,8 +903,9 @@ function CommunityFavorites() {
 
   return (
     <section
+      id="explore"
       ref={ref}
-      className="relative overflow-hidden bg-white py-28 lg:py-32"
+      className="relative overflow-hidden bg-white py-28 lg:py-32 scroll-mt-20"
       aria-labelledby="community-heading"
     >
       {/* Dot grid */}

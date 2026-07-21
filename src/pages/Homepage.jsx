@@ -14,7 +14,6 @@ function Homepage() {
   return (
     <>
       <Navbar />
-
       <div className="h-20" aria-hidden="true" />
       <Hero />
       <Statistics />
