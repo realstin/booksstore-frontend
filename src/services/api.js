@@ -95,3 +95,25 @@ export async function logoutUser() {
   clearSession();
   return data;
 }
+
+// ========== BOOKS ==========
+
+// params can include: featured (boolean), limit (number), sort (string, e.g. "-rating")
+export async function getBooks(params = {}) {
+  const query = new URLSearchParams();
+
+  if (params.featured !== undefined) query.set('featured', params.featured);
+  if (params.limit !== undefined) query.set('limit', params.limit);
+  if (params.sort !== undefined) query.set('sort', params.sort);
+
+  const queryString = query.toString();
+  const url = `${API_URL}/api/books${queryString ? `?${queryString}` : ''}`;
+
+  const response = await fetch(url, { credentials: 'include' });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch books (status ${response.status})`);
+  }
+
+  return response.json();
+}
