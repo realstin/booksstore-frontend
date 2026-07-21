@@ -35,8 +35,8 @@ function Navbar() {
   }, [mobileOpen]);
 
   const headerClass = scrolled
-    ? "sticky top-0 z-50 border-b transition-all duration-300 border-neutral-200/80 bg-white/85 backdrop-blur-xl shadow-[0_1px_0_rgba(15,20,25,0.04),0_12px_24px_-16px_rgba(15,20,25,0.12)]"
-    : "sticky top-0 z-50 border-b transition-all duration-300 border-neutral-100 bg-white";
+    ? "fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 border-neutral-200/80 bg-white/85 backdrop-blur-xl shadow-[0_1px_0_rgba(15,20,25,0.04),0_12px_24px_-16px_rgba(15,20,25,0.12)]"
+    : "fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 border-neutral-100 bg-white";
 
   const navClass = scrolled
     ? "flex items-center justify-between transition-all duration-300 h-16"
