@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { BookOpen, Users, Folder, Bookmark } from "lucide-react";
-import Container from "../../../components/Container";
+import Container from "../Container";
 
 /* ─────────────────────────────────────────
    Data

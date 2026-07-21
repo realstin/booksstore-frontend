@@ -15,7 +15,7 @@ import {
   Sun,
   Clock,
 } from "lucide-react";
-import Container from "../../../components/Container";
+import Container from "../Container";
 
 /* ─────────────────────────────────────────
    Shared easing

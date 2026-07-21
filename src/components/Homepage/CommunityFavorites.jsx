@@ -9,8 +9,8 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
-import Container from "../../../components/Container";
-import { getBooks } from "../../../services/api";
+import Container from "../Container";
+import { getBooks } from "../../services/api";
 
 /* ─────────────────────────────────────────
    Shared easing

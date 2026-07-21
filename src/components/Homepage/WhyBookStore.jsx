@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ShieldCheck, RefreshCw, Library, Focus } from "lucide-react";
-import Container from "../../../components/Container";
+import Container from "../Container";
 
 /* ─────────────────────────────────────────
    Data

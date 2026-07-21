@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import Container from "../../../components/Container";
-import Button from "../../../components/Button";
+import Container from "../Container";
+import Button from "../Button";
 
 /* ─────────────────────────────────────────
    Animation Variants

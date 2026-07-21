@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import Container from "../../../components/Container";
+import Container from "../Container";
 
 /* ─────────────────────────────────────────
    Shared easing

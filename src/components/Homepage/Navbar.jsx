@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import Container from "../../../components/Container";
-import Button from "../../../components/Button";
-import bookstoreLogo from '../../../assets/bookstorelogo.svg';
+import Container from "../Container";
+import Button from "../Button";
+import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 const navLinks = [
   { name: "Explore", href: "#explore" },
