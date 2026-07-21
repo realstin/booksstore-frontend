@@ -41,7 +41,7 @@ const contactInfo = [
     icon: Mail,
     label: "Email",
     value: "hello@bookstore.app",
-    href: "mailto:hello@bookstore.app",
+    href: "mailto:justiniratuzimbonyinshuti@gmail.com",
   },
   {
     icon: MapPin,
@@ -279,7 +279,7 @@ function Contact() {
           </motion.p>
           <motion.h1
             {...fadeUp(0.12)}
-            className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
           >
             We&apos;d love to hear
             <br className="hidden sm:block" /> from you.
@@ -307,11 +307,11 @@ function Contact() {
               <ul className="flex flex-col gap-5" role="list">
                 {contactInfo.map(({ icon: Icon, label, value, href }) => (
                   <li key={label} className="flex items-start gap-4">
-                    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-600">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-600">
                       <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
                     </span>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[11.5px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
+                      <span className="text-[11.5px] font-semibold uppercase tracking-widest text-neutral-400">
                         {label}
                       </span>
                       {href ? (

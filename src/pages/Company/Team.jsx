@@ -93,7 +93,7 @@ function MemberCard({ member }) {
         <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
           {member.role}
         </span>
-        <p className="mt-2 max-w-[280px] text-[14px] leading-[1.75] text-neutral-500">
+        <p className="mt-2 max-w-70 text-[14px] leading-[1.75] text-neutral-500">
           {member.bio}
         </p>
       </div>
@@ -195,7 +195,7 @@ function Team() {
 
           <motion.h1
             {...fadeUp(0.12)}
-            className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
           >
             Meet the leadership
             <br className="hidden sm:block" /> behind BookStore.
