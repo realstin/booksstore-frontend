@@ -25,7 +25,7 @@ const team = [
     socials: {
       x:         "https://x.com/irmjustin",
       github:    "https://github.com/realstin",
-      portfolio: "#",
+      portfolio: "https://irmjustin.github.io/",
     },
   },
 ];
