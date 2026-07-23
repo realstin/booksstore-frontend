@@ -189,7 +189,7 @@ function NewsArticle() {
             {/* Title */}
             <motion.h1
               {...fadeUp(0.12)}
-              className="mb-4 text-[clamp(1.9rem,4.5vw,3rem)] font-bold leading-[1.07] tracking-[-0.025em] text-neutral-950"
+              className="mb-4 text-[clamp(1.9rem,4.5vw,3rem)] font-bold leading-[1.07] tracking-tight text-neutral-950"
             >
               {article.title}
             </motion.h1>

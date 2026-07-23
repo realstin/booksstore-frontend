@@ -53,8 +53,8 @@ function DotGrid({ id }) {
 function Hairlines() {
   return (
     <>
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
     </>
   );
 }
@@ -91,13 +91,13 @@ function Hero() {
             </motion.span>
 
             <motion.h1 id="about-heading" {...fadeUp(0.12, 0.75)}
-              className="mb-6 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
+              className="mb-6 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}>
               Building a trusted place<br className="hidden sm:block" /> for better learning.
             </motion.h1>
 
             <motion.p {...fadeUp(0.22, 0.7)}
-              className="mb-10 max-w-[480px] text-[1.0625rem] leading-[1.8] text-neutral-500">
+              className="mb-10 max-w-120 text-[1.0625rem] leading-[1.8] text-neutral-500">
               BookStore is a platform built to help people discover trusted, up-to-date
               technology books in one organized place — giving learners a simpler path to
               resources that are actually worth their time.
@@ -145,7 +145,7 @@ function Hero() {
 ───────────────────────────────────────── */
 function HeroIllustration() {
   return (
-    <div className="relative w-full max-w-[420px]">
+    <div className="relative w-full max-w-105">
       <div aria-hidden="true" className="absolute inset-6 rounded-3xl bg-neutral-100/60 blur-3xl" />
       <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         className="relative">
@@ -241,7 +241,7 @@ function WhyWeCame() {
               Why We Came
             </motion.p>
             <motion.h2 id="why-heading" {...inViewFadeUp(0.08)}
-              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}>
               The right book should be easy to find.
             </motion.h2>
@@ -273,7 +273,7 @@ function WhyWeCame() {
                   initial={{ opacity: 0 }}
                   animate={inView ? { opacity: 1 } : {}}
                   transition={{ duration: 0.4, delay: step.delay + 0.1, ease }}
-                  className="mt-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
+                  className="mt-2 text-[12px] font-semibold uppercase tracking-widest text-neutral-500">
                   {step.label}
                 </motion.p>
                 {i < steps.length - 1 && (
@@ -282,7 +282,7 @@ function WhyWeCame() {
                     animate={inView ? { scaleY: 1 } : {}}
                     transition={{ duration: 0.4, delay: step.delay + 0.15, ease }}
                     style={{ originY: 0 }}
-                    className="my-2 h-8 w-px bg-gradient-to-b from-neutral-300 to-neutral-200"
+                    className="my-2 h-8 w-px bg-linear-to-b from-neutral-300 to-neutral-200"
                     aria-hidden="true" />
                 )}
               </div>
@@ -330,7 +330,7 @@ function WhatWeDo() {
         <motion.div {...inViewFadeUp(0)} className="mb-14 text-center">
           <p className="mb-4 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">What We Do</p>
           <h2 id="what-heading"
-            className="text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-[-0.025em] text-neutral-950"
+            className="text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}>
             One platform. Everything you need to learn.
           </h2>
@@ -386,7 +386,7 @@ function OurApproach() {
             Our Approach
           </motion.p>
           <motion.h2 id="approach-heading" {...inViewFadeUp(0.08)}
-            className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+            className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}>
             Learning deserves a better environment.
           </motion.h2>
@@ -437,7 +437,7 @@ function TheExperience() {
         <motion.div {...inViewFadeUp(0)} className="mb-14 text-center">
           <p className="mb-4 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">The Experience</p>
           <h2 id="experience-heading"
-            className="text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-[-0.025em] text-neutral-950"
+            className="text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}>
             How BookStore works.
           </h2>
@@ -488,7 +488,7 @@ function TheFuture() {
               Where We&apos;re Going
             </motion.p>
             <motion.h2 id="future-heading" {...inViewFadeUp(0.08)}
-              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-[-0.025em] text-neutral-950"
+              className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}>
               Books are only the beginning.
             </motion.h2>
@@ -558,7 +558,7 @@ function FinalCTA() {
             Start Learning
           </motion.p>
           <motion.h2 id="cta-about-heading" {...inViewFadeUp(0.08)}
-            className="mb-6 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-[-0.025em] text-white"
+            className="mb-6 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-tight text-white"
             style={{ fontFamily: "var(--font-sans)" }}>
             Find your next book.<br className="hidden sm:block" /> Keep learning.
           </motion.h2>

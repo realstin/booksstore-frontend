@@ -130,7 +130,7 @@ function News() {
               initial={{ opacity: 0, y: 22 }}
               animate={heroInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.72, delay: 0.08, ease }}
-              className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.07] tracking-[-0.025em] text-neutral-950"
+              className="mb-5 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.07] tracking-tight text-neutral-950"
             >
               News, updates, and stories from BookStore.
             </motion.h1>
