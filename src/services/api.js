@@ -117,3 +117,18 @@ export async function getBooks(params = {}) {
 
   return response.json();
 }
+
+// ========== STATISTICS ==========
+
+// Fetch statistics from backend
+export async function getStats() {
+  const response = await fetch(`${API_URL}/api/books/stats`, {
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch statistics (status ${response.status})`);
+  }
+
+  return response.json();
+}
