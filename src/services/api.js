@@ -132,3 +132,17 @@ export async function getStats() {
 
   return response.json();
 }
+// ========== AUTHENTICATION ==========
+
+// Get current logged-in user
+export async function getMe() {
+  const response = await fetch(`${API_URL}/api/auth/me`, {
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user (status ${response.status})`);
+  }
+
+  return response.json();
+}
