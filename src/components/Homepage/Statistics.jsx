@@ -1,41 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { BookOpen, Users, Folder, Bookmark } from "lucide-react";
+import { BookOpen, Users, Folder, Bookmark, Star } from "lucide-react";
 import Container from "../Container";
-
-/* ─────────────────────────────────────────
-   Data
-───────────────────────────────────────── */
-const stats = [
-  {
-    icon: BookOpen,
-    value: 12,
-    suffix: "+",
-    label: "Books Available",
-    description: "Carefully selected and verified books.",
-  },
-  {
-    icon: Users,
-    value: 58,
-    suffix: "+",
-    label: "Active Learners",
-    description: "People building their skills every day.",
-  },
-  {
-    icon: Folder,
-    value: 42,
-    suffix: "",
-    label: "Technology Categories",
-    description: "Programming, AI, Web, Mobile and more.",
-  },
-  {
-    icon: Bookmark,
-    value: 312,
-    suffix: "+",
-    label: "Books Saved",
-    description: "Personal libraries created by our community.",
-  },
-];
+import { getStats } from "../../services/api";
 
 /* ─────────────────────────────────────────
    Animated Counter Hook
@@ -133,11 +100,89 @@ function StatCard({ stat, index, started }) {
 }
 
 /* ─────────────────────────────────────────
+   Loading Skeleton
+───────────────────────────────────────── */
+function StatCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-8 animate-pulse">
+      <div className="h-11 w-11 rounded-xl bg-neutral-200 mb-5" />
+      <div className="h-8 w-24 bg-neutral-200 rounded mb-4" />
+      <div className="h-4 w-32 bg-neutral-200 rounded mb-2" />
+      <div className="h-3 w-full bg-neutral-200 rounded" />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
    Statistics Section
 ───────────────────────────────────────── */
 function Statistics() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  // ===== STATE FOR REAL STATS =====
+  const [stats, setStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // ===== FETCH STATS FROM BACKEND =====
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getStats();
+
+        // Transform backend data into stats array format
+        setStats([
+          {
+            icon: BookOpen,
+            value: data.totalBooks,
+            suffix: "+",
+            label: "Books Available",
+            description: "Carefully selected and verified books.",
+          },
+          {
+            icon: Users,
+            value: data.totalUsers,
+            suffix: "+",
+            label: "Active Learners",
+            description: "People building their skills every day.",
+          },
+          {
+            icon: Folder,
+            value: 42,
+            suffix: "",
+            label: "Technology Categories",
+            description: "Programming, AI, Web, Mobile and more.",
+          },
+          {
+            icon: Bookmark,
+            value: data.totalSaves,
+            suffix: "+",
+            label: "Books Saved",
+            description: "Personal libraries created by our community.",
+          },
+          {
+            icon: Star,
+            value: data.averageRating,
+            suffix: "★",
+            label: "Reader Satisfaction",
+            description: "Average rating from our community.",
+          },
+        ]);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+        setError(err.message);
+        setStats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <section
@@ -187,20 +232,43 @@ function Statistics() {
           </p>
         </motion.div>
 
-        {/* Cards grid */}
-        <motion.div
-          variants={{
-            hidden: {},
-            show: {},
-          }}
-          initial="hidden"
-          animate={inView ? "show" : "hidden"}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {stats.map((stat, i) => (
-            <StatCard key={stat.label} stat={stat} index={i} started={inView} />
-          ))}
-        </motion.div>
+        {/* Cards grid - Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        )}
+
+        {/* Cards grid - Error State */}
+        {!loading && error && (
+          <div className="text-center py-12">
+            <p className="text-red-600 font-semibold mb-2">Failed to load statistics</p>
+            <p className="text-neutral-500 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Cards grid - Success State */}
+        {!loading && !error && stats.length > 0 && (
+          <motion.div
+            variants={{
+              hidden: {},
+              show: {
+                transition: {
+                  staggerChildren: 0.1,
+                },
+              },
+            }}
+            initial="hidden"
+            animate={inView ? "show" : "hidden"}
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5"
+          >
+            {stats.map((stat, i) => (
+              <StatCard key={stat.label} stat={stat} index={i} started={inView} />
+            ))}
+          </motion.div>
+        )}
       </Container>
     </section>
   );
