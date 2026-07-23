@@ -3,8 +3,6 @@ import { motion, useInView } from "framer-motion";
 import {
   Bookmark,
   Star,
-  Clock,
-  TrendingUp,
   BookOpen,
   AlertCircle,
   RefreshCw,
@@ -18,43 +16,6 @@ import { getBooks } from "../../services/api";
 
 const ease = [0.22, 1, 0.36, 1];
 
-/* ─────────────────────────────────────────
-   Animated counter hook
-───────────────────────────────────────── */
-
-function useCounter(target, duration = 1600, started = false) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!started) return;
-
-    let start = null;
-    let frame;
-
-    const step = (timestamp) => {
-      if (!start) start = timestamp;
-
-      const progress = Math.min(
-        (timestamp - start) / duration,
-        1
-      );
-
-      const eased = 1 - Math.pow(1 - progress, 3);
-
-      setCount(Math.floor(eased * target));
-
-      if (progress < 1) {
-        frame = requestAnimationFrame(step);
-      }
-    };
-
-    frame = requestAnimationFrame(step);
-
-    return () => cancelAnimationFrame(frame);
-  }, [target, duration, started]);
-
-  return count;
-}
 
 /* ─────────────────────────────────────────
    Number formatter
@@ -63,37 +24,6 @@ function useCounter(target, duration = 1600, started = false) {
 function fmt(number) {
   return Number(number || 0).toLocaleString("en-US");
 }
-
-/* ─────────────────────────────────────────
-   Community stats
-
-   These are still static for now.
-   Later we can connect these to real
-   database statistics.
-───────────────────────────────────────── */
-
-const communityStats = [
-  {
-    value: 58000,
-    suffix: "+",
-    label: "Active Readers",
-  },
-  {
-    value: 312000,
-    suffix: "+",
-    label: "Books Saved",
-  },
-  {
-    value: 98,
-    suffix: "%",
-    label: "Reader Satisfaction",
-  },
-  {
-    value: 12400,
-    suffix: "+",
-    label: "Books Available",
-  },
-];
 
 /* ─────────────────────────────────────────
    Categories
@@ -263,58 +193,6 @@ function Stars({ rating = 0 }) {
         {Number(rating || 0).toFixed(1)}
       </span>
     </span>
-  );
-}
-
-/* ─────────────────────────────────────────
-   Stat chip
-───────────────────────────────────────── */
-
-function StatChip({
-  value,
-  suffix,
-  label,
-  index,
-  started,
-}) {
-  const count = useCounter(
-    value,
-    1500 + index * 80,
-    started
-  );
-
-  return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        y: 20,
-      }}
-      animate={
-        started
-          ? {
-              opacity: 1,
-              y: 0,
-            }
-          : {}
-      }
-      transition={{
-        duration: 0.6,
-        delay: index * 0.1,
-        ease,
-      }}
-      className="flex flex-col items-center gap-1 rounded-2xl border border-neutral-200 bg-white px-6 py-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
-    >
-      <p className="text-[1.9rem] font-bold leading-none tracking-[-0.03em] text-neutral-950">
-        {fmt(count)}
-        <span className="text-[1.2rem] text-neutral-400">
-          {suffix}
-        </span>
-      </p>
-
-      <p className="text-[12.5px] font-medium text-neutral-500">
-        {label}
-      </p>
-    </motion.div>
   );
 }
 
@@ -497,159 +375,6 @@ function BookCard({ book, index }) {
 }
 
 /* ─────────────────────────────────────────
-   Featured / Trending card
-
-   Uses REAL database book
-───────────────────────────────────────── */
-
-function FeaturedCard({
-  featured,
-  inView,
-}) {
-  if (!featured) return null;
-
-  const author =
-    Array.isArray(featured.authors) &&
-    featured.authors.length > 0
-      ? featured.authors.join(" & ")
-      : "Unknown Author";
-
-  const category =
-    Array.isArray(featured.categories) &&
-    featured.categories.length > 0
-      ? featured.categories.join(" · ")
-      : "Featured Book";
-
-  return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        y: 32,
-      }}
-      animate={
-        inView
-          ? {
-              opacity: 1,
-              y: 0,
-            }
-          : {}
-      }
-      transition={{
-        duration: 0.75,
-        delay: 0.1,
-        ease,
-      }}
-      className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.07)]"
-      aria-label={`Featured book: ${featured.title}`}
-    >
-      <div className="grid grid-cols-1 gap-0 md:grid-cols-[auto_1fr]">
-        {/* Cover */}
-
-        <div className="flex items-center justify-center bg-neutral-50 p-12 md:px-14 md:py-16">
-          <motion.div
-            animate={{
-              y: [0, -8, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <BookCover
-              title={featured.title}
-              coverImage={featured.coverImage}
-              size="lg"
-            />
-          </motion.div>
-        </div>
-
-        {/* Content */}
-
-        <div className="flex flex-col justify-center gap-6 p-10 md:p-12">
-          {/* Trending badge */}
-
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11.5px] font-semibold text-neutral-700 shadow-sm">
-            <TrendingUp
-              size={12}
-              strokeWidth={2.5}
-            />
-
-            Trending This Month
-          </span>
-
-          {/* Title */}
-
-          <div>
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-              {category}
-            </p>
-
-            <h3 className="mb-2 text-[clamp(1.3rem,2.5vw,1.8rem)] font-bold leading-tight tracking-tight text-neutral-950">
-              {featured.title}
-            </h3>
-
-            <p className="text-[13.5px] text-neutral-400">
-              by {author}
-            </p>
-          </div>
-
-          {/* Description */}
-
-          <p className="max-w-md text-[14.5px] leading-[1.8] text-neutral-500">
-            {featured.description ||
-              "Discover this trusted resource selected by the BookStore community."}
-          </p>
-
-          {/* Rating and saves */}
-
-          <div className="flex flex-wrap items-center gap-5">
-            <Stars rating={featured.rating} />
-
-            <span className="flex items-center gap-1.5 text-[12.5px] text-neutral-400">
-              <Bookmark
-                size={12}
-                strokeWidth={2}
-              />
-
-              Saved by {fmt(featured.savesCount)} readers
-            </span>
-          </div>
-
-          {/* Actions */}
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[13.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] hover:bg-neutral-800 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-            >
-              <BookOpen
-                size={15}
-                strokeWidth={2}
-              />
-
-              Read Online
-            </button>
-
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-3 text-[13.5px] font-semibold text-neutral-800 transition hover:scale-[1.02] hover:border-neutral-400 hover:bg-neutral-50 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-            >
-              <Bookmark
-                size={15}
-                strokeWidth={2}
-              />
-
-              Save Book
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────
    Category chips
 ───────────────────────────────────────── */
 
@@ -786,13 +511,6 @@ function CommunityFavorites() {
     margin: "-80px",
   });
 
-  const statsRef = useRef(null);
-
-  const statsInView = useInView(statsRef, {
-    once: true,
-    margin: "-60px",
-  });
-
   const cardsRef = useRef(null);
 
   const cardsInView = useInView(cardsRef, {
@@ -800,12 +518,6 @@ function CommunityFavorites() {
     margin: "-60px",
   });
 
-  const featRef = useRef(null);
-
-  const featInView = useInView(featRef, {
-    once: true,
-    margin: "-60px",
-  });
 
   const catRef = useRef(null);
 
@@ -883,21 +595,6 @@ function CommunityFavorites() {
   useEffect(() => {
     fetchCommunityBooks();
   }, []);
-
-  /*
-    The first book is used as the
-    trending/featured book.
-
-    Because the backend sorts by savesCount,
-    this will be the most-saved featured book.
-  */
-
-  const featuredBook = books[0];
-
-  /*
-    Remaining books are displayed
-    in the Community Favorites grid.
-  */
 
   const communityBooks = books.slice(1);
 
@@ -1000,27 +697,6 @@ function CommunityFavorites() {
           </p>
         </motion.div>
 
-        {/* ══════════════════════════════════════
-            ZONE 2 — Community stats
-        ══════════════════════════════════════ */}
-
-        <div
-          ref={statsRef}
-          className="mb-20 grid grid-cols-2 gap-4 lg:grid-cols-4"
-        >
-          {communityStats.map(
-            (stat, index) => (
-              <StatChip
-                key={stat.label}
-                value={stat.value}
-                suffix={stat.suffix}
-                label={stat.label}
-                index={index}
-                started={statsInView}
-              />
-            )
-          )}
-        </div>
 
         {/* ══════════════════════════════════════
             ZONE 3 — Real database books
