@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
+import { getMe } from '../services/api';
 
 // Create the context
 export const AuthContext = createContext();
@@ -8,30 +9,45 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // ===== VERIFY USER ON APP STARTUP =====
+  // Instead of reading from localStorage, fetch from backend
   useEffect(() => {
-    const storedUser = localStorage.getItem('bookstowa_user');
-    if (storedUser) {
+    const verifyUser = async () => {
       try {
-        setUser(JSON.parse(storedUser));
+        setLoading(true);
+        
+        // Fetch user from backend using HTTP-only cookie
+        const response = await getMe();
+        
+        if (response.user) {
+          setUser(response.user);
+        }
       } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('bookstowa_user');
+        // Token invalid or expired - user is not logged in
+        console.log('User not authenticated:', error.message);
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    verifyUser();
   }, []);
 
-  // Login - save user to state and localStorage
+  // ===== LOGIN =====
+  // Only store user in state (not localStorage)
+  // HTTP-only cookie is set by backend
   function login(userData) {
     setUser(userData.user);
-    localStorage.setItem('bookstowa_user', JSON.stringify(userData.user));
+    // localStorage.setItem removed - only use HTTP-only cookie
   }
 
-  // Logout - clear user from state and localStorage
+  // ===== LOGOUT =====
+  // Clear user from state
+  // HTTP-only cookie is cleared by backend
   function logout() {
     setUser(null);
-    localStorage.removeItem('bookstowa_user');
+    // localStorage.removeItem removed - cookie is cleared by backend
   }
 
   // Check if user is logged in
