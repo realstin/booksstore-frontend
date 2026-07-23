@@ -7,10 +7,10 @@ import Button from "../Button";
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 const navLinks = [
-  { name: "Explore", href: "#explore" },
-  { name: "Features", href: "#features" },
-  { name: "Library", href: "#library" },
-  { name: "About", href: "#about" },
+  { name: "Explore",  href: "#explore",   internal: false },
+  { name: "Features", href: "#features",  internal: false },
+  { name: "Library",  href: "#library",   internal: false },
+  { name: "About",    href: "/about",     internal: true  },
 ];
 
 const linkClass =
@@ -65,11 +65,17 @@ function Navbar() {
           </Link>
 
           <div className="hidden items-center gap-12 lg:flex">
-            {navLinks.map((link) => (
-              <a key={link.name} href={link.href} className={linkClass}>
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.internal ? (
+                <Link key={link.name} to={link.href} className={linkClass}>
+                  {link.name}
+                </Link>
+              ) : (
+                <a key={link.name} href={link.href} className={linkClass}>
+                  {link.name}
+                </a>
+              )
+            )}
           </div>
 
           <div className="hidden items-center gap-8 lg:flex">
@@ -127,19 +133,30 @@ function Navbar() {
             className="overflow-hidden border-t border-neutral-100 bg-white lg:hidden"
           >
             <Container className="flex flex-col gap-1 py-6">
-              {navLinks.map((link, i) => (
-                <motion.a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  initial={{ x: -16, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.25, delay: 0.05 * i }}
-                  className="rounded-xl px-3 py-3 text-[16px] font-medium text-neutral-700 transition hover:bg-neutral-50 hover:text-neutral-950"
-                >
-                  {link.name}
-                </motion.a>
-              ))}
+              {navLinks.map((link, i) =>
+                link.internal ? (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-xl px-3 py-3 text-[16px] font-medium text-neutral-700 transition hover:bg-neutral-50 hover:text-neutral-950"
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <motion.a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    initial={{ x: -16, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.25, delay: 0.05 * i }}
+                    className="rounded-xl px-3 py-3 text-[16px] font-medium text-neutral-700 transition hover:bg-neutral-50 hover:text-neutral-950"
+                  >
+                    {link.name}
+                  </motion.a>
+                )
+              )}
 
               <div className="mt-4 flex flex-col gap-3 border-t border-neutral-100 pt-5">
                 <Link

@@ -19,7 +19,7 @@ const columns = [
   {
     heading: "Company",
     links: [
-      { label: "About",    href: "#" },
+      { label: "About",    href: "/about",   internal: true },
       { label: "Team",     href: "/team",    internal: true },
       { label: "Careers",  href: "#" },
       { label: "Contact",  href: "/contact", internal: true },

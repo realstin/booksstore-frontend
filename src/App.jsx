@@ -1,17 +1,31 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-import ComingSoon from './pages/ComingSoon';
-import Homepage from './pages/Homepage';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Logout from './pages/Logout';
-import Team from './pages/Company/Team';
-import Contact from './pages/Company/Contact';
-import News from './pages/News/News';
-import NewsArticle from './pages/News/NewsArticle';
+import { useEffect, lazy, Suspense } from 'react';
 import './App.css';
 
-/* Scrolls to the top of the page on every route change */
+/* ─── Eagerly loaded (always needed immediately) ─── */
+import ComingSoon from './pages/ComingSoon';
+import Homepage   from './pages/Homepage';
+
+/* ─── Lazily loaded (only downloaded when visited) ─── */
+const Login       = lazy(() => import('./pages/Login'));
+const Signup      = lazy(() => import('./pages/Signup'));
+const Logout      = lazy(() => import('./pages/Logout'));
+const Team        = lazy(() => import('./pages/Company/Team'));
+const Contact     = lazy(() => import('./pages/Company/Contact'));
+const News        = lazy(() => import('./pages/News/News'));
+const NewsArticle = lazy(() => import('./pages/News/NewsArticle'));
+const About       = lazy(() => import('./pages/About'));
+
+/* ─── Minimal fallback shown while a chunk loads ─── */
+function PageLoader() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" aria-label="Loading" />
+    </div>
+  );
+}
+
+/* ─── Scrolls to top on every route change ─── */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -24,17 +38,20 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
-        <Route path="/"          element={<ComingSoon />} />
-        <Route path="/homepage"  element={<Homepage />} />
-        <Route path="/login"     element={<Login />} />
-        <Route path="/signup"    element={<Signup />} />
-        <Route path="/logout"    element={<Logout />} />
-        <Route path="/team"      element={<Team />} />
-        <Route path="/contact"   element={<Contact />} />
-        <Route path="/news"      element={<News />} />
-        <Route path="/news/:slug" element={<NewsArticle />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/"           element={<ComingSoon />} />
+          <Route path="/homepage"   element={<Homepage />} />
+          <Route path="/login"      element={<Login />} />
+          <Route path="/signup"     element={<Signup />} />
+          <Route path="/logout"     element={<Logout />} />
+          <Route path="/team"       element={<Team />} />
+          <Route path="/contact"    element={<Contact />} />
+          <Route path="/news"       element={<News />} />
+          <Route path="/news/:slug" element={<NewsArticle />} />
+          <Route path="/about"      element={<About />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
