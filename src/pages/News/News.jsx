@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Newspaper } from "lucide-react";
+import { Newspaper, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import Container from "../../components/Container";
 import { NewsCard } from "../../components/News/NewsCard";
 import { FeaturedCard } from "../../components/News/FeaturedCard";
@@ -112,6 +113,26 @@ function News() {
       >
         <Container>
           <div className="mx-auto max-w-3xl">
+
+            {/* Back to Home */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={heroInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, ease }}
+              className="mb-8"
+            >
+              <Link
+                to="/homepage"
+                className="group inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13.5px] font-medium text-neutral-600 shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all duration-200 hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+              >
+                <ArrowLeft
+                  size={14}
+                  className="transition-transform duration-200 group-hover:-translate-x-0.5"
+                  aria-hidden="true"
+                />
+                Back to Home
+              </Link>
+            </motion.div>
 
             {/* Eyebrow */}
             <motion.p
