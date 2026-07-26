@@ -1,13 +1,3 @@
-/**
- * BookStore News Data
- *
- * HOW TO ADD A NEW ARTICLE:
- * 1. Copy an existing object below
- * 2. Change the id, slug, title, and content
- * 3. Set featured: true on at most ONE article
- * 4. Save — the News listing and article pages update automatically
- */
-
 export const newsArticles = [
   {
     id: "introducing-bookstore",
@@ -85,61 +75,6 @@ export const newsArticles = [
     ],
   },
   {
-    id: "why-we-started",
-    slug: "why-we-started",
-    title: "Why We Started BookStore",
-    subtitle: "The story behind the platform and the problem we set out to solve.",
-    excerpt:
-      "The idea for BookStore came from a simple, recurring frustration. Here is the story of how it started and where it is going.",
-    date: "July 18, 2026",
-    location: "Kigali, Rwanda",
-    category: "Company",
-    coverImage: null,
-    readTime: "3 min read",
-    author: {
-      name: "IRATUZI M. Justin",
-      role: "Founder & Full Stack Developer",
-      initials: "IJ",
-    },
-    featured: false,
-    event: null,
-    content: [
-      {
-        type: "paragraph",
-        content:
-          "The idea for BookStore came from a simple, recurring frustration. Every time I wanted to learn something new, I found myself spending more time searching for good resources than actually learning. The best books were buried under dozens of low-quality recommendations, outdated editions, and broken links.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "I started keeping a personal list of books I trusted — books that were well-written, technically accurate, and up to date. Over time, that list grew. Friends started asking for recommendations. It became clear that the problem was not mine alone.",
-      },
-      {
-        type: "heading",
-        content: "A gap worth filling",
-      },
-      {
-        type: "paragraph",
-        content:
-          "There is no shortage of content on the internet. The problem is trust and organization. Anyone can publish anything. Telling the difference between a reliable resource and a mediocre one requires experience and time — two things that learners, especially beginners, often do not have.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "BookStore is our answer to that problem. A carefully maintained library where every book earns its place. We do the curation work so that learners can focus entirely on learning.",
-      },
-      {
-        type: "heading",
-        content: "Built in Kigali",
-      },
-      {
-        type: "paragraph",
-        content:
-          "BookStore was designed and built in Kigali, Rwanda. The technology community here is young, growing fast, and hungry for quality learning resources. We built this platform with that community in mind, but we designed it for learners everywhere.",
-      },
-    ],
-  },
-  {
     id: "bookstore-design-principles",
     slug: "bookstore-design-principles",
     title: "The Design Principles Behind BookStore",
@@ -209,66 +144,6 @@ export const newsArticles = [
         type: "paragraph",
         content:
           "Consistency means that once you learn how one part of the interface works, every other part works the same way. It reduces the learning curve and makes the product feel reliable and trustworthy. But consistency should never become repetitive — every section of the product should feel purposeful, not like a copy of the one before it.",
-      },
-    ],
-  },
-  {
-    id: "community-launch",
-    slug: "community-launch",
-    title: "Building the BookStore Community",
-    subtitle: "How readers and learners are shaping the future of BookStore together.",
-    excerpt:
-      "The best book recommendations come from people who have actually read the books. Here is how we are building a community around that idea.",
-    date: "July 10, 2026",
-    location: "Kigali, Rwanda",
-    category: "Community",
-    coverImage: null,
-    readTime: "3 min read",
-    author: {
-      name: "IRATUZI M. Justin",
-      role: "Founder & Full Stack Developer",
-      initials: "IJ",
-    },
-    featured: false,
-    event: null,
-    content: [
-      {
-        type: "paragraph",
-        content:
-          "The best book recommendation you will ever get is from someone who has actually read the book and found it genuinely useful. Not a publisher's marketing copy. Not an algorithm's prediction. A real reader's honest opinion.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "That insight shapes how we think about community at BookStore. We are not trying to build a social network. We are trying to surface the collective wisdom of a community of learners — people who have read these books, applied the knowledge, and can speak honestly about what was valuable and what was not.",
-      },
-      {
-        type: "heading",
-        content: "Community favorites",
-      },
-      {
-        type: "paragraph",
-        content:
-          "The Community Favorites section of BookStore is powered by real reader behavior — books that people actually save, return to, and recommend. These are not paid placements or editorial picks. They are a direct reflection of what the community finds valuable.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "As the community grows, these signals get stronger and more reliable. A book with thousands of saves and high ratings from real readers is a much stronger signal than any marketing copy.",
-      },
-      {
-        type: "heading",
-        content: "Growing together",
-      },
-      {
-        type: "paragraph",
-        content:
-          "We are at the very beginning of building this community. If you are reading this, you are part of the first wave. Your behavior on the platform — the books you save, the ones you mark as favorites, the libraries you build — is helping shape the experience for everyone who comes after you.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "We are grateful for that. And we are committed to building a community experience that is worthy of your trust.",
       },
     ],
   },
