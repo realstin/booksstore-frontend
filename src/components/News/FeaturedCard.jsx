@@ -38,7 +38,7 @@ export function FeaturedCard({ article }) {
         aria-label={`Read featured article: ${article.title}`}
       >
         {/* Left — image */}
-        <div className="relative min-h-[280px] overflow-hidden md:min-h-[360px]">
+        <div className="relative min-h-70 overflow-hidden md:min-h-90">
           {article.coverImage ? (
             <motion.img
               src={article.coverImage}
@@ -61,7 +61,7 @@ export function FeaturedCard({ article }) {
 
           {/* Category */}
           <div className="absolute bottom-5 left-5">
-            <span className="inline-flex rounded-full border border-white/30 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-700 backdrop-blur-sm">
+            <span className="inline-flex rounded-full border border-white/30 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-neutral-700 backdrop-blur-sm">
               {article.category}
             </span>
           </div>

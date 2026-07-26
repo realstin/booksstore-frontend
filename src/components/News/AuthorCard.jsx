@@ -10,7 +10,7 @@ export function AuthorCard({ author }) {
       className="flex items-center gap-5 rounded-2xl border border-neutral-200 bg-neutral-50/60 p-6"
     >
       {/* Avatar */}
-      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-neutral-950 shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neutral-950 shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
         <span className="text-[1.1rem] font-bold tracking-tight text-white">
           {author.initials}
         </span>

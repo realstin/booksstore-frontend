@@ -7,7 +7,7 @@ import { Calendar, MapPin, ArrowUpRight, Clock } from "lucide-react";
 ───────────────────────────────────────── */
 function CategoryBadge({ category }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
+    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
       {category}
     </span>
   );
