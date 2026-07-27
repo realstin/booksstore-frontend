@@ -10,7 +10,7 @@ import Footer from "../../components/Homepage/Footer";
    whenever the policy changes.
 ───────────────────────────────────────── */
 const LAST_UPDATED = "July 27, 2026";
-const CONTACT_EMAIL = "hello@bookstore.app"; // replace with real email
+const CONTACT_EMAIL = "justiniratuzimbonyinshuti@gmail.com"; // replace with real email
 
 /* ─────────────────────────────────────────
    Shared easing

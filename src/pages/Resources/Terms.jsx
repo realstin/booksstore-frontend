@@ -9,7 +9,7 @@ import Footer from "../../components/Homepage/Footer";
    Config — update these when terms change
 ───────────────────────────────────────── */
 const LAST_UPDATED   = "July 27, 2026";
-const CONTACT_EMAIL  = "hello@bookstore.app";
+const CONTACT_EMAIL  = "justiniratuzimbonyinshuti@gmail.com";
 // Placeholder — replace with actual jurisdiction once decided
 const GOVERNING_LAW  = "[Jurisdiction to be confirmed]";
 
@@ -154,7 +154,7 @@ const sections = [
       `These Terms of Service and any disputes arising from them will be governed by the laws of ${GOVERNING_LAW}. This section will be updated once BookStore's legal jurisdiction has been formally confirmed.`,
       "If you have questions about the governing law that applies to these Terms, please contact us using the details below.",
     ],
-    note: "⚠ Governing law placeholder — replace with actual jurisdiction before public launch.",
+    note: "⚠ Governing law will replace with actual jurisdiction before public launch.",
   },
   {
     id: "contact",
