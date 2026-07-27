@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, MapPin } from "lucide-react";
+import emailjs from "@emailjs/browser";
+
+/* ─────────────────────────────────────────
+   EmailJS credentials
+   Replace these three values with your own
+   from https://www.emailjs.com/
+───────────────────────────────────────── */
+const EMAILJS_SERVICE_ID  = "service_igdyx9n";   // e.g. "service_abc123"
+const EMAILJS_TEMPLATE_ID = "template_ot9ts8a";  // e.g. "template_xyz456"
+const EMAILJS_PUBLIC_KEY  = "3h4AvPR3rSdjHT8o-";   // e.g. "abcDEFghiJKL"
 
 /* ─────────────────────────────────────────
    Inline social icons (not in this lucide version)
@@ -64,33 +74,46 @@ const contactInfo = [
 ];
 
 /* ─────────────────────────────────────────
-   Contact form
+   Contact form — wired to EmailJS
 ───────────────────────────────────────── */
 function ContactForm() {
-  const [form, setForm]   = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent, setSent]   = useState(false);
-  const [error, setError] = useState("");
+  const formRef = useRef(null);
+  const [form, setForm]       = useState({ name: "", email: "", subject: "", message: "" });
+  const [status, setStatus]   = useState("idle"); // "idle" | "sending" | "sent" | "error"
+  const [error, setError]     = useState("");
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setError("Please fill in all required fields.");
       return;
     }
-    /* 
-      ── Functionality note ──
-      Real message delivery will be wired up later.
-      For now we just show the success state.
-    */
-    setSent(true);
+
+    setStatus("sending");
+    setError("");
+
+    try {
+      await emailjs.sendForm(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        formRef.current,
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus("sent");
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      setStatus("error");
+      setError("Something went wrong. Please try again or email us directly.");
+    }
   }
 
-  if (sent) {
+  if (status === "sent") {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
@@ -98,20 +121,17 @@ function ContactForm() {
         transition={{ duration: 0.5, ease }}
         className="flex flex-col items-center gap-5 py-16 text-center"
       >
-        {/* Checkmark circle */}
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-950">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
             <path d="M6 14l6 6L22 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h3 className="text-[1.2rem] font-bold text-neutral-950">
-          Message received!
-        </h3>
+        <h3 className="text-[1.2rem] font-bold text-neutral-950">Message sent!</h3>
         <p className="max-w-sm text-[14.5px] leading-relaxed text-neutral-500">
           Thank you for reaching out. We&apos;ll get back to you as soon as possible.
         </p>
         <button
-          onClick={() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
+          onClick={() => setStatus("idle")}
           className="mt-2 text-[13.5px] font-medium text-neutral-500 underline underline-offset-4 transition hover:text-neutral-950"
         >
           Send another message
@@ -121,9 +141,8 @@ function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
 
-      {/* Error message */}
       {error && (
         <motion.p
           initial={{ opacity: 0, y: -8 }}
@@ -135,98 +154,83 @@ function ContactForm() {
         </motion.p>
       )}
 
-      {/* Name + Email row */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="name" className="text-[13px] font-semibold text-neutral-700">
             Full Name <span className="text-neutral-400" aria-hidden="true">*</span>
           </label>
           <input
-            id="name"
-            name="name"
-            type="text"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Your name"
-            required
+            id="name" name="name" type="text"
+            value={form.name} onChange={handleChange}
+            placeholder="Your name" required
             className="h-11 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[14px] text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
           />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className="text-[13px] font-semibold text-neutral-700">
             Email Address <span className="text-neutral-400" aria-hidden="true">*</span>
           </label>
           <input
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="your@email.com"
-            required
+            id="email" name="email" type="email"
+            value={form.email} onChange={handleChange}
+            placeholder="your@email.com" required
             className="h-11 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[14px] text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
           />
         </div>
       </div>
 
-      {/* Subject */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="subject" className="text-[13px] font-semibold text-neutral-700">
           Subject
         </label>
         <input
-          id="subject"
-          name="subject"
-          type="text"
-          value={form.subject}
-          onChange={handleChange}
+          id="subject" name="subject" type="text"
+          value={form.subject} onChange={handleChange}
           placeholder="What's this about?"
           className="h-11 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[14px] text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
         />
       </div>
 
-      {/* Message */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="message" className="text-[13px] font-semibold text-neutral-700">
           Message <span className="text-neutral-400" aria-hidden="true">*</span>
         </label>
         <textarea
-          id="message"
-          name="message"
-          value={form.message}
-          onChange={handleChange}
-          placeholder="Write your message here…"
-          required
-          rows={6}
+          id="message" name="message"
+          value={form.message} onChange={handleChange}
+          placeholder="Write your message here…" required rows={6}
           className="resize-none rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[14px] leading-relaxed text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
         />
-        {/* Character hint */}
-        <p className="self-end text-[11.5px] text-neutral-400">
-          {form.message.length} characters
-        </p>
+        <p className="self-end text-[11.5px] text-neutral-400">{form.message.length} characters</p>
       </div>
 
-      {/* Submit */}
       <motion.button
         type="submit"
-        whileHover={{ scale: 1.02 }}
+        disabled={status === "sending"}
+        whileHover={{ scale: status === "sending" ? 1 : 1.02 }}
         whileTap={{ scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neutral-950 text-[15px] font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+        className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neutral-950 text-[15px] font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-black disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
       >
-        Send Message
-        {/* Paper-plane icon */}
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M14 2L9.5 13.5 7.5 8.5 2 6.5 14 2z" />
-          <path d="M14 2L7.5 8.5" />
-        </svg>
+        {status === "sending" ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
+            Sending…
+          </>
+        ) : (
+          <>
+            Send Message
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M14 2L9.5 13.5 7.5 8.5 2 6.5 14 2z" />
+              <path d="M14 2L7.5 8.5" />
+            </svg>
+          </>
+        )}
       </motion.button>
 
       <p className="text-center text-[12px] text-neutral-400">
         We typically respond within 24 hours.
       </p>
-
     </form>
   );
 }
