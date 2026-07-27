@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Container from "../Container";
@@ -7,10 +7,10 @@ import Button from "../Button";
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 const navLinks = [
-  { name: "Explore",  href: "#explore",   internal: false },
-  { name: "Features", href: "#features",  internal: false },
-  { name: "Library",  href: "#library",   internal: false },
-  { name: "About",    href: "/about",     internal: true  },
+  { name: "Explore",  hash: "explore"  },
+  { name: "Features", hash: "features" },
+  { name: "Library",  hash: "library"  },
+  { name: "About",    href: "/about", internal: true },
 ];
 
 const linkClass =
@@ -19,6 +19,16 @@ const linkClass =
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  // When on /homepage, anchor links are plain #hash.
+  // When on any other page, they navigate to /homepage#hash
+  // so the user lands on the right section.
+  const onHomepage = pathname === "/homepage";
+  const resolveHref = (link) => {
+    if (link.internal) return link.href;
+    return onHomepage ? `#${link.hash}` : `/homepage#${link.hash}`;
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -71,7 +81,7 @@ function Navbar() {
                   {link.name}
                 </Link>
               ) : (
-                <a key={link.name} href={link.href} className={linkClass}>
+                <a key={link.name} href={resolveHref(link)} className={linkClass}>
                   {link.name}
                 </a>
               )
@@ -146,7 +156,7 @@ function Navbar() {
                 ) : (
                   <motion.a
                     key={link.name}
-                    href={link.href}
+                    href={resolveHref(link)}
                     onClick={() => setMobileOpen(false)}
                     initial={{ x: -16, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
