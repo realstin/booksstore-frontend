@@ -59,9 +59,8 @@ function Hairlines() {
   );
 }
 
-/* ─────────────────────────────────────────
-   1. HERO
-───────────────────────────────────────── */
+/*          1. HERO             */
+
 function Hero() {
   return (
     <section className="relative overflow-hidden bg-white" aria-labelledby="about-heading">
@@ -212,9 +211,8 @@ function HeroIllustration() {
   );
 }
 
-/* ─────────────────────────────────────────
-   2. WHY WE CAME
-───────────────────────────────────────── */
+/*               2. WHY WE CAME              */
+
 function WhyWeCame() {
   const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -295,9 +293,8 @@ function WhyWeCame() {
   );
 }
 
-/* ─────────────────────────────────────────
-   3. WHAT WE DO — feature cards
-───────────────────────────────────────── */
+/*                   3. WHAT WE DO — feature cards                         */
+
 const features = [
   {
     icon: Search,
@@ -361,9 +358,8 @@ function WhatWeDo() {
   );
 }
 
-/* ─────────────────────────────────────────
-   4. OUR APPROACH
-───────────────────────────────────────── */
+/*                    4. OUR APPROACH           */
+
 const pillars = [
   { icon: BookOpen,     label: "Quality books"       },
   { icon: Target,       label: "Focused experience"  },
@@ -418,9 +414,8 @@ function OurApproach() {
   );
 }
 
-/* ─────────────────────────────────────────
-   5. THE EXPERIENCE — numbered steps
-───────────────────────────────────────── */
+/*                  5. THE EXPERIENCE — numbered steps                         */
+
 const steps = [
   { num: "01", title: "Discover",  desc: "Find books that match your learning interests from a curated, trusted collection." },
   { num: "02", title: "Save",      desc: "Keep important books in your personal library and return to them whenever you need." },
@@ -467,9 +462,8 @@ function TheExperience() {
   );
 }
 
-/* ─────────────────────────────────────────
-   6. THE FUTURE
-───────────────────────────────────────── */
+/*                             6. THE FUTURE                                */
+
 function TheFuture() {
   const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-70px" });
@@ -540,9 +534,8 @@ function TheFuture() {
   );
 }
 
-/* ─────────────────────────────────────────
-   7. FINAL CTA
-───────────────────────────────────────── */
+/*                  7. FINAL CTA                     */
+
 function FinalCTA() {
   return (
     <section className="relative overflow-hidden py-28 lg:py-36" style={{ backgroundColor: "#0A0A0A" }}
@@ -595,9 +588,8 @@ function FinalCTA() {
   );
 }
 
-/* ─────────────────────────────────────────
-   About page — root
-───────────────────────────────────────── */
+/*                   About page — root                    */
+
 function About() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
