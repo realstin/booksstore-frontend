@@ -31,7 +31,7 @@ const columns = [
     links: [
       { label: "Help Center",      href: "/help",  internal: true },
       { label: "Privacy Policy",   href: "/privacy", internal: true },
-      { label: "Terms of Service", href: "#" },
+      { label: "Terms of Service", href: "/terms",   internal: true },
       { label: "FAQ",              href: "/help#faq", internal: true },
     ],
   },
