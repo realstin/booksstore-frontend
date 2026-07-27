@@ -26,12 +26,25 @@ function PageLoader() {
   );
 }
 
-/* ─── Scrolls to top on every route change ─── */
+/* ─── Scrolls to top on every route change, but preserves hash targets ─── */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [pathname]);
+    if (hash) {
+      // Let the page render, then scroll to the hash element
+      const id = hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        // Small delay so lazy-loaded content finishes mounting
+        const timer = setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, [pathname, hash]);
   return null;
 }
 

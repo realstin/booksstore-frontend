@@ -32,7 +32,7 @@ const columns = [
       { label: "Help Center",      href: "/help",  internal: true },
       { label: "Privacy Policy",   href: "#" },
       { label: "Terms of Service", href: "#" },
-      { label: "FAQ",              href: "#" },
+      { label: "FAQ",              href: "/help#faq", internal: true },
     ],
   },
   {

@@ -491,7 +491,7 @@ function FAQ() {
   const toggle = (i) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section id="faq" className="relative overflow-hidden bg-white py-20 lg:py-24" aria-labelledby="faq-heading">
+    <section id="faq" className="relative overflow-hidden bg-white py-20 lg:py-24 scroll-mt-24" aria-labelledby="faq-heading">
       <DotGrid id="faq-grid" />
       <Hairlines />
       <Container>
