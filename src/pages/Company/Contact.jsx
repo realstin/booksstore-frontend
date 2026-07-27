@@ -9,9 +9,9 @@ import emailjs from "@emailjs/browser";
    Replace these three values with your own
    from https://www.emailjs.com/
 ───────────────────────────────────────── */
-const EMAILJS_SERVICE_ID  = "service_igdyx9n";   // e.g. "service_abc123"
-const EMAILJS_TEMPLATE_ID = "template_ot9ts8a";  // e.g. "template_xyz456"
-const EMAILJS_PUBLIC_KEY  = "3h4AvPR3rSdjHT8o-";   // e.g. "abcDEFghiJKL"
+const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 /* ─────────────────────────────────────────
    Inline social icons (not in this lucide version)
