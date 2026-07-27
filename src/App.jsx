@@ -16,6 +16,7 @@ const News        = lazy(() => import('./pages/News/News'));
 const NewsArticle = lazy(() => import('./pages/News/NewsArticle'));
 const About       = lazy(() => import('./pages/About'));
 const Help        = lazy(() => import('./pages/Resources/Help'));
+const Privacy     = lazy(() => import('./pages/Resources/Privacy'));
 
 /* ─── Minimal fallback shown while a chunk loads ─── */
 function PageLoader() {
@@ -65,6 +66,7 @@ function App() {
           <Route path="/news/:slug" element={<NewsArticle />} />
           <Route path="/about"      element={<About />} />
           <Route path="/help"       element={<Help />} />
+          <Route path="/privacy"    element={<Privacy />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

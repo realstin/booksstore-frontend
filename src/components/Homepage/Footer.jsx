@@ -30,7 +30,7 @@ const columns = [
     heading: "Resources",
     links: [
       { label: "Help Center",      href: "/help",  internal: true },
-      { label: "Privacy Policy",   href: "#" },
+      { label: "Privacy Policy",   href: "/privacy", internal: true },
       { label: "Terms of Service", href: "#" },
       { label: "FAQ",              href: "/help#faq", internal: true },
     ],
