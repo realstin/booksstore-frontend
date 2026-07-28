@@ -118,7 +118,53 @@ export async function getBooks(params = {}) {
   return response.json();
 }
 
-// ========== STATISTICS ==========
+// ========== SINGLE BOOK ==========
+
+// Fetch one book by MongoDB _id
+export async function getBookById(id) {
+  const response = await fetch(`${API_URL}/api/books/${id}`, {
+    credentials: 'include',
+  });
+
+  if (response.status === 404) {
+    const err = new Error('Book not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch book (status ${response.status})`);
+  }
+
+  return response.json();
+}
+
+// ========== DOWNLOAD ==========
+
+/**
+ * Streams the PDF through our backend proxy and returns a Blob.
+ * This is required because the HTML `download` attribute is ignored
+ * by browsers for cross-origin URLs (browser security policy).
+ * The backend fetches the PDF and pipes it back as same-origin,
+ * so the browser triggers a real file download.
+ */
+export async function downloadBook(id) {
+  const response = await fetch(`${API_URL}/api/books/${id}/download`, {
+    credentials: 'include',
+  });
+
+  if (response.status === 404) {
+    const err = new Error('Book not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Download failed (status ${response.status})`);
+  }
+
+  return response.blob();
+}
 
 // Fetch statistics from backend
 export async function getStats() {
