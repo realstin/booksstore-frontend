@@ -1,5 +1,7 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
+import { useAuth } from './hooks/useAuth';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 /* ─── Eagerly loaded (always needed immediately) ─── */
@@ -18,6 +20,7 @@ const About       = lazy(() => import('./pages/About'));
 const Help        = lazy(() => import('./pages/Resources/Help'));
 const Privacy     = lazy(() => import('./pages/Resources/Privacy'));
 const Terms       = lazy(() => import('./pages/Resources/Terms'));
+const Dashboard   = lazy(() => import('./pages/Dashboard/Dashboard'));
 
 /* ─── Minimal fallback shown while a chunk loads ─── */
 function PageLoader() {
@@ -50,6 +53,18 @@ function ScrollToTop() {
   return null;
 }
 
+/* ─── HomepageGuard ───────────────────────────────────────────────────────────
+   Authenticated users who land on /homepage are redirected to /dashboard.
+   Unauthenticated users see the normal public homepage.
+   While the auth check is still running we show nothing to avoid a flicker.
+──────────────────────────────────────────────────────────────────────────── */
+function HomepageGuard() {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (user)    return <Navigate to="/dashboard" replace />;
+  return <Homepage />;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -57,7 +72,7 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/"           element={<ComingSoon />} />
-          <Route path="/homepage"   element={<Homepage />} />
+          <Route path="/homepage"   element={<HomepageGuard />} />
           <Route path="/login"      element={<Login />} />
           <Route path="/signup"     element={<Signup />} />
           <Route path="/logout"     element={<Logout />} />
@@ -69,6 +84,11 @@ function App() {
           <Route path="/help"       element={<Help />} />
           <Route path="/privacy"    element={<Privacy />} />
           <Route path="/terms"      element={<Terms />} />
+          <Route path="/dashboard"  element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Suspense>
     </BrowserRouter>

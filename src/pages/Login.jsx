@@ -27,7 +27,7 @@ function Login() {
       // Login
       const data = await loginUser(formData);
       login(data);
-      navigate('/');
+      navigate('/dashboard');
     }
   );
 
