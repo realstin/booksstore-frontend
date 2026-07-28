@@ -1,116 +1,133 @@
 import { motion } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
+import {
+  BookOpen, BookMarked, TrendingUp, Clock, Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { Link } from 'react-router-dom';
 
 const ease = [0.22, 1, 0.36, 1];
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 22 },
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.68, delay, ease },
+  transition: { duration: 0.62, delay, ease },
 });
 
+/* ─────────────────────────────────────────
+   Empty state card used inside placeholder sections
+───────────────────────────────────────── */
+function EmptyCard({ icon: Icon, message }) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-neutral-200 bg-white px-6 py-10 text-center">
+      <Icon size={28} strokeWidth={1.4} className="text-neutral-300" aria-hidden="true" />
+      <p className="text-[13.5px] text-neutral-400">{message}</p>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Section wrapper with heading
+───────────────────────────────────────── */
+function Section({ title, delay, children }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.58, delay, ease }}
+      aria-labelledby={`section-${title.replace(/\s+/g, '-').toLowerCase()}`}
+    >
+      <h2
+        id={`section-${title.replace(/\s+/g, '-').toLowerCase()}`}
+        className="mb-4 text-[13.5px] font-semibold uppercase tracking-[0.14em] text-neutral-400"
+      >
+        {title}
+      </h2>
+      {children}
+    </motion.section>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Dashboard home page
+───────────────────────────────────────── */
 function Dashboard() {
   const { user } = useAuth();
-
-  // Use first name only for a friendlier greeting.
   const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   return (
-    <div
-      className="min-h-screen bg-white"
-      style={{ fontFamily: 'var(--font-sans)' }}
-    >
-      {/* Dot-grid background */}
-      <svg
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 h-full w-full opacity-[0.03]"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <pattern
-            id="dash-dot-grid"
-            x="0" y="0" width="28" height="28"
-            patternUnits="userSpaceOnUse"
-          >
-            <circle cx="1.5" cy="1.5" r="1.5" fill="#0f1419" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dash-dot-grid)" />
-      </svg>
+    <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8 lg:px-10">
 
-      {/* Minimal top bar */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-100 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-16">
-          {/* Logo */}
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          >
-            <BookOpen size={20} strokeWidth={1.75} className="text-neutral-950" aria-hidden="true" />
-            <span className="text-[18px] font-semibold tracking-tight text-neutral-950">
-              BookStore
-            </span>
-          </Link>
-
-          {/* Logout */}
-          <Link
-            to="/logout"
-            className="text-[14px] font-medium text-neutral-500 transition-colors hover:text-neutral-950 focus:outline-none focus-visible:text-neutral-950"
-          >
-            Log out
-          </Link>
-        </div>
+      {/* ── Welcome header ── */}
+      <header className="mb-10">
+        <motion.p
+          {...fadeUp(0)}
+          className="mb-2 text-[11.5px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
+        >
+          Dashboard
+        </motion.p>
+        <motion.h1
+          {...fadeUp(0.07)}
+          className="mb-3 text-[clamp(1.75rem,3.5vw,2.4rem)] font-bold leading-[1.1] tracking-[-0.02em] text-neutral-950"
+        >
+          Welcome back, {firstName}.
+        </motion.h1>
+        <motion.p
+          {...fadeUp(0.13)}
+          className="max-w-lg text-[1rem] leading-[1.75] text-neutral-500"
+        >
+          Continue your learning journey, discover something new, and build
+          your personal library.
+        </motion.p>
       </header>
 
-      {/* Main content */}
-      <main className="relative flex min-h-screen flex-col items-center justify-center px-6">
-        <div className="flex max-w-xl flex-col items-center gap-6 text-center">
+      {/* ── Sections grid ── */}
+      <div className="flex flex-col gap-10">
 
-          {/* Icon */}
-          <motion.div
-            {...fadeUp(0)}
-            className="flex h-16 w-16 items-center justify-center rounded-2xl border border-neutral-200 bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)]"
-          >
-            <BookOpen size={26} strokeWidth={1.5} className="text-neutral-700" aria-hidden="true" />
-          </motion.div>
+        {/* Continue Reading */}
+        <Section title="Continue Reading" delay={0.18}>
+          <EmptyCard
+            icon={BookOpen}
+            message="Books you begin reading will appear here."
+          />
+        </Section>
 
-          {/* Eyebrow */}
-          <motion.p
-            {...fadeUp(0.08)}
-            className="text-[11.5px] font-semibold uppercase tracking-[0.2em] text-neutral-400"
-          >
-            Your Dashboard
-          </motion.p>
+        {/* Recently Added */}
+        <Section title="Recently Added" delay={0.24}>
+          <EmptyCard
+            icon={Sparkles}
+            message="Newly added books will appear here as the library grows."
+          />
+        </Section>
 
-          {/* Heading */}
-          <motion.h1
-            {...fadeUp(0.14)}
-            className="text-[clamp(2rem,5vw,3rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
-          >
-            Welcome back, {firstName}.
-          </motion.h1>
+        {/* Two-column row */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
-          {/* Description */}
-          <motion.p
-            {...fadeUp(0.22)}
-            className="text-[1.0625rem] leading-[1.78] text-neutral-500"
-          >
-            This is your personal learning workspace. Your library, your saved
-            books, and your reading progress will all live here.
-          </motion.p>
+          {/* Trending Books */}
+          <Section title="Trending Books" delay={0.3}>
+            <EmptyCard
+              icon={TrendingUp}
+              message="Community favourites will appear here."
+            />
+          </Section>
 
-          {/* Small note */}
-          <motion.p
-            {...fadeUp(0.3)}
-            className="text-[13px] text-neutral-400"
-          >
-            More features are coming soon.
-          </motion.p>
+          {/* Recent Activity */}
+          <Section title="Recent Activity" delay={0.36}>
+            <EmptyCard
+              icon={Clock}
+              message="Your reading activity will be tracked here."
+            />
+          </Section>
 
         </div>
-      </main>
+
+        {/* Saved / Library */}
+        <Section title="Saved Books" delay={0.4}>
+          <EmptyCard
+            icon={BookMarked}
+            message="Your reading journey starts here. Save books to your library and they will appear in this section."
+          />
+        </Section>
+
+      </div>
     </div>
   );
 }

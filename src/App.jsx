@@ -2,13 +2,14 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-route
 import { useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/Dashboard/DashboardLayout';
 import './App.css';
 
-/* ─── Eagerly loaded (always needed immediately) ─── */
+/* ─── Eagerly loaded ─── */
 import ComingSoon from './pages/ComingSoon';
 import Homepage   from './pages/Homepage';
 
-/* ─── Lazily loaded (only downloaded when visited) ─── */
+/* ─── Lazily loaded — public ─── */
 const Login       = lazy(() => import('./pages/Login'));
 const Signup      = lazy(() => import('./pages/Signup'));
 const Logout      = lazy(() => import('./pages/Logout'));
@@ -20,27 +21,34 @@ const About       = lazy(() => import('./pages/About'));
 const Help        = lazy(() => import('./pages/Resources/Help'));
 const Privacy     = lazy(() => import('./pages/Resources/Privacy'));
 const Terms       = lazy(() => import('./pages/Resources/Terms'));
-const Dashboard   = lazy(() => import('./pages/Dashboard/Dashboard'));
 
-/* ─── Minimal fallback shown while a chunk loads ─── */
+/* ─── Lazily loaded — dashboard pages ─── */
+const Dashboard         = lazy(() => import('./pages/Dashboard/Dashboard'));
+const DashboardExplore  = lazy(() => import('./pages/Dashboard/Explore'));
+const DashboardLibrary  = lazy(() => import('./pages/Dashboard/Library'));
+const DashboardProfile  = lazy(() => import('./pages/Dashboard/Profile'));
+const DashboardSettings = lazy(() => import('./pages/Dashboard/Settings'));
+
+/* ─── Spinner shown while a lazy chunk loads ─── */
 function PageLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" aria-label="Loading" />
+      <div
+        className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900"
+        aria-label="Loading…"
+      />
     </div>
   );
 }
 
-/* ─── Scrolls to top on every route change, but preserves hash targets ─── */
+/* ─── Scrolls to top on route change; preserves #hash targets ─── */
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
     if (hash) {
-      // Let the page render, then scroll to the hash element
       const id = hash.replace('#', '');
       const el = document.getElementById(id);
       if (el) {
-        // Small delay so lazy-loaded content finishes mounting
         const timer = setTimeout(() => {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 80);
@@ -53,11 +61,7 @@ function ScrollToTop() {
   return null;
 }
 
-/* ─── HomepageGuard ───────────────────────────────────────────────────────────
-   Authenticated users who land on /homepage are redirected to /dashboard.
-   Unauthenticated users see the normal public homepage.
-   While the auth check is still running we show nothing to avoid a flicker.
-──────────────────────────────────────────────────────────────────────────── */
+/* ─── Redirects authenticated users away from /homepage ─── */
 function HomepageGuard() {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
@@ -71,6 +75,7 @@ function App() {
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* ── Public routes ── */}
           <Route path="/"           element={<ComingSoon />} />
           <Route path="/homepage"   element={<HomepageGuard />} />
           <Route path="/login"      element={<Login />} />
@@ -84,11 +89,22 @@ function App() {
           <Route path="/help"       element={<Help />} />
           <Route path="/privacy"    element={<Privacy />} />
           <Route path="/terms"      element={<Terms />} />
-          <Route path="/dashboard"  element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+
+          {/* ── Protected dashboard — nested so layout persists ── */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index           element={<Dashboard />} />
+            <Route path="explore"  element={<DashboardExplore />} />
+            <Route path="library"  element={<DashboardLibrary />} />
+            <Route path="profile"  element={<DashboardProfile />} />
+            <Route path="settings" element={<DashboardSettings />} />
+          </Route>
         </Routes>
       </Suspense>
     </BrowserRouter>
