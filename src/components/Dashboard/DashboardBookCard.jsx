@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Star, Bookmark, BookOpen } from 'lucide-react';
 
 /* ─────────────────────────────────────────
@@ -63,13 +64,19 @@ function FallbackCover({ title }) {
    Props:
      book      — book object from the API
      index     — position in list (used for stagger delay)
-     onClick   — optional click handler (future navigation)
+     onClick   — optional override click handler
 ───────────────────────────────────────── */
 function DashboardBookCard({ book, index = 0, onClick }) {
+  const navigate   = useNavigate();
   const category   = firstCategory(book.categories);
   const authors    = formatAuthors(book.authors);
   const savesLabel = formatCount(book.savesCount);
   const hasCover   = Boolean(book.coverImage);
+
+  function handleClick() {
+    if (onClick) { onClick(book); return; }
+    if (book._id) navigate(`/dashboard/books/${book._id}`);
+  }
 
   return (
     <motion.article
@@ -81,9 +88,12 @@ function DashboardBookCard({ book, index = 0, onClick }) {
         ease: [0.22, 1, 0.36, 1],
       }}
       whileHover={{ y: -4, transition: { duration: 0.22, ease: 'easeOut' } }}
-      onClick={onClick}
-      className="group flex cursor-default flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+      onClick={handleClick}
+      className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
       aria-label={`${book.title}${authors ? ` by ${authors}` : ''}`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
     >
       {/* ── Cover ── */}
       <div className="aspect-[3/4] w-full overflow-hidden bg-neutral-100">
