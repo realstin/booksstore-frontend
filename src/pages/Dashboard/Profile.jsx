@@ -39,7 +39,7 @@ function Profile() {
 
         {/* User card */}
         <div className="flex items-center gap-5 rounded-2xl border border-neutral-200 bg-white p-7 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[1.2rem] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)]">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[1.2rem] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)]">
             {initials || <User size={22} aria-hidden="true" />}
           </div>
           <div>

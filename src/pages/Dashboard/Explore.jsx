@@ -271,7 +271,7 @@ function Explore() {
               onClick={() => handleCategorySelect(cat)}
               aria-pressed={category === cat}
               className={[
-                'flex-shrink-0 rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2',
+                'shrink-0 rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2',
                 category === cat
                   ? 'border-neutral-950 bg-neutral-950 text-white'
                   : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400 hover:text-neutral-950',
@@ -283,7 +283,7 @@ function Explore() {
         </div>
 
         {/* Sort dropdown */}
-        <div className="relative flex-shrink-0">
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => setSortOpen((v) => !v)}
@@ -308,7 +308,7 @@ function Explore() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.16, ease: 'easeOut' }}
-              className="absolute right-0 top-full z-20 mt-1.5 min-w-[170px] overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+              className="absolute right-0 top-full z-20 mt-1.5 min-w-42.5 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
             >
               {SORT_OPTIONS.map((opt) => (
                 <li key={opt.value}>

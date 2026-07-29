@@ -83,7 +83,7 @@ function SkeletonDetail() {
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]">
       {/* Cover skeleton */}
       <div className="flex justify-center lg:justify-start">
-        <div className="aspect-[3/4] w-56 animate-pulse rounded-2xl bg-neutral-100 lg:w-full" />
+        <div className="aspect-3/4 w-56 animate-pulse rounded-2xl bg-neutral-100 lg:w-full" />
       </div>
       {/* Info skeleton */}
       <div className="flex flex-col gap-5">
@@ -158,11 +158,11 @@ function MetaRow({ icon: Icon, label, value }) {
   if (!value) return null;
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-neutral-50 text-neutral-500">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-neutral-50 text-neutral-500">
         <Icon size={13} strokeWidth={2} aria-hidden="true" />
       </span>
       <div className="flex flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">{label}</span>
         <span className="text-[13.5px] text-neutral-700">{value}</span>
       </div>
     </div>
@@ -357,12 +357,12 @@ function BookDetails() {
                   src={book.coverImage}
                   alt={`Cover of ${book.title}`}
                   loading="lazy"
-                  className="aspect-[3/4] w-full object-cover"
+                  className="aspect-3/4 w-full object-cover"
                   whileHover={{ scale: 1.03 }}
                   transition={{ duration: 0.35 }}
                 />
               ) : (
-                <div className="aspect-[3/4] w-full">
+                <div className="aspect-3/4 w-full">
                   <FallbackCover title={book.title} />
                 </div>
               )}
@@ -377,7 +377,7 @@ function BookDetails() {
               {/* Category badges */}
               {categories.map((cat) => (
                 <span key={cat}
-                  className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
+                  className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11.5px] font-semibold uppercase tracking-widest text-neutral-500">
                   {cat}
                 </span>
               ))}
