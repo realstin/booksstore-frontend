@@ -281,7 +281,7 @@ function Privacy() {
             <motion.h1
               id="privacy-heading"
               {...fadeUp(0.12)}
-              className="mb-4 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-[-0.025em] text-neutral-950"
+              className="mb-4 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
               style={{ fontFamily: "var(--font-sans)" }}
             >
               Privacy Policy

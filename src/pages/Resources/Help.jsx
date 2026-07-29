@@ -50,8 +50,8 @@ function DotGrid({ id }) {
 function Hairlines() {
   return (
     <>
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-neutral-200 to-transparent" />
     </>
   );
 }
@@ -203,7 +203,7 @@ function Hero({ query, onQuery, heroRef, heroInView }) {
 
           {/* Heading */}
           <motion.h1 id="help-heading" {...fadeUp(0.13)}
-            className="mb-5 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.07] tracking-[-0.025em] text-neutral-950"
+            className="mb-5 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.07] tracking-tight text-neutral-950"
             style={{ fontFamily: "var(--font-sans)" }}>
             How can we help?
           </motion.h1>
@@ -295,7 +295,7 @@ function SearchResults({ query, onClear }) {
               {matchedTopics.map((t) => (
                 <a key={t.title} href={`#${t.anchor}`}
                   className="group flex items-start gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all duration-200 hover:border-neutral-300 hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
-                  <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-600 transition-colors group-hover:bg-neutral-100">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-600 transition-colors group-hover:bg-neutral-100">
                     <t.icon size={16} strokeWidth={1.75} aria-hidden="true" />
                   </span>
                   <div>
@@ -358,7 +358,7 @@ function PopularTopics() {
               aria-label={topic.title}
             >
               {/* Icon */}
-              <span className="mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-700 transition-all duration-300 group-hover:border-neutral-200 group-hover:bg-neutral-100">
+              <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-700 transition-all duration-300 group-hover:border-neutral-200 group-hover:bg-neutral-100">
                 <topic.icon size={19} strokeWidth={1.75} aria-hidden="true" />
               </span>
 
@@ -370,7 +370,7 @@ function PopularTopics() {
                   </h3>
                   <ArrowRight
                     size={15}
-                    className="flex-shrink-0 text-neutral-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-neutral-700"
+                    className="shrink-0 text-neutral-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-neutral-700"
                     aria-hidden="true"
                   />
                 </div>
@@ -409,7 +409,7 @@ function GettingStarted() {
         <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-6">
           {/* Connecting line — desktop only */}
           <div aria-hidden="true"
-            className="absolute left-0 right-0 top-[42px] hidden h-px bg-gradient-to-r from-neutral-200 via-neutral-300 to-neutral-200 lg:block" />
+            className="absolute left-0 right-0 top-10.5 hidden h-px bg-linear-to-r from-neutral-200 via-neutral-300 to-neutral-200 lg:block" />
 
           {gettingStartedSteps.map((step, i) => (
             <motion.div
@@ -420,7 +420,7 @@ function GettingStarted() {
               className="relative flex flex-col items-center gap-5 text-center lg:items-start lg:text-left"
             >
               {/* Number circle */}
-              <div className="relative z-10 flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.08)]">
+              <div className="relative z-10 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.08)]">
                 <step.icon size={20} strokeWidth={1.75} className="text-neutral-800" aria-hidden="true" />
               </div>
 
@@ -460,7 +460,7 @@ function FAQItem({ faq, isOpen, onToggle }) {
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.25, ease }}
-          className="flex-shrink-0 text-neutral-400"
+          className="shrink-0 text-neutral-400"
           aria-hidden="true"
         >
           <ChevronDown size={18} strokeWidth={2} />
