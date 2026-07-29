@@ -1,15 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-// ========== SESSION HELPERS ==========
-export function getUser() {
-  const raw = localStorage.getItem('bookstowa_user');
-  return raw ? JSON.parse(raw) : null;
-}
-
-export function clearSession() {
-  localStorage.removeItem('bookstowa_user');
-}
-
 // ========== BACKEND STATUS CHECK ==========
 export async function checkBackendStatus() {
   try {
@@ -91,8 +81,6 @@ export async function logoutUser() {
   });
 
   const data = await response.json().catch(() => ({}));
-
-  clearSession();
   return data;
 }
 

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, LayoutDashboard, Compass,
-  Library, User, Settings, LogOut,
+  Library, User, Settings, LogOut, Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import DashboardNavItem from './DashboardNavItem';
@@ -28,10 +28,20 @@ function getInitials(name = '') {
 
 function DashboardMobileHeader() {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const initials = getInitials(user?.name);
 
   const close = () => setOpen(false);
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    close();
+    setLoggingOut(true);
+    await logout();
+    navigate('/login', { replace: true });
+  }
 
   return (
     <>
@@ -155,12 +165,23 @@ function DashboardMobileHeader() {
 
               {/* User + logout */}
               <div className="flex-shrink-0 border-t border-neutral-100 px-3 py-4">
-                <DashboardNavItem
-                  to="/logout"
-                  icon={LogOut}
-                  label="Log out"
-                  onClick={close}
-                />
+                {/* Logout button */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors duration-150 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+                  aria-label={loggingOut ? 'Logging out…' : 'Log out'}
+                  aria-busy={loggingOut}
+                >
+                  {loggingOut ? (
+                    <Loader2 size={17} strokeWidth={2} className="animate-spin flex-shrink-0" aria-hidden="true" />
+                  ) : (
+                    <LogOut size={17} strokeWidth={1.9} className="flex-shrink-0" aria-hidden="true" />
+                  )}
+                  <span>{loggingOut ? 'Logging out…' : 'Log out'}</span>
+                </button>
+
                 <Link
                   to="/dashboard/profile"
                   onClick={close}

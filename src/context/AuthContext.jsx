@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import { getMe } from '../services/api';
+import { getMe, logoutUser } from '../services/api';
 
 // Create the context
 export const AuthContext = createContext();
@@ -10,47 +10,42 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   // ===== VERIFY USER ON APP STARTUP =====
-  // Instead of reading from localStorage, fetch from backend
   useEffect(() => {
     const verifyUser = async () => {
       try {
         setLoading(true);
-        
-        // Fetch user from backend using HTTP-only cookie
         const response = await getMe();
-        
         if (response.user) {
           setUser(response.user);
         }
       } catch (error) {
-        // Token invalid or expired - user is not logged in
         console.log('User not authenticated:', error.message);
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
-
     verifyUser();
   }, []);
 
   // ===== LOGIN =====
-  // Only store user in state (not localStorage)
-  // HTTP-only cookie is set by backend
   function login(userData) {
     setUser(userData.user);
-    // localStorage.setItem removed - only use HTTP-only cookie
   }
 
   // ===== LOGOUT =====
-  // Clear user from state
-  // HTTP-only cookie is cleared by backend
-  function logout() {
-    setUser(null);
-    // localStorage.removeItem removed - cookie is cleared by backend
+  // Calls the backend to clear the HTTP-only JWT cookie,
+  // then clears the frontend user state regardless of outcome.
+  async function logout() {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+    }
   }
 
-  // Check if user is logged in
   const isLoggedIn = !!user;
 
   return (
