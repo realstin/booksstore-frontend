@@ -7,7 +7,7 @@ function BookCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
       {/* Cover placeholder */}
-      <div className="aspect-[3/4] w-full animate-pulse bg-neutral-100" />
+      <div className="aspect-3/4 w-full animate-pulse bg-neutral-100" />
 
       {/* Body */}
       <div className="flex flex-col gap-2.5 p-4">

@@ -18,7 +18,7 @@ function DashboardLayout() {
       style={{ fontFamily: 'var(--font-sans)' }}
     >
       {/* Desktop sidebar — hidden below lg */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
+      <div className="hidden lg:flex lg:shrink-0">
         <DashboardSidebar />
       </div>
 

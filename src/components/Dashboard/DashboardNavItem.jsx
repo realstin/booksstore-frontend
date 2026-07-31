@@ -26,7 +26,7 @@ function DashboardNavItem({ to, icon: Icon, label, onClick, end = false }) {
           <motion.span
             whileHover={{ scale: isActive ? 1 : 1.1 }}
             transition={{ duration: 0.18 }}
-            className="flex-shrink-0"
+            className="shrink-0"
             aria-hidden="true"
           >
             <Icon size={17} strokeWidth={isActive ? 2.2 : 1.9} />

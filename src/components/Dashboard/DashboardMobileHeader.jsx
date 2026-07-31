@@ -125,7 +125,7 @@ function DashboardMobileHeader() {
               className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white shadow-[4px_0_24px_rgba(0,0,0,0.08)] lg:hidden"
             >
               {/* Drawer header */}
-              <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-neutral-100 px-5">
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-100 px-5">
                 <Link
                   to="/dashboard"
                   onClick={close}
@@ -164,7 +164,7 @@ function DashboardMobileHeader() {
               </nav>
 
               {/* User + logout */}
-              <div className="flex-shrink-0 border-t border-neutral-100 px-3 py-4">
+              <div className="shrink-0 border-t border-neutral-100 px-3 py-4">
                 {/* Logout button */}
                 <button
                   type="button"
@@ -175,9 +175,9 @@ function DashboardMobileHeader() {
                   aria-busy={loggingOut}
                 >
                   {loggingOut ? (
-                    <Loader2 size={17} strokeWidth={2} className="animate-spin flex-shrink-0" aria-hidden="true" />
+                    <Loader2 size={17} strokeWidth={2} className="animate-spin shrink-0" aria-hidden="true" />
                   ) : (
-                    <LogOut size={17} strokeWidth={1.9} className="flex-shrink-0" aria-hidden="true" />
+                    <LogOut size={17} strokeWidth={1.9} className="shrink-0" aria-hidden="true" />
                   )}
                   <span>{loggingOut ? 'Logging out…' : 'Log out'}</span>
                 </button>
@@ -188,7 +188,7 @@ function DashboardMobileHeader() {
                   className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
                   aria-label="Go to your profile"
                 >
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[11px] font-bold text-white">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[11px] font-bold text-white">
                     {initials || '?'}
                   </div>
                   <div className="min-w-0 flex-1">

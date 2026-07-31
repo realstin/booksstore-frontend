@@ -96,7 +96,7 @@ function DashboardBookCard({ book, index = 0, onClick }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
     >
       {/* ── Cover ── */}
-      <div className="aspect-[3/4] w-full overflow-hidden bg-neutral-100">
+      <div className="aspect-3/4 w-full overflow-hidden bg-neutral-100">
         {hasCover ? (
           <motion.img
             src={book.coverImage}
@@ -113,7 +113,7 @@ function DashboardBookCard({ book, index = 0, onClick }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         {/* Category badge */}
         {category && (
-          <span className="self-start rounded-full border border-neutral-100 bg-neutral-50 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
+          <span className="self-start rounded-full border border-neutral-100 bg-neutral-50 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-widest text-neutral-500">
             {category}
           </span>
         )}
