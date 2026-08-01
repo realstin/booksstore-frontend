@@ -124,11 +124,11 @@ function Signup() {
             />
             <span>
               {AUTH_MESSAGES.SIGNUP_TERMS}{' '}
-              <Link to="/" className="auth-split__terms-link">
+              <Link to="/terms" className="auth-split__terms-link">
                 {AUTH_MESSAGES.SIGNUP_TERMS_SERVICE}
               </Link>
               {' '}and{' '}
-              <Link to="/" className="auth-split__terms-link">
+              <Link to="/privacy" className="auth-split__terms-link">
                 {AUTH_MESSAGES.SIGNUP_PRIVACY}
               </Link>.
             </span>
