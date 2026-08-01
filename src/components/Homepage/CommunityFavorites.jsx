@@ -363,12 +363,26 @@ function BookCard({ book, index }) {
         }}
         className="overflow-hidden"
       >
-        <button
-          type="button"
-          className="mt-1 w-full rounded-xl bg-neutral-950 py-2.5 text-[13px] font-semibold text-white transition hover:bg-neutral-800 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-        >
-          Read More
-        </button>
+        {book.pdfUrl ? (
+          <a
+            href={book.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Read ${book.title} online`}
+            className="mt-1 block w-full rounded-xl bg-neutral-950 py-2.5 text-center text-[13px] font-semibold text-white transition hover:bg-neutral-800 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+          >
+            Read More
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="mt-1 w-full cursor-not-allowed rounded-xl bg-neutral-200 py-2.5 text-[13px] font-semibold text-neutral-400"
+            aria-label="PDF not available for this book"
+          >
+            Not Available
+          </button>
+        )}
       </motion.div>
     </motion.article>
   );
