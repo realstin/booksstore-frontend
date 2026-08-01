@@ -6,8 +6,7 @@ import DashboardLayout from './components/Dashboard/DashboardLayout';
 import './App.css';
 
 /* ─── Eagerly loaded ─── */
-import ComingSoon from './pages/ComingSoon';
-import Homepage   from './pages/Homepage';
+import Homepage from './pages/Homepage';
 
 /* ─── Lazily loaded — public ─── */
 const Login       = lazy(() => import('./pages/Login'));
@@ -76,7 +75,7 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ── Public routes ── */}
-          <Route path="/"           element={<ComingSoon />} />
+          <Route path="/"           element={<HomepageGuard />} />
           <Route path="/homepage"   element={<HomepageGuard />} />
           <Route path="/login"      element={<Login />} />
           <Route path="/signup"     element={<Signup />} />
