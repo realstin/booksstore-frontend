@@ -1,10 +1,22 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
+// ========== SESSION HELPERS ==========
+
+export function getUser() {
+  const raw = localStorage.getItem('bookstowa_user');
+  return raw ? JSON.parse(raw) : null;
+}
+
+export function clearSession() {
+  localStorage.removeItem('bookstowa_user');
+}
+
 // ========== BACKEND STATUS CHECK ==========
+
 export async function checkBackendStatus() {
   try {
     const response = await fetch(`${API_URL}/api/books`, {
-      credentials: "include",
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -12,15 +24,14 @@ export async function checkBackendStatus() {
     }
 
     return { connected: true };
-
   } catch (error) {
     return { connected: false, error: error.message };
   }
 }
 
 // ========== AUTH ==========
-async function authRequest(path, body) {
 
+async function authRequest(path, body) {
   const response = await fetch(`${API_URL}/api/auth/${path}`, {
     method: 'POST',
 
@@ -28,7 +39,7 @@ async function authRequest(path, body) {
       'Content-Type': 'application/json',
     },
 
-    credentials: "include",
+    credentials: 'include',
 
     body: JSON.stringify(body),
   });
@@ -36,7 +47,6 @@ async function authRequest(path, body) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-
     const detail = data.errors
       ? data.errors.join(' ')
       : data.message;
@@ -50,57 +60,74 @@ async function authRequest(path, body) {
 }
 
 // ========== REGISTER ==========
+
 export function registerUser({ name, email, password }) {
-  return authRequest(
-    'register',
-    {
-      name,
-      email,
-      password
-    }
-  );
+  return authRequest('register', {
+    name,
+    email,
+    password,
+  });
 }
 
 // ========== LOGIN ==========
+
 export function loginUser({ email, password }) {
-  return authRequest(
-    'login',
-    {
-      email,
-      password
-    }
-  );
+  return authRequest('login', {
+    email,
+    password,
+  });
 }
 
 // ========== LOGOUT ==========
-export async function logoutUser() {
 
+export async function logoutUser() {
   const response = await fetch(`${API_URL}/api/auth/logout`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
   });
 
   const data = await response.json().catch(() => ({}));
+
+  clearSession();
+
   return data;
 }
 
 // ========== BOOKS ==========
 
-// params can include: featured (boolean), limit (number), sort (string, e.g. "-rating")
+// params can include:
+// featured (boolean)
+// limit (number)
+// sort (string, e.g. "-rating")
 export async function getBooks(params = {}) {
   const query = new URLSearchParams();
 
-  if (params.featured !== undefined) query.set('featured', params.featured);
-  if (params.limit !== undefined) query.set('limit', params.limit);
-  if (params.sort !== undefined) query.set('sort', params.sort);
+  if (params.featured !== undefined) {
+    query.set('featured', params.featured);
+  }
+
+  if (params.limit !== undefined) {
+    query.set('limit', params.limit);
+  }
+
+  if (params.sort !== undefined) {
+    query.set('sort', params.sort);
+  }
 
   const queryString = query.toString();
-  const url = `${API_URL}/api/books${queryString ? `?${queryString}` : ''}`;
 
-  const response = await fetch(url, { credentials: 'include' });
+  const url = `${API_URL}/api/books${
+    queryString ? `?${queryString}` : ''
+  }`;
+
+  const response = await fetch(url, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch books (status ${response.status})`);
+    throw new Error(
+      `Failed to fetch books (status ${response.status})`
+    );
   }
 
   return response.json();
@@ -110,9 +137,12 @@ export async function getBooks(params = {}) {
 
 // Fetch one book by MongoDB _id
 export async function getBookById(id) {
-  const response = await fetch(`${API_URL}/api/books/${id}`, {
-    credentials: 'include',
-  });
+  const response = await fetch(
+    `${API_URL}/api/books/${id}`,
+    {
+      credentials: 'include',
+    }
+  );
 
   if (response.status === 404) {
     const err = new Error('Book not found');
@@ -121,7 +151,9 @@ export async function getBookById(id) {
   }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch book (status ${response.status})`);
+    throw new Error(
+      `Failed to fetch book (status ${response.status})`
+    );
   }
 
   return response.json();
@@ -131,15 +163,16 @@ export async function getBookById(id) {
 
 /**
  * Streams the PDF through our backend proxy and returns a Blob.
- * This is required because the HTML `download` attribute is ignored
- * by browsers for cross-origin URLs (browser security policy).
  * The backend fetches the PDF and pipes it back as same-origin,
- * so the browser triggers a real file download.
+ * allowing the browser to trigger a real file download.
  */
 export async function downloadBook(id) {
-  const response = await fetch(`${API_URL}/api/books/${id}/download`, {
-    credentials: 'include',
-  });
+  const response = await fetch(
+    `${API_URL}/api/books/${id}/download`,
+    {
+      credentials: 'include',
+    }
+  );
 
   if (response.status === 404) {
     const err = new Error('Book not found');
@@ -148,35 +181,118 @@ export async function downloadBook(id) {
   }
 
   if (!response.ok) {
-    throw new Error(`Download failed (status ${response.status})`);
+    throw new Error(
+      `Download failed (status ${response.status})`
+    );
   }
 
   return response.blob();
 }
 
-// Fetch statistics from backend
+// ========== BOOK STATISTICS ==========
+
 export async function getStats() {
-  const response = await fetch(`${API_URL}/api/books/stats`, {
-    credentials: 'include'
-  });
+  const response = await fetch(
+    `${API_URL}/api/books/stats`,
+    {
+      credentials: 'include',
+    }
+  );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch statistics (status ${response.status})`);
+    throw new Error(
+      `Failed to fetch statistics (status ${response.status})`
+    );
   }
 
   return response.json();
 }
-// ========== AUTHENTICATION ==========
+
+// ========== CURRENT USER ==========
 
 // Get current logged-in user
 export async function getMe() {
-  const response = await fetch(`${API_URL}/api/auth/me`, {
-    credentials: 'include'
-  });
+  const response = await fetch(
+    `${API_URL}/api/auth/me`,
+    {
+      credentials: 'include',
+    }
+  );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch user (status ${response.status})`);
+    throw new Error(
+      `Failed to fetch user (status ${response.status})`
+    );
   }
 
   return response.json();
+}
+
+// ============================================================
+// ========== LIBRARY ==========================================
+// ============================================================
+
+// Save a book to the authenticated user's library
+export async function saveBook(bookId) {
+  const response = await fetch(
+    `${API_URL}/api/users/library/save/${bookId}`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      `Failed to save book (status ${response.status})`
+    );
+  }
+
+  return data;
+}
+
+// Remove a book from the authenticated user's library
+export async function removeBook(bookId) {
+  const response = await fetch(
+    `${API_URL}/api/users/library/remove/${bookId}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      `Failed to remove book (status ${response.status})`
+    );
+  }
+
+  return data;
+}
+
+// Get all books saved by the authenticated user
+export async function getLibrary() {
+  const response = await fetch(
+    `${API_URL}/api/users/library`,
+    {
+      credentials: 'include',
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      `Failed to fetch library (status ${response.status})`
+    );
+  }
+
+  return data;
 }
