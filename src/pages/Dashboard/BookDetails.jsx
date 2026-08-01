@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, BookOpen, Bookmark, Download,
-  Star, Languages, Building2, Calendar,
+  ArrowLeft, BookOpen, Bookmark, BookmarkCheck,
+  Download, Star, Languages, Building2, Calendar,
   Hash, FileText, RefreshCw, Wifi, WifiOff,
   AlertCircle, Loader2,
 } from 'lucide-react';
-import { getBookById, downloadBook } from '../../services/api';
+import { getBookById, downloadBook, saveBook, removeBook, getLibrary } from '../../services/api';
 
 /* ─────────────────────────────────────────
    Shared easing
@@ -170,23 +170,119 @@ function MetaRow({ icon: Icon, label, value }) {
 }
 
 /* ─────────────────────────────────────────
-   Save button — visual only, no backend yet
+   Save / Unsave button — real backend
+   Props:
+     bookId      — MongoDB _id of the book
+     initialSaved — whether the current user
+                    has already saved this book
+     initialCount — current savesCount from API
 ───────────────────────────────────────── */
-function SaveButton() {
-  const [clicked, setClicked] = useState(false);
+function SaveButton({ bookId, initialSaved, initialCount }) {
+  const [saved,      setSaved]      = useState(initialSaved);
+  const [savesCount, setSavesCount] = useState(initialCount);
+  const [saveStatus, setSaveStatus] = useState('idle'); // idle | loading | error
+  const [saveError,  setSaveError]  = useState('');
+
+  /* Keep in sync if parent updates initial values after library fetch */
+  useEffect(() => { setSaved(initialSaved);  }, [initialSaved]);
+  useEffect(() => { setSavesCount(initialCount); }, [initialCount]);
+
+  async function handleToggle() {
+    if (saveStatus === 'loading' || !bookId) return;
+    setSaveStatus('loading');
+    setSaveError('');
+    try {
+      if (saved) {
+        const res = await removeBook(bookId);
+        setSaved(false);
+        if (res.savesCount !== undefined) setSavesCount(res.savesCount);
+        else setSavesCount((c) => Math.max(0, (c ?? 1) - 1));
+      } else {
+        const res = await saveBook(bookId);
+        setSaved(true);
+        if (res.savesCount !== undefined) setSavesCount(res.savesCount);
+        else setSavesCount((c) => (c ?? 0) + 1);
+      }
+      setSaveStatus('idle');
+    } catch (err) {
+      console.error('Save toggle failed:', err);
+      setSaveStatus('error');
+      setSaveError(
+        saved
+          ? 'Unable to remove book. Please try again.'
+          : 'Unable to save book. Please try again.'
+      );
+    }
+  }
+
+  const isLoading = saveStatus === 'loading';
 
   return (
-    <motion.button
-      type="button"
-      onClick={() => setClicked(true)}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-3 text-[14px] font-semibold text-neutral-700 shadow-sm transition-colors hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-      aria-label="Save book to library (coming soon)"
-    >
-      <Bookmark size={16} strokeWidth={2} aria-hidden="true" />
-      {clicked ? 'Library coming soon' : 'Save Book'}
-    </motion.button>
+    <div className="flex flex-col gap-1.5">
+      <motion.button
+        type="button"
+        onClick={handleToggle}
+        disabled={isLoading}
+        whileHover={!isLoading ? { scale: 1.02 } : {}}
+        whileTap={!isLoading ? { scale: 0.97 } : {}}
+        transition={{ duration: 0.18 }}
+        className={[
+          'inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-60',
+          saved
+            ? 'border border-neutral-950 bg-neutral-950 text-white hover:bg-neutral-800 hover:border-neutral-800'
+            : 'border border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50',
+        ].join(' ')}
+        aria-label={
+          isLoading
+            ? saved ? 'Removing from library…' : 'Saving to library…'
+            : saved ? 'Remove from library' : 'Save to library'
+        }
+        aria-pressed={saved}
+        aria-busy={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />
+            {saved ? 'Removing…' : 'Saving…'}
+          </>
+        ) : saved ? (
+          <>
+            <BookmarkCheck size={16} strokeWidth={2} aria-hidden="true" />
+            Saved
+          </>
+        ) : (
+          <>
+            <Bookmark size={16} strokeWidth={2} aria-hidden="true" />
+            Save Book
+          </>
+        )}
+      </motion.button>
+
+      {saveStatus === 'error' && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-[12.5px] text-red-500"
+          role="alert"
+        >
+          {saveError}
+          <button
+            type="button"
+            onClick={() => setSaveStatus('idle')}
+            className="ml-2 underline underline-offset-4 transition hover:text-red-700 focus:outline-none"
+          >
+            Dismiss
+          </button>
+        </motion.p>
+      )}
+
+      {/* Live saves count feedback */}
+      {savesCount != null && savesCount > 0 && (
+        <p className="text-[12px] text-neutral-400">
+          {formatCount(savesCount)} {savesCount === 1 ? 'reader saved this' : 'readers saved this'}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -284,8 +380,10 @@ function BookDetails() {
   const { id }   = useParams();
   const navigate = useNavigate();
 
-  const [book,   setBook]   = useState(null);
-  const [status, setStatus] = useState('loading'); // loading | success | notfound | error
+  const [book,        setBook]        = useState(null);
+  const [status,      setStatus]      = useState('loading');
+  const [isSaved,     setIsSaved]     = useState(false);
+  const [libraryReady, setLibraryReady] = useState(false);
 
   const goToExplore = () => navigate('/dashboard/explore');
 
@@ -294,26 +392,47 @@ function BookDetails() {
     setBook(null);
     try {
       const data = await getBookById(id);
-      /* API may return { book: {...} } or the object directly */
       const b = data?.book ?? data;
       setBook(b);
       setStatus('success');
     } catch (err) {
       console.error('BookDetails fetch error:', err);
-      if (err.status === 404) {
-        setStatus('notfound');
-      } else {
-        setStatus('error');
-      }
+      if (err.status === 404) setStatus('notfound');
+      else setStatus('error');
     }
   }, [id]);
 
-  useEffect(() => { fetchBook(); }, [fetchBook]);
+  /* Determine whether the current user has already saved this book */
+  const fetchLibraryState = useCallback(async () => {
+    if (!id) return;
+    try {
+      const data = await getLibrary();
+      /* Backend may return { savedBooks: [...] } or an array directly */
+      const books = Array.isArray(data)
+        ? data
+        : data.savedBooks ?? data.books ?? [];
+      const alreadySaved = books.some(
+        (b) => String(b._id ?? b) === String(id)
+      );
+      setIsSaved(alreadySaved);
+    } catch (err) {
+      /* If the library fetch fails, default to not-saved
+         rather than falsely claiming the book is saved */
+      console.warn('Could not determine library state:', err.message);
+      setIsSaved(false);
+    } finally {
+      setLibraryReady(true);
+    }
+  }, [id]);
 
-  /* Derived values — only computed when book exists */
-  const authors    = book ? formatAuthors(book.authors)     : null;
+  useEffect(() => {
+    fetchBook();
+    fetchLibraryState();
+  }, [fetchBook, fetchLibraryState]);
+
+  const authors    = book ? formatAuthors(book.authors)       : null;
   const categories = book ? formatCategories(book.categories) : [];
-  const savesLabel = book ? formatCount(book.savesCount)    : null;
+  const savesLabel = book ? formatCount(book.savesCount)      : null;
   const hasCover   = Boolean(book?.coverImage);
   const hasPdf     = Boolean(book?.pdfUrl);
 
@@ -473,7 +592,16 @@ function BookDetails() {
               )}
 
               {/* Save Book */}
-              <SaveButton />
+              {libraryReady ? (
+                <SaveButton
+                  bookId={id}
+                  initialSaved={isSaved}
+                  initialCount={book.savesCount ?? 0}
+                />
+              ) : (
+                /* Skeleton while library state loads */
+                <div className="h-12 w-32 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />
+              )}
 
               {/* Download */}
               {hasPdf ? (
