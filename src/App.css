@@ -410,6 +410,30 @@
   max-width: 460px;
 }
 
+/* Switch link — "Don't have an account? Sign up" */
+.auth-split__switch {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  color: #111;
+  opacity: 0.55;
+  margin-bottom: 1.25rem;
+  width: 100%;
+  max-width: 460px;
+}
+
+.auth-split__switch-link {
+  color: #111;
+  font-weight: 600;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s;
+}
+
+.auth-split__switch-link:hover {
+  opacity: 0.65;
+}
+
 /* ══ RIGHT panel ══ */
 
 .auth-split__right {

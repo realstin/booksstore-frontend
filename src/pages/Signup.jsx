@@ -142,11 +142,15 @@ function Signup() {
             >
               {loading ? AUTH_MESSAGES.SIGNUP_CREATING : AUTH_MESSAGES.SIGNUP_BUTTON}
             </button>
-            <Link to="/login" className="auth-split__btn auth-split__btn--outline">
-              Log in
-            </Link>
           </div>
         </form>
+
+        <p className="auth-split__switch">
+          Already have an account?{' '}
+          <Link to="/login" className="auth-split__switch-link">
+            Sign in
+          </Link>
+        </p>
 
         <p className="auth-split__motto">{AUTH_MESSAGES.MOTTO}</p>
       </div>
