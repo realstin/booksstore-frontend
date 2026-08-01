@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookMarked, Compass, RefreshCw, X, Loader2, AlertCircle,
+  LayoutGrid, List,
 } from 'lucide-react';
 import { getLibrary, removeBook } from '../../services/api';
+import { prefs } from '../../utils/preferences';
 import DashboardBookCard from '../../components/Dashboard/DashboardBookCard';
 import BookCardSkeleton  from '../../components/Dashboard/BookCardSkeleton';
 
@@ -20,13 +22,33 @@ const fadeUp = (delay = 0) => ({
 });
 
 /* ─────────────────────────────────────────
-   Skeleton grid — 6 cards while loading
+   Skeleton grids
 ───────────────────────────────────────── */
 function SkeletonGrid() {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 6 }).map((_, i) => (
         <BookCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   List row skeleton
+───────────────────────────────────────── */
+function SkeletonList() {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 rounded-2xl border border-neutral-100 bg-white p-4">
+          <div className="h-16 w-12 flex-shrink-0 animate-pulse rounded-lg bg-neutral-100" />
+          <div className="flex flex-1 flex-col gap-2">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
+            <div className="h-3.5 w-1/3 animate-pulse rounded bg-neutral-100" />
+          </div>
+          <div className="h-7 w-7 animate-pulse rounded-full bg-neutral-100" />
+        </div>
       ))}
     </div>
   );
@@ -93,9 +115,96 @@ function ErrorState({ onRetry }) {
 }
 
 /* ─────────────────────────────────────────
-   LibraryBookCard
-   Wraps DashboardBookCard and adds a
-   remove button in the top-right corner.
+   List-view row for a library book
+───────────────────────────────────────── */
+function LibraryListRow({ book, onRemove }) {
+  const navigate = useNavigate();
+  const [removeStatus, setRemoveStatus] = useState('idle');
+
+  const hasCover  = Boolean(book.coverImage);
+  const authors   = Array.isArray(book.authors)
+    ? book.authors.join(', ')
+    : book.authors ?? '';
+
+  function handleRowClick() {
+    if (book._id) navigate(`/dashboard/books/${book._id}`);
+  }
+
+  async function handleRemove(e) {
+    e.stopPropagation();
+    if (removeStatus === 'loading') return;
+    setRemoveStatus('loading');
+    try {
+      await removeBook(book._id);
+      onRemove(book._id);
+    } catch {
+      setRemoveStatus('error');
+      setTimeout(() => setRemoveStatus('idle'), 3000);
+    }
+  }
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.2 } }}
+      onClick={handleRowClick}
+      className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow hover:border-neutral-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.07)]"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleRowClick(); }}
+      aria-label={`Open ${book.title}`}
+    >
+      {/* Cover thumbnail */}
+      <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-neutral-100">
+        {hasCover ? (
+          <img src={book.coverImage} alt="" className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-neutral-900 text-[10px] font-bold text-neutral-500">
+            {(book.title ?? '').slice(0, 2).toUpperCase()}
+          </div>
+        )}
+      </div>
+
+      {/* Title + author */}
+      <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+        <p className="truncate text-[14px] font-semibold text-neutral-950 group-hover:text-neutral-700">
+          {book.title}
+        </p>
+        {authors && (
+          <p className="truncate text-[12.5px] text-neutral-400">{authors}</p>
+        )}
+      </div>
+
+      {/* Remove button */}
+      <motion.button
+        type="button"
+        onClick={handleRemove}
+        disabled={removeStatus === 'loading'}
+        whileHover={removeStatus !== 'loading' ? { scale: 1.1 } : {}}
+        whileTap={removeStatus !== 'loading' ? { scale: 0.92 } : {}}
+        transition={{ duration: 0.16 }}
+        className={[
+          'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
+          removeStatus === 'error'
+            ? 'border-red-200 bg-red-50 text-red-400'
+            : 'border-neutral-200 bg-white text-neutral-400 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white',
+          removeStatus === 'loading' ? 'cursor-not-allowed opacity-50' : '',
+        ].join(' ')}
+        aria-label={removeStatus === 'loading' ? 'Removing…' : `Remove ${book.title}`}
+      >
+        {removeStatus === 'loading'
+          ? <Loader2 size={11} strokeWidth={2.5} className="animate-spin" aria-hidden="true" />
+          : <X size={11} strokeWidth={2.5} aria-hidden="true" />
+        }
+      </motion.button>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   LibraryBookCard (grid view wrapper — unchanged)
 ───────────────────────────────────────── */
 function LibraryBookCard({ book, index, onRemove }) {
   const [removeStatus, setRemoveStatus] = useState('idle'); // idle | loading | error
@@ -163,13 +272,13 @@ function Library() {
   const navigate = useNavigate();
 
   const [books,  setBooks]  = useState([]);
-  const [status, setStatus] = useState('loading'); // loading | success | error
+  const [status, setStatus] = useState('loading');
+  const [view,   setView]   = useState(() => prefs.getLibraryView());
 
   const fetchLibrary = useCallback(async () => {
     setStatus('loading');
     try {
       const data = await getLibrary();
-      /* Backend may return { savedBooks: [...] } or an array directly */
       const list = Array.isArray(data)
         ? data
         : data.savedBooks ?? data.books ?? [];
@@ -183,7 +292,11 @@ function Library() {
 
   useEffect(() => { fetchLibrary(); }, [fetchLibrary]);
 
-  /* Called by LibraryBookCard after a successful remove */
+  function handleViewChange(v) {
+    setView(v);
+    prefs.setLibraryView(v);
+  }
+
   function handleRemoved(bookId) {
     setBooks((prev) => prev.filter((b) => String(b._id) !== String(bookId)));
   }
@@ -212,7 +325,7 @@ function Library() {
       </header>
 
       {/* ── Loading ── */}
-      {status === 'loading' && <SkeletonGrid />}
+      {status === 'loading' && (view === 'grid' ? <SkeletonGrid /> : <SkeletonList />)}
 
       {/* ── Error ── */}
       {status === 'error' && <ErrorState onRetry={fetchLibrary} />}
@@ -220,45 +333,77 @@ function Library() {
       {/* ── Success ── */}
       {status === 'success' && (
         <>
-          {/* Book count */}
+          {/* Count + view toggle */}
           {count > 0 && (
-            <motion.p {...fadeUp(0.1)}
-              className="mb-6 text-[13px] text-neutral-400">
-              {countLabel}
-            </motion.p>
+            <motion.div {...fadeUp(0.1)}
+              className="mb-6 flex items-center justify-between">
+              <p className="text-[13px] text-neutral-400">{countLabel}</p>
+
+              {/* View toggle */}
+              <div className="flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => handleViewChange('grid')}
+                  aria-pressed={view === 'grid'}
+                  aria-label="Grid view"
+                  className={[
+                    'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
+                    view === 'grid'
+                      ? 'bg-white text-neutral-950 shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                      : 'text-neutral-400 hover:text-neutral-700',
+                  ].join(' ')}
+                >
+                  <LayoutGrid size={14} strokeWidth={2} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange('list')}
+                  aria-pressed={view === 'list'}
+                  aria-label="List view"
+                  className={[
+                    'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
+                    view === 'list'
+                      ? 'bg-white text-neutral-950 shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                      : 'text-neutral-400 hover:text-neutral-700',
+                  ].join(' ')}
+                >
+                  <List size={14} strokeWidth={2} aria-hidden="true" />
+                </button>
+              </div>
+            </motion.div>
           )}
 
-          {/* Empty state */}
           {count === 0 && (
             <EmptyState onExplore={() => navigate('/dashboard/explore')} />
           )}
 
-          {/* Book grid with animated removal */}
-          {count > 0 && (
-            <motion.div
-              layout
-              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
-            >
+          {count > 0 && view === 'grid' && (
+            <motion.div layout
+              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               <AnimatePresence mode="popLayout">
                 {books.map((book, i) => (
                   <motion.div
-                    key={String(book._id)}
-                    layout
-                    exit={{
-                      opacity: 0,
-                      scale: 0.92,
-                      transition: { duration: 0.25, ease },
-                    }}
-                  >
-                    <LibraryBookCard
-                      book={book}
-                      index={i}
-                      onRemove={handleRemoved}
-                    />
+                    key={String(book._id)} layout
+                    exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.25, ease } }}>
+                    <LibraryBookCard book={book} index={i} onRemove={handleRemoved} />
                   </motion.div>
                 ))}
               </AnimatePresence>
             </motion.div>
+          )}
+
+          {count > 0 && view === 'list' && (
+            <div className="flex flex-col gap-3">
+              <AnimatePresence mode="popLayout">
+                {books.map((book) => (
+                  <LibraryListRow
+                    key={String(book._id)}
+                    book={book}
+                    onRemove={handleRemoved}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
           )}
         </>
       )}

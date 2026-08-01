@@ -1,11 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=Poppins:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* ── Light theme (default) ── */
 :root {
   --ink: #0f1419;
   --cream: #fff;
   --cream-muted: #fff;
 
   --white: #fff;
+  --clay: #c8a882;
   --clay-light: #f5ede3;
   --success: #6d8659;
   --error: #a85a5a;
@@ -15,6 +18,29 @@
 
   --font-serif: 'Fraunces', serif;
   --font-sans: 'Poppins', sans-serif;
+
+  /* Theme-aware surface tokens */
+  --bg-page:      #ffffff;
+  --bg-surface:   #ffffff;
+  --bg-subtle:    #fafafa;
+  --text-primary: #0f1419;
+  --text-muted:   #737373;
+  --border-color: rgba(15, 20, 25, 0.12);
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --ink: #e8eaed;
+  --cream: #0f0f0f;
+  --cream-muted: #141414;
+
+  --bg-page:      #0f0f0f;
+  --bg-surface:   #1a1a1a;
+  --bg-subtle:    #212121;
+  --text-primary: #e8eaed;
+  --text-muted:   #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-focus: #e8eaed;
 }
 
 @layer base {
@@ -31,8 +57,8 @@
   }
 
   body {
-    background: var(--cream);
-    color: var(--ink);
+    background: var(--bg-page, var(--cream));
+    color: var(--text-primary, var(--ink));
     font-family: var(--font-sans);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
