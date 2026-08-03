@@ -11,6 +11,7 @@ import Homepage from './pages/Homepage';
 /* ─── Lazily loaded — public ─── */
 const Login       = lazy(() => import('./pages/Login'));
 const Signup      = lazy(() => import('./pages/Signup'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Team        = lazy(() => import('./pages/Company/Team'));
 const Contact     = lazy(() => import('./pages/Company/Contact'));
 const News        = lazy(() => import('./pages/News/News'));
@@ -77,8 +78,9 @@ function App() {
           {/* ── Public routes ── */}
           <Route path="/"           element={<HomepageGuard />} />
           <Route path="/homepage"   element={<HomepageGuard />} />
-          <Route path="/login"      element={<Login />} />
-          <Route path="/signup"     element={<Signup />} />
+          <Route path="/login"         element={<Login />} />
+          <Route path="/signup"        element={<Signup />} />
+          <Route path="/verify-email"  element={<VerifyEmail />} />
           <Route path="/team"       element={<Team />} />
           <Route path="/contact"    element={<Contact />} />
           <Route path="/news"       element={<News />} />
