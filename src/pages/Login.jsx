@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/api';
+import { loginUser, googleLogin } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateLoginForm } from '../utils/validation';
@@ -8,28 +8,46 @@ import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
 import libraryImage from '../assets/library.svg';
+import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
 
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError,   setGoogleError]   = useState('');
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
     { email: '', password: '' },
     async (formData) => {
-      // Validate form
       const validation = validateLoginForm(formData.email, formData.password);
-      if (!validation.valid) {
-        setError(validation.error);
-        return;
-      }
-
-      // Login
+      if (!validation.valid) { setError(validation.error); return; }
       const data = await loginUser(formData);
       login(data);
       navigate('/dashboard');
     }
   );
+
+  async function handleGoogleSuccess(credential) {
+    if (googleLoading) return;
+    setGoogleLoading(true);
+    setGoogleError('');
+    try {
+      const data = await googleLogin(credential);
+      login(data);
+      navigate('/dashboard');
+    } catch (err) {
+      setGoogleError(err.message || 'Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  function handleGoogleError(msg) {
+    setGoogleError(msg || 'Google sign-in was cancelled or failed.');
+  }
+
+  const isBusy = loading || googleLoading;
 
   return (
     <div className="auth-split">
@@ -100,12 +118,39 @@ function Login() {
             <button
               type="submit"
               className="auth-split__btn auth-split__btn--primary"
-              disabled={loading}
+              disabled={isBusy}
             >
               {loading ? AUTH_MESSAGES.LOGIN_SIGNING_IN : AUTH_MESSAGES.LOGIN_BUTTON}
             </button>
           </div>
         </form>
+
+        {/* OR divider */}
+        <div className="auth-or">
+          <span className="auth-or__line" aria-hidden="true" />
+          <span className="auth-or__text">or</span>
+          <span className="auth-or__line" aria-hidden="true" />
+        </div>
+
+        {/* Google error */}
+        {googleError && (
+          <div className="auth-split__error" role="alert">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4" />
+              <line x1="7" y1="4.5" x2="7" y2="7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              <circle cx="7" cy="9.5" r="0.75" fill="currentColor" />
+            </svg>
+            {googleError}
+          </div>
+        )}
+
+        {/* Google sign-in */}
+        <GoogleSignInButton
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          disabled={isBusy}
+          label={googleLoading ? 'Signing in…' : 'Continue with Google'}
+        />
 
         <p className="auth-split__switch">
           Don&apos;t have an account?{' '}

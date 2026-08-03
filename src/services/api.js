@@ -208,6 +208,27 @@ export async function getStats() {
   return response.json();
 }
 
+// ========== GOOGLE AUTH ==========
+
+// Send Google ID token to backend for verification and session creation
+export async function googleLogin(credential) {
+  const response = await fetch(`${API_URL}/api/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ credential }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const detail = data.errors ? data.errors.join(' ') : data.message;
+    throw new Error(detail || 'Google authentication failed. Please try again.');
+  }
+
+  return data;
+}
+
 // ========== CURRENT USER ==========
 
 // Get current logged-in user
