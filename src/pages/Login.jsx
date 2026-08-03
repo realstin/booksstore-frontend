@@ -10,6 +10,31 @@ import bookstoreLogo from '../assets/bookstorelogo.svg';
 import libraryImage from '../assets/library.svg';
 import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
 
+/* ── Translate raw backend/network error messages into user-friendly text ── */
+function friendlyAuthError(raw) {
+  if (!raw) return 'Something went wrong. Please try again.';
+  const msg = raw.toLowerCase();
+
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch'))
+    return 'Network connection problem. Please check your internet connection and try again.';
+
+  if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('email already'))
+    return 'This email is already registered with a password. Please sign in with your email and password instead.';
+
+  if (msg.includes('invalid credential') || msg.includes('invalid token') || msg.includes('could not verify'))
+    return 'This Google account could not be verified. Please try again.';
+
+  if (msg.includes('not found') || msg.includes('no account'))
+    return 'No BookStore account found for this Google account. Please sign up first.';
+
+  /* If the backend already sent a clean user-facing message, use it directly
+     (it won't contain technical keywords above) */
+  if (raw.length < 120 && !raw.includes('Error:') && !raw.includes('JWT') && !raw.includes('mongoose'))
+    return raw;
+
+  return "We couldn't sign you in with Google. Please try again.";
+}
+
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -37,14 +62,14 @@ function Login() {
       login(data);
       navigate('/dashboard');
     } catch (err) {
-      setGoogleError(err.message || 'Google sign-in failed. Please try again.');
+      setGoogleError(friendlyAuthError(err.message));
     } finally {
       setGoogleLoading(false);
     }
   }
 
   function handleGoogleError(msg) {
-    setGoogleError(msg || 'Google sign-in was cancelled or failed.');
+    setGoogleError(msg || 'Google sign-in was cancelled.');
   }
 
   const isBusy = loading || googleLoading;
