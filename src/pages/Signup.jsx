@@ -39,25 +39,24 @@ function Signup() {
   const [googleError,   setGoogleError]   = useState('');
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
-  { name: '', email: '', password: '' },
-  async (formData) => {
-    if (!agreed) { setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR); return; }
-    const validation = validateSignupForm(formData.name, formData.email, formData.password);
-    if (!validation.valid) { setError(validation.error); return; }
-    
-    try {
-      // ============ NEW: TRY-CATCH ============
-      await registerUser(formData);
-      navigate('/login');
-      // ============ END TRY-CATCH ============
-    } catch (err) {
-      // ============ NEW: ERROR HANDLING ============
-      console.error('[SIGNUP ERROR]', err);
-      setError(err.message || 'Failed to create account. Please try again.');
-      // ============ END ERROR HANDLING ============
+    { name: '', email: '', password: '' },
+    async (formData) => {
+      if (!agreed) { setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR); return; }
+      const validation = validateSignupForm(formData.name, formData.email, formData.password);
+      if (!validation.valid) { setError(validation.error); return; }
+      
+      try {
+        // ============ UPDATED: AUTO-LOGIN ON SIGNUP ============
+        const data = await registerUser(formData);
+        login(data);  // Auto-login user
+        navigate('/dashboard');  // Redirect to dashboard (not login page)
+        // ============ END AUTO-LOGIN ============
+      } catch (err) {
+        console.error('[SIGNUP ERROR]', err);
+        setError(err.message || 'Failed to create account. Please try again.');
+      }
     }
-  }
-);
+  );
 
   async function handleGoogleSuccess(credential) {
     if (googleLoading) return;
