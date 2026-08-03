@@ -39,15 +39,25 @@ function Signup() {
   const [googleError,   setGoogleError]   = useState('');
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
-    { name: '', email: '', password: '' },
-    async (formData) => {
-      if (!agreed) { setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR); return; }
-      const validation = validateSignupForm(formData.name, formData.email, formData.password);
-      if (!validation.valid) { setError(validation.error); return; }
+  { name: '', email: '', password: '' },
+  async (formData) => {
+    if (!agreed) { setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR); return; }
+    const validation = validateSignupForm(formData.name, formData.email, formData.password);
+    if (!validation.valid) { setError(validation.error); return; }
+    
+    try {
+      // ============ NEW: TRY-CATCH ============
       await registerUser(formData);
       navigate('/login');
+      // ============ END TRY-CATCH ============
+    } catch (err) {
+      // ============ NEW: ERROR HANDLING ============
+      console.error('[SIGNUP ERROR]', err);
+      setError(err.message || 'Failed to create account. Please try again.');
+      // ============ END ERROR HANDLING ============
     }
-  );
+  }
+);
 
   async function handleGoogleSuccess(credential) {
     if (googleLoading) return;

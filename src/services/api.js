@@ -32,31 +32,44 @@ export async function checkBackendStatus() {
 // ========== AUTH ==========
 
 async function authRequest(path, body) {
-  const response = await fetch(`${API_URL}/api/auth/${path}`, {
-    method: 'POST',
+  // ============ NEW: ADD TIMEOUT ============
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+  
+  try {
+    const response = await fetch(`${API_URL}/api/auth/${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(body),
+      signal: controller.signal, // Attach abort signal
+    });
 
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    const data = await response.json().catch(() => ({}));
 
-    credentials: 'include',
+    if (!response.ok) {
+      const detail = data.errors
+        ? data.errors.join(' ')
+        : data.message;
 
-    body: JSON.stringify(body),
-  });
+      throw new Error(
+        detail || 'Something went wrong. Please try again.'
+      );
+    }
 
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    const detail = data.errors
-      ? data.errors.join(' ')
-      : data.message;
-
-    throw new Error(
-      detail || 'Something went wrong. Please try again.'
-    );
+    return data;
+  } catch (error) {
+    // ============ NEW: HANDLE ABORT/TIMEOUT ============
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please check your internet connection and try again.');
+    }
+    throw error;
+    // ============ END TIMEOUT HANDLING ============
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return data;
 }
 
 // ========== REGISTER ==========
