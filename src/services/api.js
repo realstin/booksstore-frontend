@@ -206,7 +206,7 @@ export async function downloadBook(id) {
 
 export async function getStats() {
   const response = await fetch(
-    `${API_URL}/api/books/stats`,
+    `${API_URL}/api/stats`,
     {
       credentials: 'include',
     }
