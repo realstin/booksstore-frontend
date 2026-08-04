@@ -4,7 +4,7 @@
  */
 export const STATS = {
   totalUsers:      12,
-  totalBooks:      50,
-  totalSavedBooks: 120,
-  averageRating:   4.2,
+  totalBooks:      7,
+  totalSavedBooks: 3,
+  averageRating:   4.5,
 };
