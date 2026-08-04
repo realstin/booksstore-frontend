@@ -44,8 +44,14 @@ function formatNumber(n) {
    StatCard
 ───────────────────────────────────────── */
 function StatCard({ stat, index, started }) {
-  const { icon: Icon, value, suffix, label, description } = stat;
-  const count = useCounter(value, 1600 + index * 100, started);
+  const { icon: Icon, value, suffix, label, description, isDecimal } = stat;
+  /* Decimal stats (e.g. averageRating 4.7) are displayed as-is — the
+     counter animation only makes sense for integers. */
+  const intValue = isDecimal ? Math.round(value * 10) : value;
+  const rawCount = useCounter(intValue, 1600 + index * 100, started);
+  const displayValue = isDecimal
+    ? (rawCount / 10).toFixed(1)
+    : formatNumber(rawCount);
 
   return (
     <motion.article
@@ -67,7 +73,7 @@ function StatCard({ stat, index, started }) {
         transition: { duration: 0.25, ease: "easeOut" },
       }}
       className="group flex flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_8px_28px_rgba(0,0,0,0.07)] cursor-default"
-      aria-label={`${formatNumber(value)}${suffix} ${label} — ${description}`}
+      aria-label={`${displayValue}${suffix} ${label} — ${description}`}
     >
       {/* Icon */}
       <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-700 transition-colors duration-300 group-hover:border-neutral-200 group-hover:bg-neutral-100">
@@ -77,7 +83,7 @@ function StatCard({ stat, index, started }) {
       {/* Number */}
       <div className="flex items-end gap-0.5">
         <span className="text-[2.6rem] font-bold leading-none tracking-[-0.03em] text-neutral-950">
-          {formatNumber(count)}
+          {displayValue}
         </span>
         {suffix && (
           <span className="mb-1 text-[1.6rem] font-bold leading-none tracking-tight text-neutral-400">
@@ -159,17 +165,18 @@ function Statistics() {
           },
           {
             icon: Bookmark,
-            value: data.totalSaves,
+            value: data.totalSavedBooks ?? data.totalSaves ?? 0,
             suffix: "+",
             label: "Books Saved",
             description: "Personal libraries created by our community.",
           },
           {
             icon: Star,
-            value: data.averageRating,
+            value: data.averageRating ?? 0,
             suffix: "★",
-            label: "Reader Satisfaction",
+            label: "Average Rating",
             description: "Average rating from our community.",
+            isDecimal: true,
           },
         ]);
       } catch (err) {
