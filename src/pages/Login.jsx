@@ -6,35 +6,71 @@ import { validateLoginForm } from '../utils/validation';
 import { useForm } from '../hooks/useForm';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
 import libraryImage from '../assets/library.svg';
 import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
 
-/* ── Translate raw backend/network error messages into user-friendly text ── */
+/* ─────────────────────────────────────────
+   Human-readable error messages
+───────────────────────────────────────── */
 function friendlyAuthError(raw) {
   if (!raw) return 'Something went wrong. Please try again.';
   const msg = raw.toLowerCase();
-
   if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch'))
     return 'Network connection problem. Please check your internet connection and try again.';
-
   if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('email already'))
     return 'This email is already registered with a password. Please sign in with your email and password instead.';
-
   if (msg.includes('invalid credential') || msg.includes('invalid token') || msg.includes('could not verify'))
     return 'This Google account could not be verified. Please try again.';
-
   if (msg.includes('not found') || msg.includes('no account'))
     return 'No BookStore account found for this Google account. Please sign up first.';
-
-  /* If the backend already sent a clean user-facing message, use it directly
-     (it won't contain technical keywords above) */
+  if (msg.includes('not verified') || msg.includes('verify your email'))
+    return 'Please verify your email address before signing in. Check your inbox for the verification link.';
   if (raw.length < 120 && !raw.includes('Error:') && !raw.includes('JWT') && !raw.includes('mongoose'))
     return raw;
-
   return "We couldn't sign you in with Google. Please try again.";
 }
 
+/* ─────────────────────────────────────────
+   Inline error banner
+───────────────────────────────────────── */
+function ErrorBanner({ message }) {
+  if (!message) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      role="alert"
+      className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-[13.5px] text-red-700"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
+        <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4" />
+        <line x1="7" y1="4.5" x2="7" y2="7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="7" cy="9.5" r="0.75" fill="currentColor" />
+      </svg>
+      <span>{message}</span>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   OR divider
+───────────────────────────────────────── */
+function OrDivider() {
+  return (
+    <div className="flex items-center gap-3" aria-hidden="true">
+      <div className="h-px flex-1 bg-neutral-200" />
+      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-neutral-400">or</span>
+      <div className="h-px flex-1 bg-neutral-200" />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Login page
+───────────────────────────────────────── */
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -68,130 +104,149 @@ function Login() {
     }
   }
 
-  function handleGoogleError(msg) {
-    setGoogleError(msg || 'Google sign-in was cancelled.');
-  }
-
   const isBusy = loading || googleLoading;
 
   return (
-    <div className="auth-split">
+    <div
+      className="flex min-h-screen w-full bg-white"
+      style={{ fontFamily: 'var(--font-sans)' }}
+    >
+      {/* ── LEFT — form panel ── */}
+      <div className="flex w-full flex-col items-center justify-center px-6 py-12 sm:px-10 lg:w-1/2 lg:px-16 xl:px-24">
 
-      {/* ══ LEFT ══ */}
-      <div className="auth-split__left">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-[440px]"
+        >
+          {/* Logo */}
+          <Link
+            to="/"
+            className="mb-10 inline-flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+            aria-label="BookStore — go to homepage"
+          >
+            <img src={bookstoreLogo} alt="" className="h-7 w-7" aria-hidden="true" />
+            <span className="text-[17px] font-bold tracking-tight text-neutral-950">BookStore</span>
+          </Link>
 
-        <Link to="/" className="auth-split__logo">
-          <img src={bookstoreLogo} alt="BooksStore" className="auth-split__logo-img" />
-          <span className="auth-split__logo-text">BooksStore</span>
-        </Link>
-
-        <div className="auth-split__header">
-          <h1 className="auth-split__title">{AUTH_MESSAGES.LOGIN_TITLE}</h1>
-          <p className="auth-split__sub">{AUTH_MESSAGES.LOGIN_SUBTITLE}</p>
-        </div>
-
-        {error && (
-          <div className="auth-split__error" role="alert">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4" />
-              <line x1="7" y1="4.5" x2="7" y2="7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              <circle cx="7" cy="9.5" r="0.75" fill="currentColor" />
-            </svg>
-            {error}
-          </div>
-        )}
-
-        <form className="auth-split__form" onSubmit={handleSubmit} noValidate>
-
-          <div className="auth-split__field">
-            <span className="auth-split__field-label">{AUTH_MESSAGES.LOGIN_EMAIL_LABEL}</span>
-            <input
-              name="email"
-              type="email"
-              placeholder={AUTH_MESSAGES.LOGIN_EMAIL_PLACEHOLDER}
-              value={form.email}
-              onChange={handleChange}
-              className="auth-split__input"
-              autoComplete="email"
-              required
-            />
+          {/* Heading */}
+          <div className="mb-8">
+            <h1 className="mb-1.5 text-[1.75rem] font-bold leading-tight tracking-[-0.02em] text-neutral-950">
+              {AUTH_MESSAGES.LOGIN_TITLE}
+            </h1>
+            <p className="text-[15px] text-neutral-500">{AUTH_MESSAGES.LOGIN_SUBTITLE}</p>
           </div>
 
-          <div className="auth-split__field">
-            <span className="auth-split__field-label">{AUTH_MESSAGES.LOGIN_PASSWORD_LABEL}</span>
-            <input
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder={AUTH_MESSAGES.LOGIN_PASSWORD_PLACEHOLDER}
-              value={form.password}
-              onChange={handleChange}
-              className="auth-split__input"
-              autoComplete="current-password"
-              required
-            />
-            <button
-              type="button"
-              className="auth-split__eye"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <IconEyeOff /> : <IconEye />}
-            </button>
+          {/* Email/password error */}
+          <div className="mb-5">
+            <ErrorBanner message={error} />
           </div>
 
-          <div className="auth-split__actions">
+          {/* Form */}
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+
+            {/* Email */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="login-email" className="text-[13px] font-semibold text-neutral-700">
+                Email address
+              </label>
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                placeholder={AUTH_MESSAGES.LOGIN_EMAIL_PLACEHOLDER}
+                value={form.email}
+                onChange={handleChange}
+                autoComplete="email"
+                required
+                className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none transition-all focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+              />
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={AUTH_MESSAGES.LOGIN_PASSWORD_PLACEHOLDER}
+                  value={form.password}
+                  onChange={handleChange}
+                  autoComplete="current-password"
+                  required
+                  className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 pr-12 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none transition-all focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 transition hover:text-neutral-700 focus:outline-none"
+                >
+                  {showPassword ? <IconEyeOff /> : <IconEye />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
-              className="auth-split__btn auth-split__btn--primary"
               disabled={isBusy}
+              className="mt-1 h-12 w-full rounded-xl bg-neutral-950 text-[15px] font-semibold text-white transition hover:bg-black active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
             >
               {loading ? AUTH_MESSAGES.LOGIN_SIGNING_IN : AUTH_MESSAGES.LOGIN_BUTTON}
             </button>
+          </form>
+
+          {/* OR */}
+          <div className="my-5">
+            <OrDivider />
           </div>
-        </form>
 
-        {/* OR divider */}
-        <div className="auth-or">
-          <span className="auth-or__line" aria-hidden="true" />
-          <span className="auth-or__text">or</span>
-          <span className="auth-or__line" aria-hidden="true" />
-        </div>
+          {/* Google error */}
+          {googleError && (
+            <div className="mb-3">
+              <ErrorBanner message={googleError} />
+            </div>
+          )}
 
-        {/* Google error */}
-        {googleError && (
-          <div className="auth-split__error" role="alert">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4" />
-              <line x1="7" y1="4.5" x2="7" y2="7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              <circle cx="7" cy="9.5" r="0.75" fill="currentColor" />
-            </svg>
-            {googleError}
-          </div>
-        )}
+          {/* Google button */}
+          <GoogleSignInButton
+            onSuccess={handleGoogleSuccess}
+            onError={(msg) => setGoogleError(msg || 'Google sign-in was cancelled.')}
+            disabled={isBusy}
+          />
 
-        {/* Google sign-in */}
-        <GoogleSignInButton
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          disabled={isBusy}
-          label={googleLoading ? 'Signing in…' : 'Continue with Google'}
+          {/* Switch link */}
+          <p className="mt-7 text-center text-[14px] text-neutral-500">
+            Don&apos;t have an account?{' '}
+            <Link to="/signup" className="font-semibold text-neutral-950 underline underline-offset-4 transition hover:opacity-70">
+              Sign up
+            </Link>
+          </p>
+
+          {/* Motto */}
+          <p className="mt-5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-300">
+            {AUTH_MESSAGES.MOTTO}
+          </p>
+        </motion.div>
+      </div>
+
+      {/* ── RIGHT — illustration (desktop only) ── */}
+      <div
+        className="hidden overflow-hidden bg-neutral-50 lg:flex lg:w-1/2 lg:items-center lg:justify-center"
+        aria-hidden="true"
+      >
+        <img
+          src={libraryImage}
+          alt=""
+          className="max-h-[72vh] w-full max-w-[480px] object-contain"
         />
-
-        <p className="auth-split__switch">
-          Don&apos;t have an account?{' '}
-          <Link to="/signup" className="auth-split__switch-link">
-            Sign up
-          </Link>
-        </p>
-
-        <p className="auth-split__motto">{AUTH_MESSAGES.MOTTO}</p>
       </div>
-
-      {/* ══ RIGHT ══ */}
-      <div className="auth-split__right" aria-hidden="true">
-        <img src={libraryImage} alt="" className="auth-split__illustration" />
-      </div>
-
     </div>
   );
 }
