@@ -1,16 +1,80 @@
-import { useState, useEffect, useCallback } from 'react';
+import {
+  useState, useEffect, useCallback, useRef, useMemo,
+} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Download, Maximize2, Minimize2,
   AlertCircle, Loader2, RefreshCw, BookOpen,
+  Settings2, ZoomIn, ZoomOut, Sun, Moon, Monitor, BookText,
+  ChevronDown,
 } from 'lucide-react';
 import { getBookById, downloadBook } from '../../services/api';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
-/* ─────────────────────────────────────────
-   Helpers
-───────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   PREFERENCES — persisted to localStorage
+═══════════════════════════════════════════ */
+const PREF_KEY = 'bookstore_reader_prefs';
+
+const DEFAULT_PREFS = {
+  zoom:        100,   // percent: 50–200
+  theme:       'dark', // dark | light | sepia | system
+};
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem(PREF_KEY);
+    if (!raw) return { ...DEFAULT_PREFS };
+    return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_PREFS };
+  }
+}
+
+function savePrefs(prefs) {
+  try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
+}
+
+/* ═══════════════════════════════════════════
+   THEME CONFIG
+═══════════════════════════════════════════ */
+const THEMES = {
+  dark: {
+    bar:    'bg-[#1a1a1a] border-b border-white/[0.06]',
+    reader: 'bg-[#121212]',
+    panel:  'bg-[#1e1e1e] border border-white/[0.08] text-white',
+    icon:   'text-white/70 hover:text-white hover:bg-white/[0.07]',
+    label:  'text-white/50',
+    seg:    { bg: 'bg-white/[0.07]', active: 'bg-white/[0.14] text-white', text: 'text-white/60' },
+  },
+  light: {
+    bar:    'bg-white border-b border-neutral-200',
+    reader: 'bg-neutral-100',
+    panel:  'bg-white border border-neutral-200 text-neutral-900',
+    icon:   'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100',
+    label:  'text-neutral-400',
+    seg:    { bg: 'bg-neutral-100', active: 'bg-white text-neutral-900 shadow-sm', text: 'text-neutral-500' },
+  },
+  sepia: {
+    bar:    'bg-[#f5efe0] border-b border-[#d9c9a8]',
+    reader: 'bg-[#f0e8d5]',
+    panel:  'bg-[#f5efe0] border border-[#d9c9a8] text-[#3d2b1f]',
+    icon:   'text-[#7a5c3a] hover:text-[#3d2b1f] hover:bg-[#e8dcc0]',
+    label:  'text-[#9b7a50]',
+    seg:    { bg: 'bg-[#e8dcc0]', active: 'bg-[#f5efe0] text-[#3d2b1f] shadow-sm', text: 'text-[#7a5c3a]' },
+  },
+  system: { /* resolved at runtime */ },
+};
+
+function resolveTheme(theme) {
+  if (theme !== 'system') return theme;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
 function formatAuthors(authors) {
   if (!authors) return null;
   const arr = Array.isArray(authors) ? authors : [String(authors)];
@@ -28,11 +92,10 @@ function safeFilename(title) {
     .slice(0, 80) + '.pdf';
 }
 
-/* ─────────────────────────────────────────
-   Download button (reuses the same pattern
-   as BookDetails — calls the backend proxy)
-───────────────────────────────────────── */
-function ReaderDownloadButton({ bookId, bookTitle }) {
+/* ═══════════════════════════════════════════
+   DOWNLOAD BUTTON (unchanged logic)
+═══════════════════════════════════════════ */
+function ReaderDownloadButton({ bookId, bookTitle, tc }) {
   const [status, setStatus] = useState('idle');
 
   async function handleDownload() {
@@ -61,136 +124,283 @@ function ReaderDownloadButton({ bookId, bookTitle }) {
         type="button"
         onClick={handleDownload}
         disabled={status === 'downloading'}
-        className="inline-flex h-9 items-center gap-2 rounded-full border border-white/20 px-4 text-[13px] font-medium text-white/80 transition hover:border-white/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        aria-label={status === 'downloading' ? 'Downloading…' : 'Download this book'}
-        aria-busy={status === 'downloading'}
+        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${tc.icon}`}
+        aria-label={status === 'downloading' ? 'Downloading…' : 'Download book'}
       >
         {status === 'downloading'
-          ? <Loader2 size={14} strokeWidth={2} className="animate-spin" aria-hidden="true" />
-          : <Download size={14} strokeWidth={2} aria-hidden="true" />
+          ? <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+          : <Download size={15} strokeWidth={2} />
         }
-        <span className="hidden sm:inline">
-          {status === 'downloading' ? 'Downloading…' : 'Download'}
-        </span>
       </button>
       {status === 'error' && (
-        <p className="absolute right-0 top-full mt-1 whitespace-nowrap rounded-lg bg-red-900/80 px-3 py-1.5 text-[11.5px] text-red-200" role="alert">
+        <p className="absolute right-0 top-full z-50 mt-1.5 whitespace-nowrap rounded-xl bg-red-950/90 px-3 py-2 text-[11.5px] text-red-200 shadow-lg" role="alert">
           Download failed.{' '}
-          <button onClick={() => setStatus('idle')} className="underline">Retry</button>
+          <button onClick={() => setStatus('idle')} className="underline underline-offset-2">Retry</button>
         </p>
       )}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   Top reader bar
-───────────────────────────────────────── */
-function ReaderBar({ book, onBack, isFullscreen, onToggleFullscreen }) {
-  const authors = formatAuthors(book?.authors);
+/* ═══════════════════════════════════════════
+   SETTINGS PANEL
+═══════════════════════════════════════════ */
+const THEME_OPTIONS = [
+  { value: 'dark',   label: 'Dark',   icon: Moon    },
+  { value: 'light',  label: 'Light',  icon: Sun     },
+  { value: 'sepia',  label: 'Sepia',  icon: BookText },
+  { value: 'system', label: 'System', icon: Monitor },
+];
 
+function SegControl({ options, value, onChange, tc }) {
   return (
-    <div className="flex h-14 flex-shrink-0 items-center justify-between gap-4 bg-neutral-950 px-4 sm:px-6">
-      {/* Left — back + logo + title */}
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+    <div className={`flex gap-1 rounded-xl p-1 ${tc.seg.bg}`} role="group">
+      {options.map((opt) => (
         <button
+          key={opt.value}
           type="button"
-          onClick={onBack}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-          aria-label="Back to book details"
+          onClick={() => onChange(opt.value)}
+          aria-pressed={value === opt.value}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-[12px] font-medium transition-all duration-150 focus:outline-none
+            ${value === opt.value ? tc.seg.active : tc.seg.text}`}
         >
-          <ArrowLeft size={18} strokeWidth={2} aria-hidden="true" />
+          {opt.icon && <opt.icon size={12} strokeWidth={2} aria-hidden="true" />}
+          <span>{opt.label}</span>
         </button>
-
-        <img src={bookstoreLogo} alt="BookStore" className="h-5 w-5 shrink-0 opacity-70" />
-
-        <div className="min-w-0">
-          <p className="truncate text-[13.5px] font-semibold text-white leading-tight">
-            {book?.title ?? 'Loading…'}
-          </p>
-          {authors && (
-            <p className="truncate text-[11.5px] text-white/50 leading-tight">{authors}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Right — controls */}
-      <div className="flex shrink-0 items-center gap-2">
-        {book && book.pdfUrl && (
-          <ReaderDownloadButton bookId={book._id} bookTitle={book.title} />
-        )}
-
-        {/* Fullscreen toggle — only if browser supports it */}
-        {document.fullscreenEnabled && (
-          <button
-            type="button"
-            onClick={onToggleFullscreen}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          >
-            {isFullscreen
-              ? <Minimize2 size={15} strokeWidth={2} aria-hidden="true" />
-              : <Maximize2 size={15} strokeWidth={2} aria-hidden="true" />
-            }
-          </button>
-        )}
-      </div>
+      ))}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   Loading skeleton
-───────────────────────────────────────── */
+function SettingsPanel({ prefs, onPrefsChange, tc, onClose, isMobile }) {
+  const base = `absolute z-50 shadow-2xl rounded-2xl overflow-hidden ${tc.panel}`;
+  const pos   = isMobile
+    ? 'bottom-0 left-0 right-0 rounded-b-none rounded-t-2xl'
+    : 'top-full right-0 mt-2 w-72';
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={isMobile ? { y: '100%' } : { opacity: 0, y: -8, scale: 0.97 }}
+        animate={isMobile ? { y: 0 }       : { opacity: 1, y: 0, scale: 1 }}
+        exit={isMobile    ? { y: '100%' }  : { opacity: 0, y: -6, scale: 0.97 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className={`${base} ${pos}`}
+        role="dialog"
+        aria-label="Reading preferences"
+      >
+        {isMobile && (
+          <div className="flex items-center justify-between px-5 pt-4 pb-2">
+            <p className="text-[13px] font-bold">Reading settings</p>
+            <button type="button" onClick={onClose} className={`rounded-full p-1.5 transition ${tc.icon}`} aria-label="Close settings">
+              <ChevronDown size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-5 p-5 pt-4">
+          {/* Theme */}
+          <div className="flex flex-col gap-2.5">
+            <p className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>Theme</p>
+            <SegControl options={THEME_OPTIONS} value={prefs.theme} onChange={(v) => onPrefsChange('theme', v)} tc={tc} />
+          </div>
+
+          {/* Zoom */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>Zoom</p>
+              <span className="text-[12px] font-semibold opacity-70">{prefs.zoom}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onPrefsChange('zoom', Math.max(50, prefs.zoom - 10))}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${tc.icon}`}
+                aria-label="Zoom out"
+              >
+                <ZoomOut size={15} strokeWidth={2} />
+              </button>
+              <input
+                type="range" min={50} max={200} step={10}
+                value={prefs.zoom}
+                onChange={(e) => onPrefsChange('zoom', Number(e.target.value))}
+                className="h-1.5 flex-1 cursor-pointer accent-current opacity-70"
+                aria-label="Zoom level"
+              />
+              <button
+                type="button"
+                onClick={() => onPrefsChange('zoom', Math.min(200, prefs.zoom + 10))}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition ${tc.icon}`}
+                aria-label="Zoom in"
+              >
+                <ZoomIn size={15} strokeWidth={2} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   READER TOOLBAR
+═══════════════════════════════════════════ */
+function ReaderToolbar({
+  book, visible, prefs, onPrefsChange,
+  isFullscreen, onToggleFullscreen,
+  showSettings, onToggleSettings,
+  onBack, tc, settingsPanelRef, isMobile,
+}) {
+  const authors = formatAuthors(book?.authors);
+
+  return (
+    <motion.div
+      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : -4 }}
+      transition={{ duration: 0.22, ease: 'easeInOut' }}
+      className={`flex h-13 shrink-0 items-center justify-between gap-3 px-3 sm:px-5 transition-colors duration-300 ${tc.bar}`}
+      style={{ height: '52px' }}
+    >
+      {/* Left — back + logo + title */}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${tc.icon}`}
+          aria-label="Back to book details"
+        >
+          <ArrowLeft size={16} strokeWidth={2.2} aria-hidden="true" />
+        </button>
+
+        <img src={bookstoreLogo} alt="" aria-hidden="true" className="h-4.5 w-4.5 shrink-0 opacity-50" style={{ height: '18px', width: '18px' }} />
+
+        <div className="min-w-0 hidden sm:block">
+          <p className="truncate text-[13px] font-semibold leading-tight" style={{ maxWidth: '220px' }}>
+            {book?.title ?? 'Loading…'}
+          </p>
+          {authors && (
+            <p className={`truncate text-[11px] leading-tight ${tc.label}`} style={{ maxWidth: '220px' }}>
+              {authors}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Center — zoom controls (desktop) */}
+      <div className="hidden items-center gap-1 sm:flex">
+        <button
+          type="button"
+          onClick={() => onPrefsChange('zoom', Math.max(50, prefs.zoom - 10))}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition ${tc.icon}`}
+          aria-label="Zoom out"
+        >
+          <ZoomOut size={14} strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onPrefsChange('zoom', 100)}
+          className={`min-w-[3rem] rounded-lg px-2 py-1 text-[12px] font-semibold tabular-nums transition ${tc.icon}`}
+          aria-label={`Zoom: ${prefs.zoom}%. Click to reset.`}
+        >
+          {prefs.zoom}%
+        </button>
+        <button
+          type="button"
+          onClick={() => onPrefsChange('zoom', Math.min(200, prefs.zoom + 10))}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition ${tc.icon}`}
+          aria-label="Zoom in"
+        >
+          <ZoomIn size={14} strokeWidth={2} />
+        </button>
+      </div>
+
+      {/* Right — settings + fullscreen + download */}
+      <div className="flex shrink-0 items-center gap-1">
+        {/* Settings */}
+        <div className="relative" ref={settingsPanelRef}>
+          <button
+            type="button"
+            onClick={onToggleSettings}
+            aria-expanded={showSettings}
+            aria-haspopup="dialog"
+            aria-label="Reading settings"
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition ${tc.icon} ${showSettings ? 'bg-white/10' : ''}`}
+          >
+            <Settings2 size={15} strokeWidth={2} />
+          </button>
+
+          {showSettings && !isMobile && (
+            <SettingsPanel
+              prefs={prefs}
+              onPrefsChange={onPrefsChange}
+              tc={tc}
+              onClose={onToggleSettings}
+              isMobile={false}
+            />
+          )}
+        </div>
+
+        {/* Download */}
+        {book?._id && book?.pdfUrl && (
+          <ReaderDownloadButton bookId={book._id} bookTitle={book.title} tc={tc} />
+        )}
+
+        {/* Fullscreen */}
+        {document.fullscreenEnabled && (
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition ${tc.icon}`}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          >
+            {isFullscreen
+              ? <Minimize2 size={14} strokeWidth={2} />
+              : <Maximize2 size={14} strokeWidth={2} />
+            }
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   STATIC ERROR / LOADING STATES
+═══════════════════════════════════════════ */
 function ReaderSkeleton() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 bg-neutral-900">
+    <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#121212]">
       <motion.div
-        animate={{ opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ opacity: [0.35, 0.7, 0.35] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         className="flex flex-col items-center gap-3"
       >
-        <BookOpen size={36} strokeWidth={1.25} className="text-neutral-600" aria-hidden="true" />
-        <p className="text-[14px] text-neutral-500">Loading book…</p>
+        <BookOpen size={32} strokeWidth={1.25} className="text-neutral-600" aria-hidden="true" />
+        <p className="text-[13.5px] text-neutral-500">Opening book…</p>
       </motion.div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   Error state
-───────────────────────────────────────── */
 function ReaderError({ message, onRetry, onBack }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 bg-neutral-900 px-8 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800">
-        <AlertCircle size={26} strokeWidth={1.5} className="text-neutral-500" aria-hidden="true" />
+    <div className="flex h-full flex-col items-center justify-center gap-6 bg-[#121212] px-8 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800">
+        <AlertCircle size={24} strokeWidth={1.5} className="text-neutral-500" aria-hidden="true" />
       </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-[1rem] font-bold text-white">
-          {message ?? 'Unable to open this book right now.'}
-        </p>
-        <p className="max-w-xs text-[13.5px] text-neutral-400">
-          Please try again or go back to the book details.
-        </p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[1rem] font-bold text-white">{message ?? 'Unable to open this book.'}</p>
+        <p className="max-w-xs text-[13px] text-neutral-400">Please try again or go back to the book details.</p>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-full border border-neutral-700 bg-transparent px-5 py-2.5 text-[13.5px] font-medium text-neutral-300 transition hover:border-neutral-500 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        >
-          <ArrowLeft size={14} aria-hidden="true" />
-          Back to Book
+      <div className="flex flex-wrap justify-center gap-3">
+        <button type="button" onClick={onBack}
+          className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-5 py-2.5 text-[13px] font-medium text-neutral-300 transition hover:border-neutral-500 hover:text-white focus:outline-none">
+          <ArrowLeft size={13} />&nbsp;Back to Book
         </button>
         {onRetry && (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13.5px] font-semibold text-neutral-950 transition hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            <RefreshCw size={13} aria-hidden="true" />
-            Try Again
+          <button type="button" onClick={onRetry}
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-neutral-950 transition hover:bg-neutral-100 focus:outline-none">
+            <RefreshCw size={13} />&nbsp;Try Again
           </button>
         )}
       </div>
@@ -198,53 +408,85 @@ function ReaderError({ message, onRetry, onBack }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   No PDF state
-───────────────────────────────────────── */
-function NoPdfState({ book, onBack }) {
+function NoPdfState({ book, onBack, tc }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 bg-neutral-900 px-8 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800">
-        <BookOpen size={26} strokeWidth={1.5} className="text-neutral-500" aria-hidden="true" />
+    <div className={`flex h-full flex-col items-center justify-center gap-6 px-8 text-center ${tc.reader}`}>
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800">
+        <BookOpen size={24} strokeWidth={1.5} className="text-neutral-500" aria-hidden="true" />
       </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-[1rem] font-bold text-white">
-          Online reading isn&apos;t available for this book yet.
-        </p>
-        <p className="max-w-xs text-[13.5px] text-neutral-400">
-          This book doesn&apos;t have an online reading version. You may still be able to download it.
-        </p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[1rem] font-bold text-white">Online reading isn&apos;t available yet.</p>
+        <p className="max-w-xs text-[13px] text-neutral-400">This book doesn&apos;t have a reading version, but you can download it.</p>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-5 py-2.5 text-[13.5px] font-medium text-neutral-300 transition hover:border-neutral-500 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        >
-          <ArrowLeft size={14} aria-hidden="true" />
-          Back to Book
+      <div className="flex flex-wrap justify-center gap-3">
+        <button type="button" onClick={onBack}
+          className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-5 py-2.5 text-[13px] font-medium text-neutral-300 transition hover:border-neutral-500 hover:text-white focus:outline-none">
+          <ArrowLeft size={13} />&nbsp;Back to Book
         </button>
         {book?._id && book?.pdfUrl && (
-          <ReaderDownloadButton bookId={book._id} bookTitle={book.title} />
+          <ReaderDownloadButton bookId={book._id} bookTitle={book.title} tc={tc} />
         )}
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   BookReader page
-───────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   MAIN BookReader
+═══════════════════════════════════════════ */
 function BookReader() {
   const { id }   = useParams();
   const navigate = useNavigate();
 
-  const [book,   setBook]   = useState(null);
-  const [status, setStatus] = useState('loading'); // loading | success | notfound | error
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [pdfError,     setPdfError]     = useState(false);
+  /* ── Book data ── */
+  const [book,     setBook]     = useState(null);
+  const [status,   setStatus]   = useState('loading');
+  const [pdfError, setPdfError] = useState(false);
 
-  const goBack = () => navigate(`/dashboard/books/${id}`);
+  /* ── Preferences ── */
+  const [prefs, setPrefsState] = useState(loadPrefs);
+
+  function updatePref(key, value) {
+    setPrefsState((p) => {
+      const next = { ...p, [key]: value };
+      savePrefs(next);
+      return next;
+    });
+  }
+
+  /* ── UI state ── */
+  const [isFullscreen,  setIsFullscreen]  = useState(false);
+  const [showSettings,  setShowSettings]  = useState(false);
+  const [toolbarVisible, setToolbarVisible] = useState(true);
+
+  /* ── Refs ── */
+  const settingsPanelRef = useRef(null);
+  const hideTimerRef     = useRef(null);
+  const containerRef     = useRef(null);
+
+  /* ── Responsive ── */
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  /* ── Resolved theme (handles 'system') ── */
+  const resolvedTheme = useMemo(() => resolveTheme(prefs.theme), [prefs.theme]);
+  const tc = THEMES[resolvedTheme] ?? THEMES.dark;
+
+  /* Watch system preference if theme === 'system' */
+  useEffect(() => {
+    if (prefs.theme !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => setPrefsState((p) => ({ ...p })); // force re-render
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [prefs.theme]);
+
+  /* ── Fetch book ── */
+  const goBack = useCallback(() => navigate(`/dashboard/books/${id}`), [navigate, id]);
 
   const fetchBook = useCallback(async () => {
     setStatus('loading');
@@ -252,61 +494,99 @@ function BookReader() {
     setPdfError(false);
     try {
       const data = await getBookById(id);
-      const b = data?.book ?? data;
-      setBook(b);
+      setBook(data?.book ?? data);
       setStatus('success');
     } catch (err) {
-      console.error('BookReader fetch error:', err);
       setStatus(err.status === 404 ? 'notfound' : 'error');
     }
   }, [id]);
 
   useEffect(() => { fetchBook(); }, [fetchBook]);
 
-  /* Fullscreen */
+  /* ── Auto-hide toolbar ── */
+  function resetHideTimer() {
+    setToolbarVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      if (!showSettings) setToolbarVisible(false);
+    }, 3000);
+  }
+
+  useEffect(() => {
+    resetHideTimer();
+    return () => clearTimeout(hideTimerRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSettings]);
+
+  function handleActivity() { resetHideTimer(); }
+
+  /* ── Fullscreen ── */
   function handleToggleFullscreen() {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.().catch(() => {});
-      setIsFullscreen(true);
+      containerRef.current?.requestFullscreen?.().catch(() => {});
     } else {
       document.exitFullscreen?.().catch(() => {});
-      setIsFullscreen(false);
     }
   }
 
   useEffect(() => {
-    function onFsChange() {
-      setIsFullscreen(Boolean(document.fullscreenElement));
-    }
-    document.addEventListener('fullscreenchange', onFsChange);
-    return () => document.removeEventListener('fullscreenchange', onFsChange);
+    const handler = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
+  /* ── Close settings when clicking outside ── */
+  useEffect(() => {
+    if (!showSettings) return;
+    function handler(e) {
+      if (settingsPanelRef.current && !settingsPanelRef.current.contains(e.target)) {
+        setShowSettings(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [showSettings]);
+
+  /* ── Keyboard shortcuts ── */
+  useEffect(() => {
+    function handler(e) {
+      if (e.key === 'Escape' && showSettings) { setShowSettings(false); return; }
+      if ((e.key === '+' || e.key === '=') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        updatePref('zoom', Math.min(200, prefs.zoom + 10));
+      }
+      if (e.key === '-' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        updatePref('zoom', Math.max(50, prefs.zoom - 10));
+      }
+    }
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSettings, prefs.zoom]);
+
+  /* ── Render ── */
   const hasPdf = Boolean(book?.pdfUrl);
 
-  /* ── Error / not-found ── */
-  if (status === 'notfound') {
+  /* Error/notfound — bare layout */
+  if (status === 'notfound' || status === 'error') {
     return (
-      <div className="flex h-screen flex-col bg-neutral-950" style={{ fontFamily: 'var(--font-sans)' }}>
-        <ReaderBar book={null} onBack={goBack} isFullscreen={isFullscreen} onToggleFullscreen={handleToggleFullscreen} />
+      <div className="flex h-screen flex-col bg-[#121212]" style={{ fontFamily: 'var(--font-sans)' }}>
+        <ReaderToolbar
+          book={null} visible tc={THEMES.dark}
+          prefs={prefs} onPrefsChange={updatePref}
+          isFullscreen={isFullscreen} onToggleFullscreen={handleToggleFullscreen}
+          showSettings={false} onToggleSettings={() => {}}
+          onBack={goBack} settingsPanelRef={settingsPanelRef} isMobile={isMobile}
+        />
         <div className="flex-1">
           <ReaderError
-            message="Book not found."
-            onBack={goBack}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <div className="flex h-screen flex-col bg-neutral-950" style={{ fontFamily: 'var(--font-sans)' }}>
-        <ReaderBar book={null} onBack={goBack} isFullscreen={isFullscreen} onToggleFullscreen={handleToggleFullscreen} />
-        <div className="flex-1">
-          <ReaderError
-            message="We couldn't load this book."
-            onRetry={fetchBook}
+            message={status === 'notfound' ? 'Book not found.' : "We couldn't load this book."}
+            onRetry={status === 'error' ? fetchBook : undefined}
             onBack={goBack}
           />
         </div>
@@ -316,47 +596,68 @@ function BookReader() {
 
   return (
     <div
-      className="flex h-screen flex-col overflow-hidden bg-neutral-950"
+      ref={containerRef}
+      className={`flex h-screen flex-col overflow-hidden transition-colors duration-300 ${tc.reader}`}
       style={{ fontFamily: 'var(--font-sans)' }}
+      onMouseMove={handleActivity}
+      onTouchStart={handleActivity}
+      onClick={handleActivity}
     >
-      {/* Top bar */}
-      <ReaderBar
+      {/* ── Toolbar ── */}
+      <ReaderToolbar
         book={book}
-        onBack={goBack}
+        visible={toolbarVisible}
+        tc={tc}
+        prefs={prefs}
+        onPrefsChange={updatePref}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
+        showSettings={showSettings}
+        onToggleSettings={() => setShowSettings((v) => !v)}
+        onBack={goBack}
+        settingsPanelRef={settingsPanelRef}
+        isMobile={isMobile}
       />
 
-      {/* Reading area */}
+      {/* ── Mobile settings bottom sheet ── */}
+      {showSettings && isMobile && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setShowSettings(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50">
+            <SettingsPanel
+              prefs={prefs} onPrefsChange={updatePref}
+              tc={tc} onClose={() => setShowSettings(false)} isMobile
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Reading area ── */}
       <div className="relative flex-1 overflow-hidden">
         {status === 'loading' && <ReaderSkeleton />}
 
         {status === 'success' && !hasPdf && (
-          <NoPdfState book={book} onBack={goBack} />
+          <NoPdfState book={book} onBack={goBack} tc={tc} />
         )}
 
         {status === 'success' && hasPdf && !pdfError && (
-          /*
-            We embed the PDF using an <iframe> pointing at the pdfUrl.
-
-            WHY IFRAME (not <embed> or <object>):
-            - <iframe> is the most widely supported cross-browser approach.
-            - Mobile Chrome and Safari both support PDF rendering inside iframes
-              for same-origin or CORS-permissive URLs.
-            - If the pdfUrl is a Google Drive link, a Cloudinary URL, or similar,
-              the browser will render it natively or show its own PDF viewer.
-
-            IMPORTANT: If pdfUrl is cross-origin and the server doesn't send
-            Access-Control-Allow-Origin, the iframe will load but the PDF viewer
-            inside will handle it. The user can still scroll and read.
-            For downloads we use the backend proxy (downloadBook) to ensure
-            same-origin delivery.
-          */
           <iframe
-            key={book._id}
+            key={`${book._id}-${prefs.zoom}`}
             src={book.pdfUrl}
             title={`Reading: ${book.title}`}
-            className="h-full w-full border-0"
+            className="border-0 transition-all duration-300"
+            style={{
+              width:  `${prefs.zoom}%`,
+              height: '100%',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              display: 'block',
+              maxWidth: '100%',
+            }}
             onError={() => setPdfError(true)}
             aria-label={`PDF reader for ${book.title}`}
           />
@@ -364,8 +665,8 @@ function BookReader() {
 
         {status === 'success' && hasPdf && pdfError && (
           <ReaderError
-            message="The PDF couldn't be displayed in the reader."
-            onRetry={() => { setPdfError(false); }}
+            message="The PDF couldn't be displayed."
+            onRetry={() => setPdfError(false)}
             onBack={goBack}
           />
         )}
