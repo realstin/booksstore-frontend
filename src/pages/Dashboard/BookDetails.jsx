@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, BookOpen, Bookmark, BookmarkCheck,
@@ -566,18 +566,16 @@ function BookDetails() {
 
             {/* Action buttons */}
             <motion.div {...fadeUp(0.3)} className="flex flex-wrap gap-3">
-              {/* Read Online */}
+              {/* Read Online — navigates to the dedicated reader page */}
               {hasPdf ? (
-                <a
-                  href={book.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to={`/dashboard/books/${id}/read`}
                   className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
                   aria-label={`Read ${book.title} online`}
                 >
                   <BookOpen size={16} strokeWidth={2} aria-hidden="true" />
                   Read Online
-                </a>
+                </Link>
               ) : (
                 <button
                   type="button"

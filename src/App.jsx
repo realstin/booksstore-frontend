@@ -28,6 +28,7 @@ const DashboardLibrary  = lazy(() => import('./pages/Dashboard/Library'));
 const DashboardProfile  = lazy(() => import('./pages/Dashboard/Profile'));
 const DashboardSettings = lazy(() => import('./pages/Dashboard/Settings'));
 const BookDetails       = lazy(() => import('./pages/Dashboard/BookDetails'));
+const BookReader        = lazy(() => import('./pages/Dashboard/BookReader'));
 
 /* ─── Spinner shown while a lazy chunk loads ─── */
 function PageLoader() {
@@ -104,7 +105,8 @@ function App() {
             <Route path="library"  element={<DashboardLibrary />} />
             <Route path="profile"  element={<DashboardProfile />} />
             <Route path="settings" element={<DashboardSettings />} />
-            <Route path="books/:id" element={<BookDetails />} />
+            <Route path="books/:id"      element={<BookDetails />} />
+            <Route path="books/:id/read" element={<BookReader />} />
           </Route>
         </Routes>
       </Suspense>
