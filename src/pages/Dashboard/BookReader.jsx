@@ -7,9 +7,9 @@ import {
   ArrowLeft, Download, Maximize2, Minimize2,
   AlertCircle, Loader2, RefreshCw, BookOpen,
   Settings2, ZoomIn, ZoomOut, Sun, Moon, Monitor, BookText,
-  ChevronDown,
+  ChevronDown, Bookmark, BookmarkCheck,
 } from 'lucide-react';
-import { getBookById, downloadBook } from '../../services/api';
+import { getBookById, downloadBook, bookmarkPage, removeBookmark, getBookBookmarks } from '../../services/api';
 import { recordBookOpened, updateReadingPage, getSavedPage } from '../../utils/readingProgress';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
@@ -446,9 +446,15 @@ function BookReader() {
 
   /* ── Page tracking ── */
   const [currentPage,  setCurrentPage]  = useState(1);
-  const [pageInput,    setPageInput]    = useState('1');   // controlled input string
-  const [resumedFrom,  setResumedFrom]  = useState(null);  // page we resumed at (for toast)
-  const pageUpdateTimer = useRef(null);                    // debounce timer
+  const [pageInput,    setPageInput]    = useState('1');
+  const [resumedFrom,  setResumedFrom]  = useState(null);
+  const pageUpdateTimer = useRef(null);
+
+  /* ── Bookmarks (database-backed) ── */
+  const [bookmarkedPages,  setBookmarkedPages]  = useState(new Set());
+  const [bmStatus,         setBmStatus]         = useState('idle'); // idle | saving | removing | error
+  const [bmError,          setBmError]          = useState('');
+  const [showBookmarks,    setShowBookmarks]     = useState(false);
 
   /* ── Preferences ── */
   const [prefs, setPrefsState] = useState(loadPrefs);
@@ -511,11 +517,18 @@ function BookReader() {
         setCurrentPage(saved);
         setPageInput(String(saved));
         setResumedFrom(saved);
-        /* Auto-hide "Resumed" toast after 3 s */
         setTimeout(() => setResumedFrom(null), 3000);
       } else {
         setCurrentPage(1);
         setPageInput('1');
+      }
+      /* Load bookmarks — failure must not block reading */
+      try {
+        const bmData = await getBookBookmarks(b._id);
+        const pages  = (bmData?.bookmarks ?? []).map((bm) => Number(bm.page));
+        setBookmarkedPages(new Set(pages));
+      } catch {
+        setBookmarkedPages(new Set());
       }
     } catch (err) {
       setStatus(err.status === 404 ? 'notfound' : 'error');
@@ -756,7 +769,116 @@ function BookReader() {
               >
                 ›
               </button>
+
+              {/* ── Bookmark toggle ── */}
+              <div className="ml-3 flex items-center gap-1.5 border-l border-white/[0.08] pl-3">
+                <button
+                  type="button"
+                  disabled={bmStatus === 'saving' || bmStatus === 'removing'}
+                  onClick={async () => {
+                    if (bmStatus === 'saving' || bmStatus === 'removing') return;
+                    setBmError('');
+                    const isMarked = bookmarkedPages.has(currentPage);
+                    setBmStatus(isMarked ? 'removing' : 'saving');
+                    try {
+                      if (isMarked) {
+                        await removeBookmark(book._id, currentPage);
+                        setBookmarkedPages((prev) => { const s = new Set(prev); s.delete(currentPage); return s; });
+                      } else {
+                        await bookmarkPage(book._id, currentPage);
+                        setBookmarkedPages((prev) => new Set([...prev, currentPage]));
+                      }
+                      setBmStatus('idle');
+                    } catch {
+                      setBmStatus('error');
+                      setBmError(isMarked ? "Couldn't remove bookmark." : "Couldn't save bookmark.");
+                      setTimeout(() => { setBmStatus('idle'); setBmError(''); }, 3000);
+                    }
+                  }}
+                  className={`flex h-7 items-center gap-1.5 rounded-full px-2.5 transition ${tc.icon}
+                    ${bookmarkedPages.has(currentPage) ? 'opacity-100' : 'opacity-70'}`}
+                  aria-label={
+                    bmStatus !== 'idle'
+                      ? (bmStatus === 'saving' ? 'Saving bookmark…' : 'Removing bookmark…')
+                      : bookmarkedPages.has(currentPage)
+                      ? `Remove bookmark from page ${currentPage}`
+                      : `Bookmark page ${currentPage}`
+                  }
+                >
+                  {bmStatus !== 'idle' ? (
+                    <Loader2 size={13} strokeWidth={2} className="animate-spin" aria-hidden="true" />
+                  ) : bookmarkedPages.has(currentPage) ? (
+                    <BookmarkCheck size={13} strokeWidth={2} aria-hidden="true" />
+                  ) : (
+                    <Bookmark size={13} strokeWidth={2} aria-hidden="true" />
+                  )}
+                  <span className="text-[11.5px] font-medium hidden sm:inline">
+                    {bookmarkedPages.has(currentPage) ? 'Bookmarked' : 'Bookmark'}
+                  </span>
+                </button>
+
+                {/* Bookmark list toggle */}
+                {bookmarkedPages.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowBookmarks((v) => !v); }}
+                    className={`flex h-7 items-center gap-1 rounded-full px-2 transition text-[11.5px] font-medium ${tc.icon}`}
+                    aria-label={showBookmarks ? 'Hide bookmarks list' : 'Show bookmarks list'}
+                    aria-expanded={showBookmarks}
+                  >
+                    {bookmarkedPages.size}
+                    <ChevronDown size={11} strokeWidth={2}
+                      className={`transition-transform duration-200 ${showBookmarks ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* ── Inline bookmark error ── */}
+            {bmError && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                className={`px-4 py-1.5 text-center text-[12px] ${tc.bar}`}
+                role="alert"
+              >
+                <span className="text-red-400">{bmError}</span>
+              </motion.div>
+            )}
+
+            {/* ── Bookmarks panel ── */}
+            <AnimatePresence>
+              {showBookmarks && bookmarkedPages.size > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`overflow-hidden border-b ${tc.bar}`}
+                >
+                  <div className="flex flex-wrap items-center gap-1.5 px-4 py-2.5">
+                    <span className={`text-[11px] font-semibold uppercase tracking-[0.1em] mr-1 ${tc.label}`}>
+                      Bookmarks:
+                    </span>
+                    {[...bookmarkedPages].sort((a, b) => a - b).map((pg) => (
+                      <button
+                        key={pg}
+                        type="button"
+                        onClick={() => { navigateToPage(pg); setShowBookmarks(false); }}
+                        className={`rounded-full px-3 py-0.5 text-[12px] font-medium transition
+                          ${pg === currentPage
+                            ? resolvedTheme === 'dark' ? 'bg-white text-black' : 'bg-neutral-950 text-white'
+                            : tc.icon}`}
+                        aria-label={`Jump to bookmark at page ${pg}`}
+                      >
+                        p.{pg}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <iframe
               key={`${book._id}-${prefs.zoom}-${currentPage}`}

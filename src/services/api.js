@@ -355,3 +355,61 @@ export async function getLibrary() {
 
   return data;
 }
+
+// ============================================================
+// ========== BOOKMARKS =======================================
+// ============================================================
+
+// Create a bookmark for the authenticated user
+export async function bookmarkPage(bookId, page) {
+  const response = await fetch(`${API_URL}/api/bookmarks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ bookId, page }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `Failed to bookmark page (status ${response.status})`);
+  }
+  return data;
+}
+
+// Remove a bookmark for the authenticated user
+export async function removeBookmark(bookId, page) {
+  const response = await fetch(
+    `${API_URL}/api/bookmarks/${bookId}/${page}`,
+    { method: 'DELETE', credentials: 'include' }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `Failed to remove bookmark (status ${response.status})`);
+  }
+  return data;
+}
+
+// Get all bookmarks for the authenticated user for a specific book
+export async function getBookBookmarks(bookId) {
+  const response = await fetch(
+    `${API_URL}/api/bookmarks/book/${bookId}`,
+    { credentials: 'include' }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `Failed to fetch bookmarks (status ${response.status})`);
+  }
+  return data; // { bookmarks: [{page, _id, createdAt, ...}] }
+}
+
+// Get all bookmarks for the authenticated user (all books)
+export async function getBookmarks() {
+  const response = await fetch(
+    `${API_URL}/api/bookmarks`,
+    { credentials: 'include' }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `Failed to fetch bookmarks (status ${response.status})`);
+  }
+  return data;
+}
