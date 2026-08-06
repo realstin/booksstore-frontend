@@ -180,7 +180,9 @@ function ContinueReading() {
   const lastRead    = formatLastRead(entry.lastReadAt);
   const hasAuthors  = Array.isArray(entry.authors) && entry.authors.length > 0;
   const authorLine  = hasAuthors ? entry.authors.join(', ') : null;
-  const sessions    = entry.sessionCount ?? 1;
+  const currentPage = entry.currentPage    ?? null;
+  const totalPages  = entry.totalPages     ?? null;
+  const pct         = entry.progressPercent ?? null;
 
   return (
     <motion.div
@@ -213,17 +215,36 @@ function ContinueReading() {
           {authorLine && (
             <p className="text-[13px] text-neutral-500">{authorLine}</p>
           )}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          {/* Progress bar */}
+          {pct !== null && (
+            <div className="mt-1 flex flex-col gap-1">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                <div
+                  className="h-full rounded-full bg-neutral-950 transition-all duration-500"
+                  style={{ width: `${Math.min(100, pct)}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[11.5px] text-neutral-400">
+                <span>{pct.toFixed(1)}% complete</span>
+                {currentPage && totalPages && (
+                  <span>Page {currentPage} of {totalPages}</span>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3 pt-0.5">
             {lastRead && (
               <span className="flex items-center gap-1.5 text-[12px] text-neutral-400">
                 <Clock size={11} strokeWidth={2} aria-hidden="true" />
                 {lastRead}
               </span>
             )}
-            <span className="flex items-center gap-1.5 text-[12px] text-neutral-400">
-              <BookOpen size={11} strokeWidth={2} aria-hidden="true" />
-              {sessions} session{sessions !== 1 ? 's' : ''}
-            </span>
+            {!pct && currentPage && currentPage > 1 && (
+              <span className="flex items-center gap-1.5 text-[12px] text-neutral-400">
+                <BookOpen size={11} strokeWidth={2} aria-hidden="true" />
+                Page {currentPage}
+              </span>
+            )}
           </div>
         </div>
 

@@ -10,7 +10,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { getBookById, downloadBook } from '../../services/api';
-import { recordBookOpened } from '../../utils/readingProgress';
+import { recordBookOpened, updateReadingPage, getSavedPage } from '../../utils/readingProgress';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 /* ═══════════════════════════════════════════
@@ -444,6 +444,12 @@ function BookReader() {
   const [status,   setStatus]   = useState('loading');
   const [pdfError, setPdfError] = useState(false);
 
+  /* ── Page tracking ── */
+  const [currentPage,  setCurrentPage]  = useState(1);
+  const [pageInput,    setPageInput]    = useState('1');   // controlled input string
+  const [resumedFrom,  setResumedFrom]  = useState(null);  // page we resumed at (for toast)
+  const pageUpdateTimer = useRef(null);                    // debounce timer
+
   /* ── Preferences ── */
   const [prefs, setPrefsState] = useState(loadPrefs);
 
@@ -486,7 +492,7 @@ function BookReader() {
     return () => mq.removeEventListener('change', handler);
   }, [prefs.theme]);
 
-  /* ── Fetch book ── */
+  /* ── Fetch book + restore saved page ── */
   const goBack = useCallback(() => navigate(`/dashboard/books/${id}`), [navigate, id]);
 
   const fetchBook = useCallback(async () => {
@@ -494,17 +500,55 @@ function BookReader() {
     setBook(null);
     setPdfError(false);
     try {
-      const data = await getBookById(id);
-      const b = data?.book ?? data;
+      const data  = await getBookById(id);
+      const b     = data?.book ?? data;
       setBook(b);
       setStatus('success');
       recordBookOpened(b);
+      /* Restore saved page */
+      const saved = getSavedPage(id);
+      if (saved > 1) {
+        setCurrentPage(saved);
+        setPageInput(String(saved));
+        setResumedFrom(saved);
+        /* Auto-hide "Resumed" toast after 3 s */
+        setTimeout(() => setResumedFrom(null), 3000);
+      } else {
+        setCurrentPage(1);
+        setPageInput('1');
+      }
     } catch (err) {
       setStatus(err.status === 404 ? 'notfound' : 'error');
     }
   }, [id]);
 
   useEffect(() => { fetchBook(); }, [fetchBook]);
+
+  /* ── Navigate to a specific page ── */
+  function navigateToPage(page) {
+    const n     = Math.max(1, Math.floor(Number(page) || 1));
+    const total = book?.pages ?? null;
+    const safe  = total ? Math.min(n, total) : n;
+    setCurrentPage(safe);
+    setPageInput(String(safe));
+    /* Debounced persistence — 800 ms after last change */
+    if (pageUpdateTimer.current) clearTimeout(pageUpdateTimer.current);
+    pageUpdateTimer.current = setTimeout(() => {
+      updateReadingPage(id, safe, total);
+    }, 800);
+  }
+
+  /* ── Persist on unmount (catch navigation away) ── */
+  useEffect(() => {
+    return () => {
+      if (pageUpdateTimer.current) clearTimeout(pageUpdateTimer.current);
+      /* Flush immediately on unmount */
+      if (book?._id) {
+        updateReadingPage(book._id, currentPage, book?.pages ?? null);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book, currentPage]);
 
   /* ── Auto-hide toolbar ── */
   function resetHideTimer() {
@@ -648,22 +692,89 @@ function BookReader() {
         )}
 
         {status === 'success' && hasPdf && !pdfError && (
-          <iframe
-            key={`${book._id}-${prefs.zoom}`}
-            src={book.pdfUrl}
-            title={`Reading: ${book.title}`}
-            className="border-0 transition-all duration-300"
-            style={{
-              width:  `${prefs.zoom}%`,
-              height: '100%',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              display: 'block',
-              maxWidth: '100%',
-            }}
-            onError={() => setPdfError(true)}
-            aria-label={`PDF reader for ${book.title}`}
-          />
+          <>
+            {/* Resumed toast */}
+            {resumedFrom && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
+                className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[12.5px] font-medium text-white/90 backdrop-blur-sm"
+                aria-live="polite"
+              >
+                Resumed from page {resumedFrom}
+              </motion.div>
+            )}
+
+            {/* Page navigation bar */}
+            <div className={`flex items-center justify-center gap-2 py-2 text-[13px] ${tc.bar}`}>
+              <button
+                type="button"
+                onClick={() => navigateToPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className={`flex h-7 w-7 items-center justify-center rounded-full transition disabled:opacity-30 ${tc.icon}`}
+                aria-label="Previous page"
+              >
+                ‹
+              </button>
+              <span className={`${tc.label} text-[12px]`}>Page</span>
+              <input
+                type="number"
+                min={1}
+                max={book?.pages || undefined}
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onBlur={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (!isNaN(n) && n >= 1) navigateToPage(n);
+                  else setPageInput(String(currentPage));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const n = parseInt(e.target.value, 10);
+                    if (!isNaN(n) && n >= 1) navigateToPage(n);
+                  }
+                }}
+                className={`w-16 rounded-lg border px-2 py-0.5 text-center text-[13px] font-semibold outline-none transition
+                  ${resolvedTheme === 'dark'
+                    ? 'border-white/10 bg-white/10 text-white'
+                    : resolvedTheme === 'sepia'
+                    ? 'border-[#c4a87a] bg-[#ede0c8] text-[#3d2b1f]'
+                    : 'border-neutral-200 bg-white text-neutral-900'}`}
+                aria-label="Current page number"
+              />
+              {book?.pages && (
+                <span className={`${tc.label} text-[12px]`}>of {book.pages}</span>
+              )}
+              <button
+                type="button"
+                onClick={() => navigateToPage(currentPage + 1)}
+                disabled={book?.pages ? currentPage >= book.pages : false}
+                className={`flex h-7 w-7 items-center justify-center rounded-full transition disabled:opacity-30 ${tc.icon}`}
+                aria-label="Next page"
+              >
+                ›
+              </button>
+            </div>
+
+            <iframe
+              key={`${book._id}-${prefs.zoom}-${currentPage}`}
+              src={`${book.pdfUrl}#page=${currentPage}`}
+              title={`Reading: ${book.title}`}
+              className="border-0 transition-all duration-300"
+              style={{
+                width:  `${prefs.zoom}%`,
+                height: 'calc(100% - 36px)',
+                marginLeft:  'auto',
+                marginRight: 'auto',
+                display: 'block',
+                maxWidth: '100%',
+              }}
+              onError={() => setPdfError(true)}
+              aria-label={`PDF reader for ${book.title}`}
+            />
+          </>
         )}
 
         {status === 'success' && hasPdf && pdfError && (
