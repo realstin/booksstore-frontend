@@ -10,6 +10,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { getBookById, downloadBook } from '../../services/api';
+import { recordBookOpened } from '../../utils/readingProgress';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 /* ═══════════════════════════════════════════
@@ -494,8 +495,10 @@ function BookReader() {
     setPdfError(false);
     try {
       const data = await getBookById(id);
-      setBook(data?.book ?? data);
+      const b = data?.book ?? data;
+      setBook(b);
       setStatus('success');
+      recordBookOpened(b);
     } catch (err) {
       setStatus(err.status === 404 ? 'notfound' : 'error');
     }

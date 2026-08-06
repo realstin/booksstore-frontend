@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, TrendingUp, Star as StarIcon, RefreshCw,
+  BookOpen, Clock, Compass,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getBooks } from '../../services/api';
 import DashboardBookCard from '../../components/Dashboard/DashboardBookCard';
 import BookCardSkeleton from '../../components/Dashboard/BookCardSkeleton';
+import { getMostRecentBook, formatLastRead } from '../../utils/readingProgress';
 
 /* ─────────────────────────────────────────
    Shared easing
@@ -124,6 +127,117 @@ function BookSection({ books, status, emptyMessage, onRetry, skeletonCount = 6 }
   if (status === 'error')   return <ErrorState onRetry={onRetry} />;
   if (!books || books.length === 0) return <EmptyState message={emptyMessage} />;
   return <BookGrid books={books} />;
+}
+
+/* ─────────────────────────────────────────
+   Continue Reading section
+───────────────────────────────────────── */
+function ContinueReading() {
+  const navigate   = useNavigate();
+  const [entry,    setEntry]    = useState(undefined); // undefined = not yet checked
+
+  useEffect(() => {
+    /* Read from localStorage synchronously — no network needed */
+    try {
+      setEntry(getMostRecentBook() ?? null);
+    } catch {
+      setEntry(null);
+    }
+  }, []);
+
+  /* Still checking */
+  if (entry === undefined) return null;
+
+  /* No reading history — empty state */
+  if (entry === null) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease }}
+        className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-neutral-200 bg-white px-8 py-10 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
+      >
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50">
+          <BookOpen size={22} strokeWidth={1.75} className="text-neutral-400" aria-hidden="true" />
+        </div>
+        <div className="flex flex-1 flex-col gap-1">
+          <p className="text-[15px] font-semibold text-neutral-800">Start your reading journey</p>
+          <p className="text-[13.5px] text-neutral-400">Discover a book and start learning today.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/explore')}
+          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+        >
+          <Compass size={14} strokeWidth={2} aria-hidden="true" />
+          Explore Books
+        </button>
+      </motion.div>
+    );
+  }
+
+  /* Has reading history — show the most recent book */
+  const lastRead    = formatLastRead(entry.lastReadAt);
+  const hasAuthors  = Array.isArray(entry.authors) && entry.authors.length > 0;
+  const authorLine  = hasAuthors ? entry.authors.join(', ') : null;
+  const sessions    = entry.sessionCount ?? 1;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.58, ease }}
+      className="flex flex-col gap-5 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)] sm:flex-row sm:items-stretch"
+    >
+      {/* Cover */}
+      <div className="relative h-36 w-full overflow-hidden bg-neutral-100 sm:h-auto sm:w-28 sm:shrink-0">
+        {entry.bookCover ? (
+          <img
+            src={entry.bookCover}
+            alt={`Cover of ${entry.bookTitle}`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-neutral-900">
+            <BookOpen size={28} strokeWidth={1.25} className="text-neutral-600" aria-hidden="true" />
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col justify-between gap-4 px-5 pb-5 pt-0 sm:py-5 sm:pl-0">
+        <div className="flex flex-col gap-1.5">
+          <p className="line-clamp-2 text-[15.5px] font-bold leading-snug tracking-tight text-neutral-950">
+            {entry.bookTitle}
+          </p>
+          {authorLine && (
+            <p className="text-[13px] text-neutral-500">{authorLine}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {lastRead && (
+              <span className="flex items-center gap-1.5 text-[12px] text-neutral-400">
+                <Clock size={11} strokeWidth={2} aria-hidden="true" />
+                {lastRead}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 text-[12px] text-neutral-400">
+              <BookOpen size={11} strokeWidth={2} aria-hidden="true" />
+              {sessions} session{sessions !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate(`/dashboard/books/${entry.bookId}/read`)}
+          className="self-start inline-flex items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+          aria-label={`Continue reading ${entry.bookTitle}`}
+        >
+          Continue Reading →
+        </button>
+      </div>
+    </motion.div>
+  );
 }
 
 /* ─────────────────────────────────────────
@@ -255,8 +369,13 @@ function Dashboard() {
       {/* ── Data sections ── */}
       <div className="flex flex-col gap-12">
 
+        {/* Continue Reading */}
+        <Section id="continue-reading" title="Continue Reading" icon={BookOpen} delay={0.18}>
+          <ContinueReading />
+        </Section>
+
         {/* Recently Added */}
-        <Section id="recently-added" title="Recently Added" icon={Sparkles} delay={0.18}>
+        <Section id="recently-added" title="Recently Added" icon={Sparkles} delay={0.24}>
           <BookSection
             books={recentBooks}
             status={recentStatus}
@@ -266,7 +385,7 @@ function Dashboard() {
         </Section>
 
         {/* Trending Books */}
-        <Section id="trending-books" title="Trending Books" icon={TrendingUp} delay={0.24}>
+        <Section id="trending-books" title="Trending Books" icon={TrendingUp} delay={0.3}>
           <BookSection
             books={trendingBooks}
             status={trendingStatus}
@@ -276,7 +395,7 @@ function Dashboard() {
         </Section>
 
         {/* Community Favorites */}
-        <Section id="community-favorites" title="Community Favorites" icon={StarIcon} delay={0.3}>
+        <Section id="community-favorites" title="Community Favorites" icon={StarIcon} delay={0.36}>
           <BookSection
             books={featuredBooks}
             status={featuredStatus}
