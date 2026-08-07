@@ -152,7 +152,7 @@ function Footer() {
           <div className="flex flex-col sm:col-span-2 lg:col-span-1">
             {/* Logo */}
             <Link
-              to="/homepage"
+              to="/"
               className="mb-4 inline-flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
               aria-label="BookStore — go to homepage"
             >

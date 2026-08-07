@@ -284,7 +284,7 @@ function Terms() {
           {/* Back navigation */}
           <motion.div {...fadeUp(0)} className="mb-10 flex flex-wrap items-center gap-3">
             <Link
-              to="/homepage"
+              to="/"
               className="group inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13.5px] font-medium text-neutral-600 shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all duration-200 hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
             >
               <ArrowLeft size={14} className="transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true" />

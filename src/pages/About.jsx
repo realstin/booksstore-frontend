@@ -104,7 +104,7 @@ function Hero() {
 
             <motion.div {...fadeUp(0.32, 0.68)}
               className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link to="/homepage#explore">
+              <Link to="/#explore">
                 <Button size="lg" variant="primary" className="group w-full gap-2 sm:w-auto">
                   Explore Books
                   <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
@@ -562,7 +562,7 @@ function FinalCTA() {
           </motion.p>
           <motion.div {...inViewFadeUp(0.24)}
             className="flex flex-col items-center gap-3 sm:flex-row">
-            <Link to="/homepage#explore">
+            <Link to="/#explore">
               <motion.button
                 whileHover={{ scale: 1.03, backgroundColor: "#f5f5f5" }}
                 whileTap={{ scale: 0.97 }}

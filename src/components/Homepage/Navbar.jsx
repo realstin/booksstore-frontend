@@ -21,13 +21,13 @@ function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
 
-  // When on /homepage, anchor links are plain #hash.
-  // When on any other page, they navigate to /homepage#hash
+  // When on /, anchor links are plain #hash.
+  // When on any other page, they navigate to /#hash
   // so the user lands on the right section.
-  const onHomepage = pathname === "/homepage";
+  const onHomepage = pathname === "/";
   const resolveHref = (link) => {
     if (link.internal) return link.href;
-    return onHomepage ? `#${link.hash}` : `/homepage#${link.hash}`;
+    return onHomepage ? `#${link.hash}` : `/#${link.hash}`;
   };
 
   useEffect(() => {
@@ -69,7 +69,7 @@ function Navbar() {
     >
       <Container>
         <nav className={navClass}>
-          <Link to="/homepage" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+          <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
             <img src={bookstoreLogo} alt="BookStore Logo" className={logoImgClass} />
             <span className={logoTextClass}>BookStore</span>
           </Link>

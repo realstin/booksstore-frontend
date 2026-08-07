@@ -39,7 +39,7 @@ function NotFound() {
           Back to News
         </Link>
         <Link
-          to="/homepage"
+          to="/"
           className="inline-flex h-11 items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 text-[14px] font-semibold text-neutral-700 transition hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
         >
           Back to Home
@@ -280,7 +280,7 @@ function NewsArticle() {
                 All News
               </Link>
               <Link
-                to="/homepage"
+                to="/"
                 className="group inline-flex items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition-all duration-200 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
               >
                 Back to Home

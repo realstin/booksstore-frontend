@@ -62,7 +62,7 @@ function ScrollToTop() {
   return null;
 }
 
-/* ─── Redirects authenticated users away from /homepage ─── */
+/* ─── Redirects authenticated users away from / to /dashboard ─── */
 function HomepageGuard() {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
@@ -78,7 +78,6 @@ function App() {
         <Routes>
           {/* ── Public routes ── */}
           <Route path="/"           element={<HomepageGuard />} />
-          <Route path="/homepage"   element={<HomepageGuard />} />
           <Route path="/login"         element={<Login />} />
           <Route path="/signup"        element={<Signup />} />
           <Route path="/verify-email"  element={<VerifyEmail />} />

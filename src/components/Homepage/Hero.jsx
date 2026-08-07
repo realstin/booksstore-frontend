@@ -318,7 +318,7 @@ function Hero() {
                 </Button>
               </Link>
 
-              <Link to="/homepage#library">
+              <Link to="/#library">
                 <Button
                   size="lg"
                   variant="secondary"
