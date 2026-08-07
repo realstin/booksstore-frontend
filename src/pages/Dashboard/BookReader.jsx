@@ -8,8 +8,12 @@ import {
   AlertCircle, Loader2, RefreshCw, BookOpen,
   Settings2, ZoomIn, ZoomOut, Sun, Moon, Monitor, BookText,
   ChevronDown, Bookmark, BookmarkCheck,
+  PenLine, X as XIcon, Trash2, ChevronRight,
 } from 'lucide-react';
-import { getBookById, downloadBook, bookmarkPage, removeBookmark, getBookBookmarks } from '../../services/api';
+import {
+  getBookById, downloadBook, bookmarkPage, removeBookmark, getBookBookmarks,
+  createNote, getBookNotes, updateNote, deleteNote,
+} from '../../services/api';
 import { recordBookOpened, updateReadingPage, getSavedPage } from '../../utils/readingProgress';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
@@ -456,6 +460,13 @@ function BookReader() {
   const [bmError,          setBmError]          = useState('');
   const [showBookmarks,    setShowBookmarks]     = useState(false);
 
+  /* ── Notes (database-backed) ── */
+  const [notes,         setNotes]         = useState([]);
+  const [noteStatus,    setNoteStatus]    = useState('idle');   // idle | loading | error
+  const [showNotes,     setShowNotes]     = useState(false);
+  const [noteEditor,    setNoteEditor]    = useState(null);     // null | { mode, noteId?, draft, saving, error }
+  const [deletingNote,  setDeletingNote]  = useState(null);     // noteId awaiting confirm
+
   /* ── Preferences ── */
   const [prefs, setPrefsState] = useState(loadPrefs);
 
@@ -529,6 +540,15 @@ function BookReader() {
         setBookmarkedPages(new Set(pages));
       } catch {
         setBookmarkedPages(new Set());
+      }
+      /* Load notes — failure must not block reading */
+      try {
+        setNoteStatus('loading');
+        const nd = await getBookNotes(b._id);
+        setNotes(Array.isArray(nd) ? nd : nd.notes ?? []);
+        setNoteStatus('idle');
+      } catch {
+        setNoteStatus('error');
       }
     } catch (err) {
       setStatus(err.status === 404 ? 'notfound' : 'error');
@@ -834,6 +854,25 @@ function BookReader() {
                   </button>
                 )}
               </div>
+
+              {/* ── Notes toggle ── */}
+              <div className="ml-2 flex items-center gap-1 border-l border-white/[0.08] pl-2">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setShowNotes((v) => !v); setShowBookmarks(false); }}
+                  className={`flex h-7 items-center gap-1.5 rounded-full px-2.5 transition ${tc.icon} ${showNotes ? 'opacity-100' : 'opacity-70'}`}
+                  aria-label={showNotes ? 'Hide notes' : 'Open notes'}
+                  aria-expanded={showNotes}
+                >
+                  <PenLine size={13} strokeWidth={2} aria-hidden="true" />
+                  <span className="hidden sm:inline text-[11.5px] font-medium">Notes</span>
+                  {notes.length > 0 && (
+                    <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-white/20 px-1 text-[10px] font-bold">
+                      {notes.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* ── Inline bookmark error ── */}
@@ -875,6 +914,201 @@ function BookReader() {
                         p.{pg}
                       </button>
                     ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ── Notes panel ── */}
+            <AnimatePresence>
+              {showNotes && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.22 }}
+                  className={`overflow-hidden border-b ${tc.bar}`}
+                  style={{ maxHeight: '45vh', overflowY: 'auto' }}
+                >
+                  <div className="px-4 py-3">
+
+                    {/* ── Header ── */}
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>
+                        Notes {notes.length > 0 && `(${notes.length})`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => { setNoteEditor({ mode: 'create', draft: '', saving: false, error: '' }); }}
+                        className={`flex h-6 items-center gap-1 rounded-full px-2.5 text-[11.5px] font-medium transition ${tc.icon}`}
+                        aria-label={`Add note for page ${currentPage}`}
+                      >
+                        + Add note
+                      </button>
+                    </div>
+
+                    {/* ── Note editor (create / edit) ── */}
+                    {noteEditor && (
+                      <div className={`mb-3 rounded-xl border p-3 ${resolvedTheme === 'dark' ? 'border-white/10 bg-white/5' : 'border-neutral-200 bg-neutral-50'}`}>
+                        <p className={`mb-2 text-[11px] font-semibold ${tc.label}`}>
+                          {noteEditor.mode === 'create' ? `Page ${currentPage}` : `Edit note`}
+                        </p>
+                        <textarea
+                          id="note-textarea"
+                          value={noteEditor.draft}
+                          onChange={(e) => setNoteEditor((n) => ({ ...n, draft: e.target.value.slice(0, 5000), error: '' }))}
+                          placeholder="Write your note…"
+                          maxLength={5000}
+                          rows={3}
+                          className={`w-full resize-none rounded-lg border p-2 text-[13px] leading-relaxed outline-none transition
+                            ${resolvedTheme === 'dark'
+                              ? 'border-white/10 bg-white/10 text-white placeholder-white/30'
+                              : resolvedTheme === 'sepia'
+                              ? 'border-[#c4a87a] bg-[#ede0c8] text-[#3d2b1f]'
+                              : 'border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400'}`}
+                          aria-label={noteEditor.mode === 'create' ? `Note for page ${currentPage}` : 'Edit note content'}
+                          disabled={noteEditor.saving}
+                        />
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className={`text-[10.5px] ${tc.label}`}>{noteEditor.draft.length}/5000</span>
+                          {noteEditor.error && <span className="text-[11px] text-red-400">{noteEditor.error}</span>}
+                        </div>
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setNoteEditor(null)}
+                            className={`flex-1 rounded-lg py-1.5 text-[12px] font-medium transition ${tc.icon}`}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            disabled={noteEditor.saving || !noteEditor.draft.trim()}
+                            onClick={async () => {
+                              if (!noteEditor.draft.trim()) return;
+                              setNoteEditor((n) => ({ ...n, saving: true, error: '' }));
+                              try {
+                                if (noteEditor.mode === 'create') {
+                                  const res = await createNote(book._id, currentPage, noteEditor.draft.trim());
+                                  const newNote = res.note ?? res;
+                                  setNotes((prev) => [...prev, newNote].sort((a, b) => a.page - b.page));
+                                } else {
+                                  const res = await updateNote(noteEditor.noteId, noteEditor.draft.trim());
+                                  const updated = res.note ?? res;
+                                  setNotes((prev) => prev.map((n) => n._id === noteEditor.noteId ? { ...n, ...updated } : n));
+                                }
+                                setNoteEditor(null);
+                              } catch (err) {
+                                setNoteEditor((n) => ({ ...n, saving: false, error: err.message || "Couldn't save note." }));
+                              }
+                            }}
+                            className={`flex-1 rounded-lg py-1.5 text-[12px] font-semibold transition disabled:opacity-50
+                              ${resolvedTheme === 'dark' ? 'bg-white text-black hover:bg-neutral-100' : 'bg-neutral-950 text-white hover:bg-black'}`}
+                          >
+                            {noteEditor.saving ? <Loader2 size={12} className="mx-auto animate-spin" /> : noteEditor.mode === 'create' ? 'Save Note' : 'Save Changes'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Note load error ── */}
+                    {noteStatus === 'error' && (
+                      <p className="text-[12px] text-red-400 mb-2">
+                        Unable to load your notes.{' '}
+                        <button onClick={() => { setNoteStatus('loading'); getBookNotes(book._id).then((d) => { setNotes(d.notes ?? []); setNoteStatus('idle'); }).catch(() => setNoteStatus('error')); }}
+                          className="underline">Retry</button>
+                      </p>
+                    )}
+
+                    {/* ── Empty state ── */}
+                    {noteStatus !== 'error' && notes.length === 0 && !noteEditor && (
+                      <div className="py-4 text-center">
+                        <p className={`text-[12.5px] ${tc.label}`}>No notes yet</p>
+                        <p className={`text-[11.5px] mt-0.5 ${tc.label} opacity-70`}>Save important ideas while you read.</p>
+                        <button
+                          type="button"
+                          onClick={() => setNoteEditor({ mode: 'create', draft: '', saving: false, error: '' })}
+                          className={`mt-2 text-[12px] font-medium underline ${tc.icon}`}
+                        >
+                          Add your first note
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ── Notes list ── */}
+                    {notes.length > 0 && (
+                      <div className="flex flex-col gap-2">
+                        {notes.map((note) => (
+                          <div
+                            key={note._id}
+                            className={`group rounded-xl border p-3 transition
+                              ${resolvedTheme === 'dark' ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.07]' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}
+                          >
+                            {/* Delete confirm */}
+                            {deletingNote === note._id ? (
+                              <div className="flex items-center justify-between gap-2">
+                                <span className={`text-[12px] ${tc.label}`}>Delete this note?</span>
+                                <div className="flex gap-2">
+                                  <button onClick={() => setDeletingNote(null)} className={`text-[11.5px] px-2 py-0.5 rounded-md transition ${tc.icon}`}>Cancel</button>
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await deleteNote(note._id);
+                                        setNotes((prev) => prev.filter((n) => n._id !== note._id));
+                                        setDeletingNote(null);
+                                      } catch {
+                                        setDeletingNote(null);
+                                      }
+                                    }}
+                                    className="text-[11.5px] px-2 py-0.5 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                {/* Page badge + actions */}
+                                <div className="mb-1.5 flex items-center justify-between">
+                                  <button
+                                    type="button"
+                                    onClick={() => { navigateToPage(note.page); setShowNotes(false); }}
+                                    className={`flex items-center gap-1 text-[11px] font-semibold transition ${tc.icon}`}
+                                    aria-label={`Jump to page ${note.page}`}
+                                  >
+                                    Page {note.page}
+                                    <ChevronRight size={10} strokeWidth={2.5} aria-hidden="true" />
+                                  </button>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      type="button"
+                                      onClick={() => setNoteEditor({ mode: 'edit', noteId: note._id, draft: note.content, saving: false, error: '' })}
+                                      className={`flex h-5 w-5 items-center justify-center rounded transition ${tc.icon}`}
+                                      aria-label="Edit note"
+                                    >
+                                      <PenLine size={11} strokeWidth={2} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setDeletingNote(note._id)}
+                                      className="flex h-5 w-5 items-center justify-center rounded text-red-400 hover:text-red-300 transition"
+                                      aria-label="Delete note"
+                                    >
+                                      <Trash2 size={11} strokeWidth={2} />
+                                    </button>
+                                  </div>
+                                </div>
+                                {/* Note content */}
+                                <p className={`text-[12.5px] leading-relaxed whitespace-pre-wrap break-words ${resolvedTheme === 'dark' ? 'text-white/80' : 'text-neutral-700'}`}>
+                                  {note.content}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                   </div>
                 </motion.div>
               )}

@@ -413,3 +413,55 @@ export async function getBookmarks() {
   }
   return data;
 }
+
+// ============================================================
+// ========== NOTES ===========================================
+// ============================================================
+
+export async function createNote(bookId, page, content) {
+  const response = await fetch(`${API_URL}/api/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ bookId, page, content }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || 'Unable to save your note. Please try again.');
+  return data;
+}
+
+export async function getBookNotes(bookId) {
+  const response = await fetch(`${API_URL}/api/notes/book/${bookId}`, { credentials: 'include' });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || 'Unable to load your notes. Please try again.');
+  return data; // { notes: [{_id, page, content, createdAt, updatedAt, ...}] }
+}
+
+export async function getNotes() {
+  const response = await fetch(`${API_URL}/api/notes`, { credentials: 'include' });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || 'Unable to load your notes. Please try again.');
+  return data;
+}
+
+export async function updateNote(noteId, content) {
+  const response = await fetch(`${API_URL}/api/notes/${noteId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ content }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "Your note couldn't be updated. Please try again.");
+  return data;
+}
+
+export async function deleteNote(noteId) {
+  const response = await fetch(`${API_URL}/api/notes/${noteId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "Your note couldn't be deleted. Please try again.");
+  return data;
+}
