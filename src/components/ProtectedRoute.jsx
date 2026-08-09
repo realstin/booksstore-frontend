@@ -8,18 +8,19 @@ import { useAuth } from '../hooks/useAuth';
  *
  * Behaviour:
  *   - While the auth check is still running (cookie → /api/auth/me):
- *     show nothing (or a loader) to avoid a flash-redirect to /login.
+ *     show a loader to avoid a flash-redirect to /login. We wait for
+ *     isInitialized rather than `loading` so the gate is tied to the
+ *     completion of the initial check, not just the fetch in-flight state.
  *   - If the check finishes and the user IS authenticated: render children.
  *   - If the check finishes and the user is NOT authenticated:
- *     redirect to /login, preserving the attempted URL so we can
- *     redirect back after a successful login if needed.
+ *     redirect to /login.
  */
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, isInitialized } = useAuth();
 
-  // Auth check still in progress — render nothing to avoid flicker.
-  // AuthContext sets loading=true on mount and false once getMe() settles.
-  if (loading) {
+  // Auth check still in progress — render a loader to avoid a premature
+  // redirect to /login before we know whether the user has a valid session.
+  if (!isInitialized) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div

@@ -63,10 +63,24 @@ function ScrollToTop() {
 }
 
 /* ─── Redirects authenticated users away from / to /dashboard ─── */
+//
+// The homepage is public — it renders immediately without waiting for the
+// /api/auth/me round-trip. Authentication detection runs in the background:
+//
+//   • isInitialized === false  → auth check still in flight; render homepage
+//     now so visitors never see a blocking spinner on the public page.
+//
+//   • isInitialized === true && user exists  → we confirmed the user is logged
+//     in; redirect to /dashboard. Because React batches the state update and
+//     re-render before the browser paints, a fast /api/auth/me response means
+//     the logged-in user is redirected before the homepage is ever visible.
+//
+//   • isInitialized === true && no user  → confirmed unauthenticated; keep
+//     rendering the homepage normally.
+//
 function HomepageGuard() {
-  const { user, loading } = useAuth();
-  if (loading) return <PageLoader />;
-  if (user)    return <Navigate to="/dashboard" replace />;
+  const { user, isInitialized } = useAuth();
+  if (isInitialized && user) return <Navigate to="/dashboard" replace />;
   return <Homepage />;
 }
 

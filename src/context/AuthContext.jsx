@@ -8,6 +8,11 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // isInitialized: false until the initial /api/auth/me request settles
+  // (success or failure). Consumers that must not render before we know
+  // the auth state (e.g. ProtectedRoute) wait for this flag; consumers
+  // that are public (e.g. HomepageGuard) can render immediately.
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // ===== VERIFY USER ON APP STARTUP =====
   useEffect(() => {
@@ -23,6 +28,10 @@ export function AuthProvider({ children }) {
         setUser(null);
       } finally {
         setLoading(false);
+        // Mark initialization complete whether the request succeeded or failed.
+        // This ensures the app never stays permanently blocked on a spinner
+        // if the backend is slow or unavailable.
+        setIsInitialized(true);
       }
     };
     verifyUser();
@@ -57,6 +66,7 @@ export function AuthProvider({ children }) {
         logout,
         isLoggedIn,
         loading,
+        isInitialized,
       }}
     >
       {children}
