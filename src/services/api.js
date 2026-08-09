@@ -271,20 +271,28 @@ export async function googleLogin(credential) {
 
 // Get current logged-in user
 export async function getMe() {
-  const response = await fetch(
-    `${API_URL}/api/auth/me`,
-    {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
       credentials: 'include',
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user (status ${response.status})`);
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch user (status ${response.status})`
-    );
+    return response.json();
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please check your internet connection and try again.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json();
 }
 
 // ============================================================
