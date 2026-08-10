@@ -206,14 +206,14 @@ function SettingsPanel({ prefs, onPrefsChange, tc, onClose, isMobile }) {
         <div className="flex flex-col gap-5 p-5 pt-4">
           {/* Theme */}
           <div className="flex flex-col gap-2.5">
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>Theme</p>
+            <p className={`text-[11px] font-semibold uppercase tracking-widest ${tc.label}`}>Theme</p>
             <SegControl options={THEME_OPTIONS} value={prefs.theme} onChange={(v) => onPrefsChange('theme', v)} tc={tc} />
           </div>
 
           {/* Zoom */}
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <p className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>Zoom</p>
+              <p className={`text-[11px] font-semibold uppercase tracking-widest ${tc.label}`}>Zoom</p>
               <span className="text-[12px] font-semibold opacity-70">{prefs.zoom}%</span>
             </div>
             <div className="flex items-center gap-2">
@@ -304,7 +304,7 @@ function ReaderToolbar({
         <button
           type="button"
           onClick={() => onPrefsChange('zoom', 100)}
-          className={`min-w-[3rem] rounded-lg px-2 py-1 text-[12px] font-semibold tabular-nums transition ${tc.icon}`}
+          className={`min-w-12 rounded-lg px-2 py-1 text-[12px] font-semibold tabular-nums transition ${tc.icon}`}
           aria-label={`Zoom: ${prefs.zoom}%. Click to reset.`}
         >
           {prefs.zoom}%
@@ -791,7 +791,7 @@ function BookReader() {
               </button>
 
               {/* ── Bookmark toggle ── */}
-              <div className="ml-3 flex items-center gap-1.5 border-l border-white/[0.08] pl-3">
+              <div className="ml-3 flex items-center gap-1.5 border-l border-white/8 pl-3">
                 <button
                   type="button"
                   disabled={bmStatus === 'saving' || bmStatus === 'removing'}
@@ -856,7 +856,7 @@ function BookReader() {
               </div>
 
               {/* ── Notes toggle ── */}
-              <div className="ml-2 flex items-center gap-1 border-l border-white/[0.08] pl-2">
+              <div className="ml-2 flex items-center gap-1 border-l border-white/8 pl-2">
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setShowNotes((v) => !v); setShowBookmarks(false); }}
@@ -867,7 +867,7 @@ function BookReader() {
                   <PenLine size={13} strokeWidth={2} aria-hidden="true" />
                   <span className="hidden sm:inline text-[11.5px] font-medium">Notes</span>
                   {notes.length > 0 && (
-                    <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-white/20 px-1 text-[10px] font-bold">
+                    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-white/20 px-1 text-[10px] font-bold">
                       {notes.length}
                     </span>
                   )}
@@ -897,7 +897,7 @@ function BookReader() {
                   className={`overflow-hidden border-b ${tc.bar}`}
                 >
                   <div className="flex flex-wrap items-center gap-1.5 px-4 py-2.5">
-                    <span className={`text-[11px] font-semibold uppercase tracking-[0.1em] mr-1 ${tc.label}`}>
+                    <span className={`text-[11px] font-semibold uppercase tracking-widest mr-1 ${tc.label}`}>
                       Bookmarks:
                     </span>
                     {[...bookmarkedPages].sort((a, b) => a - b).map((pg) => (
@@ -934,7 +934,7 @@ function BookReader() {
 
                     {/* ── Header ── */}
                     <div className="mb-2 flex items-center justify-between">
-                      <span className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${tc.label}`}>
+                      <span className={`text-[11px] font-semibold uppercase tracking-widest ${tc.label}`}>
                         Notes {notes.length > 0 && `(${notes.length})`}
                       </span>
                       <button
@@ -1042,7 +1042,7 @@ function BookReader() {
                           <div
                             key={note._id}
                             className={`group rounded-xl border p-3 transition
-                              ${resolvedTheme === 'dark' ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.07]' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}
+                              ${resolvedTheme === 'dark' ? 'border-white/[0.07] bg-white/4 hover:bg-white/[0.07]' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}
                           >
                             {/* Delete confirm */}
                             {deletingNote === note._id ? (
@@ -1099,7 +1099,7 @@ function BookReader() {
                                   </div>
                                 </div>
                                 {/* Note content */}
-                                <p className={`text-[12.5px] leading-relaxed whitespace-pre-wrap break-words ${resolvedTheme === 'dark' ? 'text-white/80' : 'text-neutral-700'}`}>
+                                <p className={`text-[12.5px] leading-relaxed whitespace-pre-wrap wrap-break-word ${resolvedTheme === 'dark' ? 'text-white/80' : 'text-neutral-700'}`}>
                                   {note.content}
                                 </p>
                               </>
