@@ -62,7 +62,7 @@ function OrDivider() {
   return (
     <div className="flex items-center gap-3" aria-hidden="true">
       <div className="h-px flex-1 bg-neutral-200" />
-      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-neutral-400">or</span>
+      <span className="text-[12px] font-semibold uppercase tracking-widest text-neutral-400">or</span>
       <div className="h-px flex-1 bg-neutral-200" />
     </div>
   );
@@ -118,7 +118,7 @@ function Login() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-[440px]"
+          className="w-full max-w-110"
         >
           {/* Logo */}
           <Link
@@ -244,7 +244,7 @@ function Login() {
         <img
           src={libraryImage}
           alt=""
-          className="max-h-[72vh] w-full max-w-[480px] object-contain"
+          className="max-h-[72vh] w-full max-w-120 object-contain"
         />
       </div>
     </div>
