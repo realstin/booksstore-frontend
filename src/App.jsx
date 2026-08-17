@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useSearchParams } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -29,6 +29,8 @@ const DashboardProfile  = lazy(() => import('./pages/Dashboard/Profile'));
 const DashboardSettings = lazy(() => import('./pages/Dashboard/Settings'));
 const BookDetails       = lazy(() => import('./pages/Dashboard/BookDetails'));
 const BookReader        = lazy(() => import('./pages/Dashboard/BookReader'));
+// Phase 1 experimental — only activated via ?v=2 query param
+const BookReaderV2      = lazy(() => import('./pages/Dashboard/BookReaderV2'));
 
 /* ─── Spinner shown while a lazy chunk loads ─── */
 function PageLoader() {
@@ -84,6 +86,20 @@ function HomepageGuard() {
   return <Homepage />;
 }
 
+/* ─── Reader switcher — ?v=2 activates the Phase 1 experimental PDF.js reader ───
+ *
+ * Default (?v absent or anything other than "2"): original BookReader (iframe).
+ * With ?v=2: BookReaderV2 (PDF.js via react-pdf) — Phase 1 experimental only.
+ *
+ * This component is the only change to App.jsx for Phase 1. Everything else,
+ * including DashboardLayout, ProtectedRoute, and all other routes, is untouched.
+ * BookReader.jsx itself is never modified.
+ */
+function BookReaderSwitcher() {
+  const [searchParams] = useSearchParams();
+  return searchParams.get('v') === '2' ? <BookReaderV2 /> : <BookReader />;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -119,7 +135,7 @@ function App() {
             <Route path="profile"  element={<DashboardProfile />} />
             <Route path="settings" element={<DashboardSettings />} />
             <Route path="books/:id"      element={<BookDetails />} />
-            <Route path="books/:id/read" element={<BookReader />} />
+            <Route path="books/:id/read" element={<BookReaderSwitcher />} />
           </Route>
         </Routes>
       </Suspense>
