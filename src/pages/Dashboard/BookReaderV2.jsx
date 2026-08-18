@@ -136,7 +136,7 @@ function BookReaderV2() {
 
       {/* ── Header ── */}
       <div
-        className="sticky top-0 z-10 flex items-center gap-3 border-b border-white/[0.06] bg-[#1a1a1a] px-4 sm:px-6"
+        className="sticky top-0 z-10 flex items-center gap-3 border-b border-white/6 bg-[#1a1a1a] px-4 sm:px-6"
         style={{ height: '52px' }}
       >
         <button
