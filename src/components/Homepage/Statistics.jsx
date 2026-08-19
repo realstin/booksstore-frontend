@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { BookOpen, Users, Folder, Bookmark, Star } from "lucide-react";
 import Container from "../Container";
 import { STATS } from "../../constants/stats";
+import { useStats } from "../../hooks/useStats";
 
 /* ─────────────────────────────────────────
    Animated Counter Hook
@@ -37,46 +38,51 @@ function formatNumber(n) {
 }
 
 /* ─────────────────────────────────────────
-   Hardcoded stats array — driven by STATS constants
+   Build the cards array from live (or fallback) data.
+   Technology Categories (42) is kept static — no backend
+   value is available for it yet.
 ───────────────────────────────────────── */
-const STAT_CARDS = [
-  {
-    icon:        BookOpen,
-    value:       STATS.totalBooks,
-    suffix:      "+",
-    label:       "Books Available",
-    description: "Carefully selected and verified books.",
-  },
-  {
-    icon:        Users,
-    value:       STATS.totalUsers,
-    suffix:      "+",
-    label:       "Active Learners",
-    description: "People building their skills every day.",
-  },
-  {
-    icon:        Folder,
-    value:       42,
-    suffix:      "",
-    label:       "Technology Categories",
-    description: "Programming, AI, Web, Mobile and more.",
-  },
-  {
-    icon:        Bookmark,
-    value:       STATS.totalSavedBooks,
-    suffix:      "+",
-    label:       "Books Saved",
-    description: "Personal libraries created by our community.",
-  },
-  {
-    icon:        Star,
-    value:       STATS.averageRating,
-    suffix:      "★",
-    label:       "Average Rating",
-    description: "Average rating from our community.",
-    isDecimal:   true,
-  },
-];
+function buildStatCards(liveStats) {
+  const s = liveStats ?? STATS; // fall back to constants if fetch failed
+  return [
+    {
+      icon:        BookOpen,
+      value:       s.totalBooks,
+      suffix:      "+",
+      label:       "Books Available",
+      description: "Carefully selected and verified books.",
+    },
+    {
+      icon:        Users,
+      value:       s.totalUsers,
+      suffix:      "+",
+      label:       "Active Learners",
+      description: "People building their skills every day.",
+    },
+    {
+      icon:        Folder,
+      value:       42,
+      suffix:      "",
+      label:       "Technology Categories",
+      description: "Programming, AI, Web, Mobile and more.",
+    },
+    {
+      icon:        Bookmark,
+      value:       s.totalSavedBooks,
+      suffix:      "+",
+      label:       "Books Saved",
+      description: "Personal libraries created by our community.",
+    },
+    {
+      icon:        Star,
+      value:       s.averageRating,
+      suffix:      "★",
+      label:       "Average Rating",
+      description: "Average rating from our community.",
+      isDecimal:   true,
+    },
+  ];
+}
 
 /* ─────────────────────────────────────────
    StatCard
@@ -136,11 +142,46 @@ function StatCard({ stat, index, started }) {
 }
 
 /* ─────────────────────────────────────────
+   StatCardSkeleton — shown while fetching
+───────────────────────────────────────── */
+function StatCardSkeleton({ index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+      aria-hidden="true"
+    >
+      {/* icon placeholder */}
+      <div className="h-11 w-11 animate-pulse rounded-xl bg-neutral-100" />
+      {/* value placeholder */}
+      <div className="h-10 w-24 animate-pulse rounded-lg bg-neutral-100" />
+      {/* label + description placeholders */}
+      <div className="flex flex-col gap-2">
+        <div className="h-4 w-3/4 animate-pulse rounded bg-neutral-100" />
+        <div className="h-3.5 w-full animate-pulse rounded bg-neutral-100" />
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────
    Statistics Section
 ───────────────────────────────────────── */
 function Statistics() {
   const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const { stats, loading } = useStats();
+
+  /*
+   * Build the cards only once stats have resolved (or failed).
+   * While loading → render skeletons.
+   * On error      → stats is null; buildStatCards falls back to STATS constants.
+   * On success    → stats holds live data from /api/stats.
+   */
+  const statCards = loading ? null : buildStatCards(stats);
 
   return (
     <section
@@ -183,17 +224,25 @@ function Statistics() {
           </p>
         </motion.div>
 
-        {/* Cards grid */}
-        <motion.div
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-          initial="hidden"
-          animate={inView ? "show" : "hidden"}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5"
-        >
-          {STAT_CARDS.map((stat, i) => (
-            <StatCard key={stat.label} stat={stat} index={i} started={inView} />
-          ))}
-        </motion.div>
+        {/* Cards grid — skeletons while fetching, real cards once ready */}
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <StatCardSkeleton key={i} index={i} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+            initial="hidden"
+            animate={inView ? "show" : "hidden"}
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5"
+          >
+            {statCards.map((stat, i) => (
+              <StatCard key={stat.label} stat={stat} index={i} started={inView} />
+            ))}
+          </motion.div>
+        )}
       </Container>
     </section>
   );
