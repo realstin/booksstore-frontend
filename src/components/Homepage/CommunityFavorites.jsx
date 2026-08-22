@@ -564,6 +564,8 @@ function CommunityFavorites() {
           ? data
           : []
       );
+      // NOTE: limit: 6 matches the 6 cards rendered below.
+      // All books in the response are displayed — no slicing.
     } catch (err) {
       console.error(
         "Failed to load community books:",
@@ -585,7 +587,8 @@ function CommunityFavorites() {
     fetchCommunityBooks();
   }, []);
 
-  const communityBooks = books.slice(1);
+  // All fetched books are displayed — no item is skipped.
+  const communityBooks = books;
 
   return (
     <section
