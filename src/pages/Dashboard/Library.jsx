@@ -5,7 +5,8 @@ import {
   BookMarked, Compass, RefreshCw, X, Loader2, AlertCircle,
   LayoutGrid, List, Bookmark, ArrowRight, Clock,
 } from 'lucide-react';
-import { getLibrary, removeBook, getBookmarks } from '../../services/api';
+import { getBookmarks } from '../../services/api';
+import { useLibrary } from '../../context/LibraryContext';
 import { formatLastRead } from '../../utils/readingProgress';
 import { prefs } from '../../utils/preferences';
 import DashboardBookCard from '../../components/Dashboard/DashboardBookCard';
@@ -272,27 +273,15 @@ function LibraryBookCard({ book, index, onRemove }) {
 function Library() {
   const navigate = useNavigate();
 
-  /* ── Saved books ── */
-  const [books,  setBooks]  = useState([]);
-  const [status, setStatus] = useState('loading');
-  const [view,   setView]   = useState(() => prefs.getLibraryView());
+  /* ── Saved books — from shared LibraryContext (no independent fetch) ── */
+  const {
+    savedBooks: books,
+    libStatus:  status,
+    removeBook,
+    refresh:    fetchLibrary,
+  } = useLibrary();
 
-  const fetchLibrary = useCallback(async () => {
-    setStatus('loading');
-    try {
-      const data = await getLibrary();
-      const list = Array.isArray(data)
-        ? data
-        : data.savedBooks ?? data.books ?? [];
-      setBooks(list);
-      setStatus('success');
-    } catch (err) {
-      console.error('Library fetch error:', err);
-      setStatus('error');
-    }
-  }, []);
-
-  useEffect(() => { fetchLibrary(); }, [fetchLibrary]);
+  const [view, setView] = useState(() => prefs.getLibraryView());
 
   /* ── Bookmarks ── */
   const [bmarks,    setBmarks]    = useState([]);
@@ -318,10 +307,6 @@ function Library() {
   function handleViewChange(v) {
     setView(v);
     prefs.setLibraryView(v);
-  }
-
-  function handleRemoved(bookId) {
-    setBooks((prev) => prev.filter((b) => String(b._id) !== String(bookId)));
   }
 
   const count      = books.length;
@@ -408,7 +393,7 @@ function Library() {
                   <motion.div
                     key={String(book._id)} layout
                     exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.25, ease } }}>
-                    <LibraryBookCard book={book} index={i} onRemove={handleRemoved} />
+                    <LibraryBookCard book={book} index={i} onRemove={removeBook} />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -422,7 +407,7 @@ function Library() {
                   <LibraryListRow
                     key={String(book._id)}
                     book={book}
-                    onRemove={handleRemoved}
+                    onRemove={removeBook}
                   />
                 ))}
               </AnimatePresence>

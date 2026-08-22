@@ -7,7 +7,8 @@ import {
   Hash, FileText, RefreshCw, Wifi, WifiOff,
   AlertCircle, Loader2,
 } from 'lucide-react';
-import { getBookById, downloadBook, saveBook, removeBook, getLibrary } from '../../services/api';
+import { getBookById, downloadBook } from '../../services/api';
+import { useLibrary } from '../../context/LibraryContext';
 
 /* ─────────────────────────────────────────
    Shared easing
@@ -170,21 +171,22 @@ function MetaRow({ icon: Icon, label, value }) {
 }
 
 /* ─────────────────────────────────────────
-   Save / Unsave button — real backend
+   Save / Unsave button
    Props:
-     bookId      — MongoDB _id of the book
-     initialSaved — whether the current user
-                    has already saved this book
+     bookId       — MongoDB _id of the book
+     initialSaved — whether the current user has already saved this book
      initialCount — current savesCount from API
+     onSave       — context saveBook(bookId, bookObject) — updates shared list
+     onRemove     — context removeBook(bookId)           — updates shared list
 ───────────────────────────────────────── */
-function SaveButton({ bookId, initialSaved, initialCount }) {
+function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
   const [saved,      setSaved]      = useState(initialSaved);
   const [savesCount, setSavesCount] = useState(initialCount);
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | loading | error
   const [saveError,  setSaveError]  = useState('');
 
-  /* Keep in sync if parent updates initial values after library fetch */
-  useEffect(() => { setSaved(initialSaved);  }, [initialSaved]);
+  /* Keep in sync if parent updates initial values */
+  useEffect(() => { setSaved(initialSaved);      }, [initialSaved]);
   useEffect(() => { setSavesCount(initialCount); }, [initialCount]);
 
   async function handleToggle() {
@@ -193,12 +195,14 @@ function SaveButton({ bookId, initialSaved, initialCount }) {
     setSaveError('');
     try {
       if (saved) {
-        const res = await removeBook(bookId);
+        /* onRemove comes from LibraryContext — updates shared savedBooks list */
+        const res = await onRemove(bookId);
         setSaved(false);
         if (res.savesCount !== undefined) setSavesCount(res.savesCount);
         else setSavesCount((c) => Math.max(0, (c ?? 1) - 1));
       } else {
-        const res = await saveBook(bookId);
+        /* onSave comes from LibraryContext — updates shared savedBooks list */
+        const res = await onSave(bookId);
         setSaved(true);
         if (res.savesCount !== undefined) setSavesCount(res.savesCount);
         else setSavesCount((c) => (c ?? 0) + 1);
@@ -380,10 +384,21 @@ function BookDetails() {
   const { id }   = useParams();
   const navigate = useNavigate();
 
-  const [book,        setBook]        = useState(null);
-  const [status,      setStatus]      = useState('loading');
-  const [isSaved,     setIsSaved]     = useState(false);
-  const [libraryReady, setLibraryReady] = useState(false);
+  /* ── Library state from shared context (no independent fetch) ── */
+  const {
+    libStatus,
+    isSaved:    isBookSaved,
+    saveBook:   ctxSaveBook,
+    removeBook: ctxRemoveBook,
+  } = useLibrary();
+
+  /* isSaved is derived from shared state — recomputed on every render */
+  const isSaved     = isBookSaved(id);
+  /* libraryReady: true once the shared library fetch has settled */
+  const libraryReady = libStatus !== 'loading';
+
+  const [book,   setBook]   = useState(null);
+  const [status, setStatus] = useState('loading');
 
   const goToExplore = () => navigate('/dashboard/explore');
 
@@ -402,33 +417,9 @@ function BookDetails() {
     }
   }, [id]);
 
-  /* Determine whether the current user has already saved this book */
-  const fetchLibraryState = useCallback(async () => {
-    if (!id) return;
-    try {
-      const data = await getLibrary();
-      /* Backend may return { savedBooks: [...] } or an array directly */
-      const books = Array.isArray(data)
-        ? data
-        : data.savedBooks ?? data.books ?? [];
-      const alreadySaved = books.some(
-        (b) => String(b._id ?? b) === String(id)
-      );
-      setIsSaved(alreadySaved);
-    } catch (err) {
-      /* If the library fetch fails, default to not-saved
-         rather than falsely claiming the book is saved */
-      console.warn('Could not determine library state:', err.message);
-      setIsSaved(false);
-    } finally {
-      setLibraryReady(true);
-    }
-  }, [id]);
-
   useEffect(() => {
     fetchBook();
-    fetchLibraryState();
-  }, [fetchBook, fetchLibraryState]);
+  }, [fetchBook]);
 
   const authors    = book ? formatAuthors(book.authors)       : null;
   const categories = book ? formatCategories(book.categories) : [];
@@ -595,6 +586,8 @@ function BookDetails() {
                   bookId={id}
                   initialSaved={isSaved}
                   initialCount={book.savesCount ?? 0}
+                  onSave={ctxSaveBook}
+                  onRemove={ctxRemoveBook}
                 />
               ) : (
                 /* Skeleton while library state loads */

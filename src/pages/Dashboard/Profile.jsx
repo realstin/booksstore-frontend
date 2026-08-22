@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,7 +5,7 @@ import {
   BookMarked, ChevronRight, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { getLibrary } from '../../services/api';
+import { useLibrary } from '../../context/LibraryContext';
 
 /* ─────────────────────────────────────────
    Shared easing
@@ -102,28 +101,9 @@ function Profile() {
   const { user }   = useAuth();
   const navigate   = useNavigate();
 
-  /* Library count — best-effort, never crashes page */
-  const [libCount,  setLibCount]  = useState(null);  // null = unknown
-  const [libStatus, setLibStatus] = useState('loading');
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data  = await getLibrary();
-        const books = Array.isArray(data)
-          ? data
-          : data.savedBooks ?? data.books ?? [];
-        if (!cancelled) {
-          setLibCount(books.length);
-          setLibStatus('success');
-        }
-      } catch {
-        if (!cancelled) setLibStatus('error');
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  /* ── Library count — from shared LibraryContext (no independent fetch) ── */
+  const { savedBooks, libStatus } = useLibrary();
+  const libCount = savedBooks.length;
 
   const memberSince = formatMemberDate(user?.createdAt);
 
