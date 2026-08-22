@@ -86,7 +86,7 @@ function InfoRow({ icon: Icon, label, value }) {
         <Icon size={14} strokeWidth={2} aria-hidden="true" />
       </span>
       <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">
           {label}
         </span>
         <span className="truncate text-[14px] text-neutral-800">{value}</span>
@@ -175,7 +175,7 @@ function Profile() {
               </p>
             )}
             {user?.role && (
-              <span className="self-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-0.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-neutral-500 sm:self-start">
+              <span className="self-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-0.5 text-[11.5px] font-semibold uppercase tracking-widest text-neutral-500 sm:self-start">
                 {capitalise(user.role)}
               </span>
             )}

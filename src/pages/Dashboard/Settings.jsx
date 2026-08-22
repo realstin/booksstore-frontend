@@ -100,7 +100,7 @@ function Toggle({ checked, onChange, label }) {
       <span
         className={[
           'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.2)] transition-transform duration-200',
-          checked ? 'left-[1.375rem]' : 'left-0.5',
+          checked ? 'left-5.5' : 'left-0.5',
         ].join(' ')}
         aria-hidden="true"
       />
@@ -155,7 +155,7 @@ function DeferredRow({ icon: Icon, label, note, last = false }) {
           {note && <p className="mt-0.5 text-[12px] text-neutral-400">{note}</p>}
         </div>
       </div>
-      <span className="shrink-0 rounded-full border border-neutral-100 bg-neutral-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
+      <span className="shrink-0 rounded-full border border-neutral-100 bg-neutral-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-400">
         Coming soon
       </span>
     </div>

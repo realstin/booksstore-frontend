@@ -10,24 +10,17 @@ import {
 import Container from "../Container";
 import { getBooks } from "../../services/api";
 
-/* ─────────────────────────────────────────
-   Shared easing
-───────────────────────────────────────── */
+/*    Shared easing    */
 
 const ease = [0.22, 1, 0.36, 1];
 
-
-/* ─────────────────────────────────────────
-   Number formatter
-───────────────────────────────────────── */
+/* Number formatter */
 
 function fmt(number) {
   return Number(number || 0).toLocaleString("en-US");
 }
 
-/* ─────────────────────────────────────────
-   Categories
-───────────────────────────────────────── */
+/* Categories */
 
 const categories = [
   "Frontend",
@@ -42,12 +35,10 @@ const categories = [
   "Programming",
 ];
 
-/* ─────────────────────────────────────────
+/* 
    Mini fallback book cover SVG
-
-   Used when a book does not have a
-   coverImage in the database.
-───────────────────────────────────────── */
+   Used when a book does not have a coverImage in the database.
+ */
 
 function BookCover({
   title = "Book",
@@ -452,9 +443,7 @@ function CategoryChips({ inView }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   Loading state
-───────────────────────────────────────── */
+/*  Loading state  */
 
 function BooksLoading() {
   return (
@@ -479,9 +468,7 @@ function BooksLoading() {
   );
 }
 
-/* ─────────────────────────────────────────
-   Error state
-───────────────────────────────────────── */
+/*    Error state  */
 
 function BooksError({ message, onRetry }) {
   return (
@@ -513,9 +500,7 @@ function BooksError({ message, onRetry }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   Community Favorites Section
-───────────────────────────────────────── */
+/*    Community Favorites Section   */
 
 function CommunityFavorites() {
   const ref = useRef(null);
@@ -547,9 +532,7 @@ function CommunityFavorites() {
     margin: "-60px",
   });
 
-  /* ─────────────────────────────────────────
-     Real database books
-  ───────────────────────────────────────── */
+  /*    Real database books   */
 
   const [books, setBooks] = useState([]);
 
@@ -557,9 +540,7 @@ function CommunityFavorites() {
 
   const [error, setError] = useState("");
 
-  /* ─────────────────────────────────────────
-     Fetch books from backend
-  ───────────────────────────────────────── */
+  /*    Fetch books from backend   */
 
   const fetchCommunityBooks = async () => {
     try {
@@ -568,11 +549,7 @@ function CommunityFavorites() {
 
       /*
         Ask backend for featured books.
-
-        Sort by savesCount descending,
-        so books saved by the most readers
-        appear first.
-
+                 Sort by savesCount descending,  so books saved by the most readers appear first.
         Limit to 6 books for the homepage.
       */
 
@@ -602,9 +579,7 @@ function CommunityFavorites() {
     }
   };
 
-  /* ─────────────────────────────────────────
-     Load books when component mounts
-  ───────────────────────────────────────── */
+  /*  Load books when component mounts   */
 
   useEffect(() => {
     fetchCommunityBooks();

@@ -199,9 +199,7 @@ function MarqueeTrack({ inView }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   Partners Section
-───────────────────────────────────────── */
+/*   Partners Section   */
 function Partners() {
   const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });

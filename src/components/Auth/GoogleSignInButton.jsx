@@ -4,34 +4,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const GIS_SCRIPT_URL   = 'https://accounts.google.com/gsi/client';
 const SCRIPT_ID        = 'google-gis-script';
 
-/**
- * GoogleSignInButton
- *
- * Uses google.accounts.id.renderButton() — Google's officially-supported
- * approach that works reliably on desktop AND mobile (Android Chrome,
- * iPhone Safari).
- *
- * Why NOT google.accounts.id.prompt():
- *   - prompt() triggers One Tap, a floating overlay UI.
- *   - Mobile browsers (especially Safari) routinely block or ignore it.
- *   - It is not triggered by a user gesture in the traditional sense,
- *     so mobile browsers may suppress it entirely.
- *
- * Why renderButton() works on mobile:
- *   - Google renders their own <button> inside our container div.
- *   - It is a real user-gesture-initiated click, not a floating prompt.
- *   - Google's own rendered button handles the OAuth flow correctly
- *     across all supported browsers including mobile Safari and Chrome.
- *
- * The credential callback is identical — the same ID token is produced
- * and sent to the backend via googleLogin(credential).
- *
- * Props:
- *   onSuccess(credential) — called with the Google ID token string
- *   onError(message)      — called on error
- *   disabled              — prevents interaction while a request is running
- *   label                 — ignored (Google controls the button text in this mode)
- */
+
 function GoogleSignInButton({
   onSuccess,
   onError,

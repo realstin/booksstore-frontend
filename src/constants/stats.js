@@ -9,8 +9,8 @@
  * primary source of truth.
  */
 export const STATS = {
-  totalUsers:      12,
-  totalBooks:      7,
-  totalSavedBooks: 3,
+  totalUsers:      25,
+  totalBooks:      9,
+  totalSavedBooks: 7,
   averageRating:   4.5,
 };

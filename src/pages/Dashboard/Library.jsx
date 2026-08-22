@@ -43,7 +43,7 @@ function SkeletonList() {
     <div className="flex flex-col gap-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 rounded-2xl border border-neutral-100 bg-white p-4">
-          <div className="h-16 w-12 flex-shrink-0 animate-pulse rounded-lg bg-neutral-100" />
+          <div className="h-16 w-12 shrink-0 animate-pulse rounded-lg bg-neutral-100" />
           <div className="flex flex-1 flex-col gap-2">
             <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
             <div className="h-3.5 w-1/3 animate-pulse rounded bg-neutral-100" />
@@ -158,7 +158,7 @@ function LibraryListRow({ book, onRemove }) {
       aria-label={`Open ${book.title}`}
     >
       {/* Cover thumbnail */}
-      <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-neutral-100">
+      <div className="h-16 w-12 shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-neutral-100">
         {hasCover ? (
           <img src={book.coverImage} alt="" className="h-full w-full object-cover" loading="lazy" />
         ) : (
@@ -187,7 +187,7 @@ function LibraryListRow({ book, onRemove }) {
         whileTap={removeStatus !== 'loading' ? { scale: 0.92 } : {}}
         transition={{ duration: 0.16 }}
         className={[
-          'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900',
           removeStatus === 'error'
             ? 'border-red-200 bg-red-50 text-red-400'
             : 'border-neutral-200 bg-white text-neutral-400 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white',
