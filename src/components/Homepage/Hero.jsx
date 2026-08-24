@@ -235,6 +235,15 @@ function AnimatedIllustration() {
    Hero
 ───────────────────────────────────────── */
 function Hero() {
+  const scrollToCommunityFavorites = (event) => {
+    event.preventDefault();
+    document.getElementById("explore")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    window.history.replaceState(null, "", "#explore");
+  };
+
   return (
     <section
       className="relative overflow-hidden bg-white"
@@ -318,7 +327,7 @@ function Hero() {
                 </Button>
               </Link>
 
-              <Link to="/#library">
+              <Link to="/#explore" onClick={scrollToCommunityFavorites}>
                 <Button
                   size="lg"
                   variant="secondary"

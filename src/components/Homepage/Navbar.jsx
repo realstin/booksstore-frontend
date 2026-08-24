@@ -9,7 +9,7 @@ import bookstoreLogo from '../../assets/bookstorelogo.svg';
 const navLinks = [
   { name: "Explore",  hash: "explore"  },
   { name: "Features", hash: "features" },
-  { name: "Library",  hash: "library"  },
+  { name: "Library",  hash: "explore"  },
   { name: "About",    href: "/about", internal: true },
 ];
 
