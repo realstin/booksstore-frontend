@@ -166,7 +166,7 @@ function ContinueReading() {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/dashboard/explore')}
+          onClick={() => navigate('/explore')}
           className="inline-flex shrink-0 items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
         >
           <Compass size={14} strokeWidth={2} aria-hidden="true" />
@@ -250,7 +250,7 @@ function ContinueReading() {
 
         <button
           type="button"
-          onClick={() => navigate(`/dashboard/books/${entry.bookId}/read`)}
+          onClick={() => navigate(`/books/${entry.bookId}/read`)}
           className="self-start inline-flex items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
           aria-label={`Continue reading ${entry.bookTitle}`}
         >

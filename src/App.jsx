@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useSearchParams, useParams } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -64,7 +64,7 @@ function ScrollToTop() {
   return null;
 }
 
-/* ─── Redirects authenticated users away from / to /dashboard ─── */
+/* ─── Redirects authenticated users away from / to /home ─── */
 //
 // The homepage is public — it renders immediately without waiting for the
 // /api/auth/me round-trip. Authentication detection runs in the background:
@@ -73,7 +73,7 @@ function ScrollToTop() {
 //     now so visitors never see a blocking spinner on the public page.
 //
 //   • isInitialized === true && user exists  → we confirmed the user is logged
-//     in; redirect to /dashboard. Because React batches the state update and
+//     in; redirect to /home. Because React batches the state update and
 //     re-render before the browser paints, a fast /api/auth/me response means
 //     the logged-in user is redirected before the homepage is ever visible.
 //
@@ -82,18 +82,27 @@ function ScrollToTop() {
 //
 function HomepageGuard() {
   const { user, isInitialized } = useAuth();
-  if (isInitialized && user) return <Navigate to="/dashboard" replace />;
+  if (isInitialized && user) return <Navigate to="/home" replace />;
   return <Homepage />;
 }
 
+/* ─── Backward-compatibility redirect for parameterised book routes ───
+ * <Navigate> cannot forward :id automatically, so we use a tiny wrapper
+ * that reads the param and builds the new URL.
+ */
+function RedirectBookDetails() {
+  const { id } = useParams();
+  return <Navigate to={`/books/${id}`} replace />;
+}
+function RedirectBookReader() {
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const qs = searchParams.toString();
+  return <Navigate to={`/books/${id}/read${qs ? `?${qs}` : ''}`} replace />;
+}
 /* ─── Reader switcher — ?v=2 activates the Phase 1 experimental PDF.js reader ───
- *
  * Default (?v absent or anything other than "2"): original BookReader (iframe).
  * With ?v=2: BookReaderV2 (PDF.js via react-pdf) — Phase 1 experimental only.
- *
- * This component is the only change to App.jsx for Phase 1. Everything else,
- * including DashboardLayout, ProtectedRoute, and all other routes, is untouched.
- * BookReader.jsx itself is never modified.
  */
 function BookReaderSwitcher() {
   const [searchParams] = useSearchParams();
@@ -120,22 +129,32 @@ function App() {
           <Route path="/privacy"    element={<Privacy />} />
           <Route path="/terms"      element={<Terms />} />
 
-          {/* ── Protected dashboard — nested so layout persists ── */}
+          {/* ── Backward-compatibility redirects (old /dashboard/* URLs) ── */}
+          <Route path="/dashboard"          element={<Navigate to="/home"     replace />} />
+          <Route path="/dashboard/explore"  element={<Navigate to="/explore"  replace />} />
+          <Route path="/dashboard/library"  element={<Navigate to="/library"  replace />} />
+          <Route path="/dashboard/profile"  element={<Navigate to="/profile"  replace />} />
+          <Route path="/dashboard/settings" element={<Navigate to="/settings" replace />} />
+          <Route path="/dashboard/books/:id"      element={<RedirectBookDetails />} />
+          <Route path="/dashboard/books/:id/read" element={<RedirectBookReader />} />
+
+          {/* ── Protected app — nested so layout persists ── */}
+          {/* The parent Route has no path — it acts purely as a layout wrapper.
+              Each child uses an absolute path so URLs are /home, /explore, etc. */}
           <Route
-            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardLayout />
               </ProtectedRoute>
             }
           >
-            <Route index           element={<Dashboard />} />
-            <Route path="explore"  element={<DashboardExplore />} />
-            <Route path="library"  element={<DashboardLibrary />} />
-            <Route path="profile"  element={<DashboardProfile />} />
-            <Route path="settings" element={<DashboardSettings />} />
-            <Route path="books/:id"      element={<BookDetails />} />
-            <Route path="books/:id/read" element={<BookReaderSwitcher />} />
+            <Route path="/home"              element={<Dashboard />} />
+            <Route path="/explore"           element={<DashboardExplore />} />
+            <Route path="/library"           element={<DashboardLibrary />} />
+            <Route path="/profile"           element={<DashboardProfile />} />
+            <Route path="/settings"          element={<DashboardSettings />} />
+            <Route path="/books/:id"         element={<BookDetails />} />
+            <Route path="/books/:id/read"    element={<BookReaderSwitcher />} />
           </Route>
         </Routes>
       </Suspense>

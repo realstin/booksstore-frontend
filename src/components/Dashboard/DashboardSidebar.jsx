@@ -9,11 +9,11 @@ import DashboardNavItem from './DashboardNavItem';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 const primaryNav = [
-  { to: '/dashboard',          label: 'Home',       icon: LayoutDashboard, end: true },
-  { to: '/dashboard/explore',  label: 'Explore',    icon: Compass },
-  { to: '/dashboard/library',  label: 'My Library', icon: Library },
-  { to: '/dashboard/profile',  label: 'Profile',    icon: User },
-  { to: '/dashboard/settings', label: 'Settings',   icon: Settings },
+  { to: '/home',     label: 'Home',       icon: LayoutDashboard, end: true },
+  { to: '/explore',  label: 'Explore',    icon: Compass },
+  { to: '/library',  label: 'My Library', icon: Library },
+  { to: '/profile',  label: 'Profile',    icon: User },
+  { to: '/settings', label: 'Settings',   icon: Settings },
 ];
 
 /* Builds avatar initials from a full name string */
@@ -47,9 +47,9 @@ function DashboardSidebar() {
       {/* ── Brand ── */}
       <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-neutral-100 px-5">
         <Link
-          to="/dashboard"
+          to="/home"
           className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          aria-label="BookStore dashboard home"
+          aria-label="BookStore home"
         >
           <img
             src={bookstoreLogo}
@@ -99,7 +99,7 @@ function DashboardSidebar() {
 
         {/* User card */}
         <Link
-          to="/dashboard/profile"
+          to="/profile"
           className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
           aria-label="Go to your profile"
         >

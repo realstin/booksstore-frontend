@@ -129,7 +129,7 @@ function LibraryListRow({ book, onRemove }) {
     : book.authors ?? '';
 
   function handleRowClick() {
-    if (book._id) navigate(`/dashboard/books/${book._id}`);
+    if (book._id) navigate(`/books/${book._id}`);
   }
 
   async function handleRemove(e) {
@@ -382,7 +382,7 @@ function Library() {
           )}
 
           {count === 0 && (
-            <EmptyState onExplore={() => navigate('/dashboard/explore')} />
+            <EmptyState onExplore={() => navigate('/explore')} />
           )}
 
           {count > 0 && view === 'grid' && (
@@ -470,7 +470,7 @@ function Library() {
               <p className="text-[15px] font-semibold text-neutral-800">No bookmarks yet</p>
               <p className="mt-1 text-[13.5px] text-neutral-400">Bookmark important pages while reading.</p>
             </div>
-            <button type="button" onClick={() => navigate('/dashboard/explore')}
+            <button type="button" onClick={() => navigate('/explore')}
               className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-5 py-2.5 text-[13.5px] font-medium text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
               <Compass size={14} strokeWidth={2} aria-hidden="true" />
               Explore Books
@@ -505,10 +505,10 @@ function Library() {
                   transition={{ duration: 0.5, delay: i * 0.06, ease }}
                   whileHover={{ y: -2, transition: { duration: 0.18 } }}
                   className="group flex cursor-pointer flex-col gap-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow hover:border-neutral-300 hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
-                  onClick={() => bookId && navigate(`/dashboard/books/${bookId}/read?page=${bm.page}`)}
+                  onClick={() => bookId && navigate(`/books/${bookId}/read?page=${bm.page}`)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && bookId) navigate(`/dashboard/books/${bookId}/read?page=${bm.page}`); }}
+                  onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && bookId) navigate(`/books/${bookId}/read?page=${bm.page}`); }}
                   aria-label={`Open ${title} at page ${bm.page}`}
                 >
                   {/* Top: cover + info */}

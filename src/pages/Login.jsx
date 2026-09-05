@@ -85,7 +85,7 @@ function Login() {
       if (!validation.valid) { setError(validation.error); return; }
       const data = await loginUser(formData);
       login(data);
-      navigate('/dashboard');
+      navigate('/home');
     }
   );
 
@@ -96,7 +96,7 @@ function Login() {
     try {
       const data = await googleLogin(credential);
       login(data);
-      navigate('/dashboard');
+      navigate('/home');
     } catch (err) {
       setGoogleError(friendlyAuthError(err.message));
     } finally {

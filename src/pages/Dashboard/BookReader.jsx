@@ -510,7 +510,7 @@ function BookReader() {
   }, [prefs.theme]);
 
   /* ── Fetch book + restore saved page ── */
-  const goBack = useCallback(() => navigate(`/dashboard/books/${id}`), [navigate, id]);
+  const goBack = useCallback(() => navigate(`/books/${id}`), [navigate, id]);
 
   const fetchBook = useCallback(async () => {
     setStatus('loading');

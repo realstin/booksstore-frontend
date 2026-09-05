@@ -139,7 +139,7 @@ function Signup() {
 
       if (data?.user) {
         login(data);
-        navigate('/dashboard');
+        navigate('/home');
         return;
       }
 
@@ -155,7 +155,7 @@ function Signup() {
     try {
       const data = await googleLogin(credential);
       login(data);
-      navigate('/dashboard');
+      navigate('/home');
     } catch (err) {
       setGoogleError(friendlyAuthError(err.message));
     } finally {

@@ -10,11 +10,11 @@ import DashboardNavItem from './DashboardNavItem';
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
 
 const navItems = [
-  { to: '/dashboard',          label: 'Home',       icon: LayoutDashboard, end: true },
-  { to: '/dashboard/explore',  label: 'Explore',    icon: Compass },
-  { to: '/dashboard/library',  label: 'My Library', icon: Library },
-  { to: '/dashboard/profile',  label: 'Profile',    icon: User },
-  { to: '/dashboard/settings', label: 'Settings',   icon: Settings },
+  { to: '/home',     label: 'Home',       icon: LayoutDashboard, end: true },
+  { to: '/explore',  label: 'Explore',    icon: Compass },
+  { to: '/library',  label: 'My Library', icon: Library },
+  { to: '/profile',  label: 'Profile',    icon: User },
+  { to: '/settings', label: 'Settings',   icon: Settings },
 ];
 
 function getInitials(name = '') {
@@ -48,9 +48,9 @@ function DashboardMobileHeader() {
       {/* ── Top bar ── */}
       <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:hidden">
         <Link
-          to="/dashboard"
+          to="/home"
           className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          aria-label="BookStore dashboard home"
+          aria-label="BookStore home"
           onClick={close}
         >
           <img src={bookstoreLogo} alt="BookStore" className="h-6 w-6" />
@@ -127,7 +127,7 @@ function DashboardMobileHeader() {
               {/* Drawer header */}
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-100 px-5">
                 <Link
-                  to="/dashboard"
+                  to="/home"
                   onClick={close}
                   className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
                 >
@@ -183,7 +183,7 @@ function DashboardMobileHeader() {
                 </button>
 
                 <Link
-                  to="/dashboard/profile"
+                  to="/profile"
                   onClick={close}
                   className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
                   aria-label="Go to your profile"

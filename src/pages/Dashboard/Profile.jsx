@@ -201,7 +201,7 @@ function Profile() {
               </div>
               <motion.button
                 type="button"
-                onClick={() => navigate('/dashboard/library')}
+                onClick={() => navigate('/library')}
                 whileHover={{ x: 2 }}
                 transition={{ duration: 0.18 }}
                 className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13px] font-medium text-neutral-600 transition-colors hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"

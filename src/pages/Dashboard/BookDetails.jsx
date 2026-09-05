@@ -400,7 +400,7 @@ function BookDetails() {
   const [book,   setBook]   = useState(null);
   const [status, setStatus] = useState('loading');
 
-  const goToExplore = () => navigate('/dashboard/explore');
+  const goToExplore = () => navigate('/explore');
 
   const fetchBook = useCallback(async () => {
     setStatus('loading');
@@ -560,7 +560,7 @@ function BookDetails() {
               {/* Read Online — navigates to the dedicated reader page */}
               {hasPdf ? (
                 <Link
-                  to={`/dashboard/books/${id}/read`}
+                  to={`/books/${id}/read`}
                   className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
                   aria-label={`Read ${book.title} online`}
                 >

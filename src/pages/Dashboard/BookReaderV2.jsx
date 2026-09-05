@@ -84,7 +84,7 @@ function BookReaderV2() {
   const navigate = useNavigate();
 
   const goBack = useCallback(
-    () => navigate(`/dashboard/books/${id}`),
+    () => navigate(`/books/${id}`),
     [navigate, id],
   );
 

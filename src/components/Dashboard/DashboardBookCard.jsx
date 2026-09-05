@@ -75,7 +75,7 @@ function DashboardBookCard({ book, index = 0, onClick }) {
 
   function handleClick() {
     if (onClick) { onClick(book); return; }
-    if (book._id) navigate(`/dashboard/books/${book._id}`);
+    if (book._id) navigate(`/books/${book._id}`);
   }
 
   return (
