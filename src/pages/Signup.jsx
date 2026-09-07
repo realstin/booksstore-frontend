@@ -7,7 +7,6 @@ import { useForm } from '../hooks/useForm';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail } from 'lucide-react';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
 import libraryImage from '../assets/library.svg';
 import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
@@ -66,54 +65,15 @@ function OrDivider() {
 }
 
 /* ─────────────────────────────────────────
-   Email-sent success state
-───────────────────────────────────────── */
-function EmailSentState({ email }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="flex flex-col items-center gap-5 py-4 text-center"
-    >
-      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-        <Mail size={26} strokeWidth={1.5} className="text-neutral-700" aria-hidden="true" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[1.15rem] font-bold tracking-tight text-neutral-950">
-          Check your email
-        </h2>
-        <p className="text-[14px] leading-[1.75] text-neutral-500">
-          We sent a verification link to{' '}
-          {email && <strong className="font-semibold text-neutral-800">{email}</strong>}.
-          Click the link to activate your account.
-        </p>
-        <p className="text-[13px] text-neutral-400">
-          Can&apos;t find it? Check your spam or junk folder.
-        </p>
-      </div>
-      <Link
-        to="/login"
-        className="mt-2 inline-flex h-11 items-center rounded-full border border-neutral-200 px-7 text-[14px] font-semibold text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-      >
-        Go to Login
-      </Link>
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────
    Signup page
 ───────────────────────────────────────── */
 function Signup() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [agreed,       setAgreed]       = useState(false);
+  const [showPassword,  setShowPassword]  = useState(false);
+  const [agreed,        setAgreed]        = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError,   setGoogleError]   = useState('');
-  /* Track the email that was registered so we can show it in the success state */
-  const [verificationEmail, setVerificationEmail] = useState('');
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
     { name: '', email: '', password: '' },
@@ -124,26 +84,12 @@ function Signup() {
 
       const data = await registerUser(formData);
 
-      /*
-        Three possible backend responses:
-        1. Email verification required → data.code === 'EMAIL_VERIFICATION_REQUIRED'
-           Show the "check your email" screen.
-        2. Auto-login (no email verification) → data.user exists
-           Log the user in and go to dashboard.
-        3. Any other shape → treat as success and go to login.
-      */
-      if (data?.code === 'EMAIL_VERIFICATION_REQUIRED') {
-        setVerificationEmail(formData.email);
-        return; // show EmailSentState — useForm will not throw
-      }
-
       if (data?.user) {
         login(data);
         navigate('/home');
         return;
       }
 
-      /* Fallback — backend registered successfully but no session */
       navigate('/login');
     }
   );
@@ -164,27 +110,6 @@ function Signup() {
   }
 
   const isBusy = loading || googleLoading;
-
-  /* ── Email verification sent → show success screen ── */
-  if (verificationEmail) {
-    return (
-      <div
-        className="flex min-h-screen w-full items-center justify-center bg-white px-6 py-12"
-        style={{ fontFamily: 'var(--font-sans)' }}
-      >
-        <div className="w-full max-w-105">
-          <Link
-            to="/"
-            className="mb-10 inline-flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          >
-            <img src={bookstoreLogo} alt="" className="h-7 w-7" aria-hidden="true" />
-            <span className="text-[17px] font-bold tracking-tight text-neutral-950">BookStore</span>
-          </Link>
-          <EmailSentState email={verificationEmail} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
