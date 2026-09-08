@@ -57,9 +57,9 @@ function Section({ id, title, icon: Icon, delay = 0, children }) {
 /* ─────────────────────────────────────────
    Skeleton grid — shown while loading
 ───────────────────────────────────────── */
-function SkeletonGrid({ count = 6 }) {
+function SkeletonGrid({ count = 4 }) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
         <BookCardSkeleton key={i} />
       ))}
@@ -106,7 +106,7 @@ function ErrorState({ onRetry }) {
 ───────────────────────────────────────── */
 function BookGrid({ books }) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {books.map((book, i) => (
         <DashboardBookCard
           key={book._id ?? i}
@@ -122,7 +122,7 @@ function BookGrid({ books }) {
    Section state machine
    status: 'loading' | 'success' | 'error'
 ───────────────────────────────────────── */
-function BookSection({ books, status, emptyMessage, onRetry, skeletonCount = 6 }) {
+function BookSection({ books, status, emptyMessage, onRetry, skeletonCount = 4 }) {
   if (status === 'loading') return <SkeletonGrid count={skeletonCount} />;
   if (status === 'error')   return <ErrorState onRetry={onRetry} />;
   if (!books || books.length === 0) return <EmptyState message={emptyMessage} />;
@@ -284,9 +284,9 @@ function Dashboard() {
     setFeaturedStatus('loading');
 
     const [recentResult, trendingResult, featuredResult] = await Promise.allSettled([
-      getBooks({ sort: '-createdAt',  limit: 6 }),
-      getBooks({ sort: '-savesCount', limit: 6 }),
-      getBooks({ featured: true,      limit: 6 }),
+      getBooks({ sort: '-createdAt',  limit: 4 }),
+      getBooks({ sort: '-savesCount', limit: 4 }),
+      getBooks({ featured: true,      limit: 4 }),
     ]);
 
     /* Recently Added */
@@ -328,7 +328,7 @@ function Dashboard() {
   const retryRecent = useCallback(async () => {
     setRecentStatus('loading');
     try {
-      const data = await getBooks({ sort: '-createdAt', limit: 6 });
+      const data = await getBooks({ sort: '-createdAt', limit: 4 });
       setRecentBooks(Array.isArray(data) ? data : data.books ?? []);
       setRecentStatus('success');
     } catch (err) {
@@ -340,7 +340,7 @@ function Dashboard() {
   const retryTrending = useCallback(async () => {
     setTrendingStatus('loading');
     try {
-      const data = await getBooks({ sort: '-savesCount', limit: 6 });
+      const data = await getBooks({ sort: '-savesCount', limit: 4 });
       setTrendingBooks(Array.isArray(data) ? data : data.books ?? []);
       setTrendingStatus('success');
     } catch (err) {
@@ -352,7 +352,7 @@ function Dashboard() {
   const retryFeatured = useCallback(async () => {
     setFeaturedStatus('loading');
     try {
-      const data = await getBooks({ featured: true, limit: 6 });
+      const data = await getBooks({ featured: true, limit: 4 });
       setFeaturedBooks(Array.isArray(data) ? data : data.books ?? []);
       setFeaturedStatus('success');
     } catch (err) {
