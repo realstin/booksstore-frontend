@@ -1,0 +1,98 @@
+<svg viewBox="0 0 480 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a modern digital bookshelf">
+  <!-- Background card -->
+  <rect x="20" y="20" width="440" height="480" rx="24" fill="#f9f9f9" stroke="#e5e5e5" stroke-width="1.5"/>
+
+  <!-- Shelf -->
+  <rect x="48" y="200" width="384" height="4" rx="2" fill="#e5e5e5"/>
+
+  <!-- Book 1 — tall dark -->
+  <rect x="60" y="112" width="44" height="88" rx="5" fill="#0f1419"/>
+  <rect x="60" y="112" width="8" height="88" rx="3" fill="#1a2430"/>
+  <rect x="75" y="130" width="20" height="2" rx="1" fill="#ffffff" fill-opacity="0.13"/>
+  <rect x="75" y="136" width="14" height="2" rx="1" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- Book 2 — medium gray -->
+  <rect x="112" y="128" width="38" height="72" rx="5" fill="#3f3f3f"/>
+  <rect x="112" y="128" width="7" height="72" rx="3" fill="#4a4a4a"/>
+  <rect x="125" y="144" width="16" height="2" rx="1" fill="#ffffff" fill-opacity="0.13"/>
+  <rect x="125" y="150" width="10" height="2" rx="1" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- Book 3 — light -->
+  <rect x="158" y="118" width="36" height="82" rx="5" fill="#d4d4d4"/>
+  <rect x="158" y="118" width="7" height="82" rx="3" fill="#c0c0c0"/>
+  <rect x="170" y="134" width="15" height="2" rx="1" fill="#000000" fill-opacity="0.13"/>
+
+  <!-- Book 4 — medium dark -->
+  <rect x="202" y="122" width="42" height="78" rx="5" fill="#262626"/>
+  <rect x="202" y="122" width="8" height="78" rx="3" fill="#333333"/>
+  <rect x="216" y="140" width="18" height="2" rx="1" fill="#ffffff" fill-opacity="0.13"/>
+  <rect x="216" y="146" width="12" height="2" rx="1" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- Book 5 — light gray -->
+  <rect x="252" y="132" width="34" height="68" rx="5" fill="#b0b0b0"/>
+  <rect x="252" y="132" width="7" height="68" rx="3" fill="#a0a0a0"/>
+
+  <!-- Book 6 — near-black -->
+  <rect x="294" y="115" width="40" height="85" rx="5" fill="#171717"/>
+  <rect x="294" y="115" width="8" height="85" rx="3" fill="#222222"/>
+  <rect x="308" y="132" width="16" height="2" rx="1" fill="#ffffff" fill-opacity="0.13"/>
+  <rect x="308" y="138" width="12" height="2" rx="1" fill="#ffffff" fill-opacity="0.08"/>
+
+  <!-- Book 7 — off-white -->
+  <rect x="342" y="125" width="36" height="75" rx="5" fill="#e8e8e8"/>
+  <rect x="342" y="125" width="7" height="75" rx="3" fill="#dddddd"/>
+
+  <!-- Book 8 — dark -->
+  <rect x="386" y="120" width="38" height="80" rx="5" fill="#404040"/>
+  <rect x="386" y="120" width="7" height="80" rx="3" fill="#4a4a4a"/>
+  <rect x="399" y="138" width="14" height="2" rx="1" fill="#ffffff" fill-opacity="0.13"/>
+
+  <!-- Search bar -->
+  <rect x="48" y="56" width="260" height="40" rx="10" fill="white" stroke="#e5e5e5" stroke-width="1.5"/>
+  <circle cx="77" cy="76" r="8" stroke="#a3a3a3" stroke-width="1.5"/>
+  <line x1="83" y1="82" x2="89" y2="88" stroke="#a3a3a3" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="100" y="72" width="100" height="3" rx="1.5" fill="#d4d4d4"/>
+  <rect x="100" y="79" width="68" height="3" rx="1.5" fill="#e5e5e5"/>
+
+  <!-- Bookmark button -->
+  <rect x="322" y="56" width="40" height="40" rx="10" fill="white" stroke="#e5e5e5" stroke-width="1.5"/>
+  <path d="M334 66h16a2 2 0 0 1 2 2v16l-8-5-8 5V68a2 2 0 0 1 2-2z" fill="#0f1419"/>
+
+  <!-- Save button (checked) -->
+  <rect x="372" y="56" width="40" height="40" rx="10" fill="#0f1419" stroke="#0f1419" stroke-width="1.5"/>
+  <path d="M384 70l4 4 8-8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Open book -->
+  <rect x="48" y="228" width="384" height="180" rx="14" fill="white" stroke="#e5e5e5" stroke-width="1.5"/>
+  <line x1="240" y1="240" x2="240" y2="396" stroke="#e5e5e5" stroke-width="1.5"/>
+
+  <!-- Left page lines -->
+  <rect x="68" y="256" width="120" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="266" width="100" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="276" width="110" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="286" width="90"  height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="296" width="115" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="306" width="80"  height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="316" width="105" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="68" y="326" width="95"  height="3" rx="1.5" fill="#e5e5e5"/>
+
+  <!-- Right page lines (some dark = highlighted text) -->
+  <rect x="256" y="256" width="120" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="256" y="266" width="100" height="3" rx="1.5" fill="#0f1419"/>
+  <rect x="256" y="276" width="110" height="3" rx="1.5" fill="#0f1419"/>
+  <rect x="256" y="286" width="85"  height="3" rx="1.5" fill="#0f1419"/>
+  <rect x="256" y="296" width="115" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="256" y="306" width="80"  height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="256" y="316" width="105" height="3" rx="1.5" fill="#e5e5e5"/>
+  <rect x="256" y="326" width="70"  height="3" rx="1.5" fill="#e5e5e5"/>
+
+  <!-- Reading progress bar -->
+  <rect x="68" y="362" width="344" height="6" rx="3" fill="#f0f0f0"/>
+  <rect x="68" y="362" width="180" height="6" rx="3" fill="#0f1419"/>
+  <rect x="68"  y="376" width="40" height="3" rx="1.5" fill="#d4d4d4"/>
+  <rect x="340" y="376" width="36" height="3" rx="1.5" fill="#d4d4d4"/>
+
+  <!-- Decorative circles -->
+  <circle cx="448" cy="44"  r="10" fill="#f0f0f0" stroke="#e5e5e5" stroke-width="1"/>
+  <circle cx="36"  cy="460" r="7"  fill="#f0f0f0" stroke="#e5e5e5" stroke-width="1"/>
+</svg>
