@@ -246,6 +246,54 @@ export async function verifyEmail(token) {
   return { ok: response.ok, status: response.status, ...data };
 }
 
+// ========== FORGOT PASSWORD ==========
+
+export async function forgotPassword(email) {
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body:        JSON.stringify({ email }),
+      signal:      controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || 'Something went wrong. Please try again.');
+    return data;
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Request timed out. Please check your internet connection.');
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// ========== RESET PASSWORD ==========
+
+export async function resetPassword(token, password) {
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body:        JSON.stringify({ token, password }),
+      signal:      controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || data.code || 'Something went wrong. Please try again.');
+    return data;
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Request timed out. Please check your internet connection.');
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 // ========== GOOGLE AUTH ==========
 
 // Send Google ID token to backend for verification and session creation

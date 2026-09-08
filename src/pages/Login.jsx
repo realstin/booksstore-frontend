@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
-import libraryImage from '../assets/library.svg';
+import libraryImage  from '../assets/library.svg';
 import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
 
 /* ─────────────────────────────────────────
@@ -25,7 +25,7 @@ function friendlyAuthError(raw) {
     return 'This Google account could not be verified. Please try again.';
   if (msg.includes('not found') || msg.includes('no account'))
     return 'No BookStore account found for this Google account. Please sign up first.';
-  if (msg.includes('not verified') || msg.includes('verify your email'))
+  if (msg.includes('not verified') || msg.includes('verify your email') || msg.includes('email_not_verified'))
     return 'Please verify your email address before signing in. Check your inbox for the verification link.';
   if (raw.length < 120 && !raw.includes('Error:') && !raw.includes('JWT') && !raw.includes('mongoose'))
     return raw;
@@ -74,7 +74,7 @@ function OrDivider() {
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword,  setShowPassword]  = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError,   setGoogleError]   = useState('');
 
@@ -166,9 +166,17 @@ function Login() {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[12.5px] font-medium text-neutral-500 transition hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-1"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   id="login-password"
@@ -241,11 +249,7 @@ function Login() {
         className="hidden overflow-hidden bg-neutral-50 lg:flex lg:w-1/2 lg:items-center lg:justify-center"
         aria-hidden="true"
       >
-        <img
-          src={libraryImage}
-          alt=""
-          className="max-h-[72vh] w-full max-w-120 object-contain"
-        />
+        <img src={libraryImage} alt="" className="max-h-[72vh] w-full max-w-120 object-contain" />
       </div>
     </div>
   );
