@@ -448,7 +448,7 @@ function CategoryChips({ inView }) {
 function BooksLoading() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {[1, 2, 3, 4, 5, 6].map((item) => (
+      {[1, 2, 3].map((item) => (
         <div
           key={item}
           className="animate-pulse rounded-3xl border border-neutral-200 bg-white p-7"
@@ -519,18 +519,7 @@ function CommunityFavorites() {
 
 
   const catRef = useRef(null);
-
-  const catInView = useInView(catRef, {
-    once: true,
-    margin: "-60px",
-  });
-
-  const socialRef = useRef(null);
-
-  const socialInView = useInView(socialRef, {
-    once: true,
-    margin: "-60px",
-  });
+  const catInView = useInView(catRef, { once: true, margin: "-60px" });
 
   /*    Real database books   */
 
@@ -555,7 +544,7 @@ function CommunityFavorites() {
 
       const data = await getBooks({
         featured: true,
-        limit: 6,
+        limit: 3,
         sort: "-savesCount",
       });
 
@@ -673,19 +662,15 @@ function CommunityFavorites() {
 
           <h2
             id="community-heading"
-            className="mb-5 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
+            className="mb-4 text-[clamp(1.9rem,4vw,2.75rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
           >
             Trusted by readers.
             <br className="hidden sm:block" />
             Chosen by the community.
           </h2>
 
-          <p className="mx-auto max-w-160 text-[1.0625rem] leading-[1.75] text-neutral-500">
-            Discover books that readers are saving,
-            recommending, and finding valuable.
-            Instead of searching endlessly, find
-            trusted resources that the BookStore
-            community has already discovered.
+          <p className="mx-auto max-w-md text-[1.0625rem] leading-[1.75] text-neutral-500">
+            Books the BookStore community is saving and recommending right now.
           </p>
         </motion.div>
 
@@ -762,89 +747,18 @@ function CommunityFavorites() {
             ZONE 4 — Categories
         ══════════════════════════════════════ */}
 
-        <div
-          ref={catRef}
-          className="mb-20"
-        >
+        <div ref={catRef} className="mb-4">
           <motion.p
-            initial={{
-              opacity: 0,
-              y: 14,
-            }}
-            animate={
-              catInView
-                ? {
-                    opacity: 1,
-                    y: 0,
-                  }
-                : {}
-            }
-            transition={{
-              duration: 0.55,
-              ease,
-            }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={catInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.55, ease }}
             className="mb-7 text-center text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
           >
             Browse by Category
           </motion.p>
-
-          <CategoryChips
-            inView={catInView}
-          />
+          <CategoryChips inView={catInView} />
         </div>
 
-        {/* ══════════════════════════════════════
-            ZONE 6 — Social proof
-        ══════════════════════════════════════ */}
-
-        <motion.div
-          ref={socialRef}
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          animate={
-            socialInView
-              ? {
-                  opacity: 1,
-                  y: 0,
-                }
-              : {}
-          }
-          transition={{
-            duration: 0.65,
-            ease,
-          }}
-          className="flex flex-col items-center gap-4 text-center"
-        >
-          {/* Stars */}
-
-          <div
-            className="flex items-center gap-1"
-            aria-label="Five star rating"
-          >
-            {[1, 2, 3, 4, 5].map(
-              (star) => (
-                <Star
-                  key={star}
-                  size={22}
-                  strokeWidth={0}
-                  fill="#0f1419"
-                  aria-hidden="true"
-                />
-              )
-            )}
-          </div>
-
-          <p className="text-[1.1rem] font-semibold text-neutral-900">
-            Loved by thousands of learners around the world.
-          </p>
-
-          <p className="max-w-sm text-[15px] leading-relaxed text-neutral-400">
-            Join the growing community building
-            their personal learning library.
-          </p>
-        </motion.div>
       </Container>
     </section>
   );
