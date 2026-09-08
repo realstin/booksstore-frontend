@@ -166,17 +166,9 @@ function Login() {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
-                  Password
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-[12.5px] font-medium text-neutral-500 transition hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-1"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
+                Password
+              </label>
               <div className="relative">
                 <input
                   id="login-password"
