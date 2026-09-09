@@ -6,7 +6,7 @@ import {
   Loader2, Mail,
 } from 'lucide-react';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
-import { verifyEmail } from '../services/api';
+import { verifyEmail, resendVerification } from '../services/api';
 
 /* ─────────────────────────────────────────
    Shared easing
@@ -66,7 +66,7 @@ const STATE_CONFIG = {
     icon:    Clock,
     colour:  'text-neutral-500',
     heading: 'Verification link expired',
-    body:    'This verification link is no longer valid. Please request a new verification email by signing up again or contacting support.',
+    body:    'This verification link is no longer valid. Enter your email below to receive a new one.',
     cta:     { label: 'Go to Login', to: '/login' },
   },
   [STATES.missingToken]: {
@@ -92,6 +92,20 @@ function VerifyEmail() {
   const [searchParams]  = useSearchParams();
   const token           = searchParams.get('token');
   const [state, setState] = useState(token ? STATES.loading : STATES.missingToken);
+  const [resendEmail,  setResendEmail]  = useState('');
+  const [resendStatus, setResendStatus] = useState('idle'); // idle | loading | sent
+
+  async function handleResend(e) {
+    e.preventDefault();
+    if (!resendEmail.trim() || resendStatus === 'loading') return;
+    setResendStatus('loading');
+    try {
+      await resendVerification(resendEmail.trim());
+      setResendStatus('sent');
+    } catch {
+      setResendStatus('idle');
+    }
+  }
 
   useEffect(() => {
     if (!token) return; // missingToken already set above
@@ -214,7 +228,42 @@ function VerifyEmail() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: 0.2, ease }}
+                  className="flex w-full flex-col items-center gap-3"
                 >
+                  {/* Resend form — only shown for expired token */}
+                  {state === STATES.expiredToken && (
+                    resendStatus === 'sent' ? (
+                      <p className="text-[13.5px] font-medium text-neutral-600">
+                        ✓ A new verification email has been sent.
+                      </p>
+                    ) : (
+                      <form
+                        onSubmit={handleResend}
+                        className="flex w-full flex-col gap-2 sm:flex-row"
+                        aria-label="Resend verification email"
+                      >
+                        <label htmlFor="resend-email" className="sr-only">Your email address</label>
+                        <input
+                          id="resend-email"
+                          type="email"
+                          value={resendEmail}
+                          onChange={(e) => setResendEmail(e.target.value)}
+                          placeholder="Enter your email"
+                          required
+                          disabled={resendStatus === 'loading'}
+                          className="h-11 flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[13.5px] text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:opacity-60"
+                        />
+                        <button
+                          type="submit"
+                          disabled={resendStatus === 'loading'}
+                          className="h-11 shrink-0 rounded-xl bg-neutral-950 px-5 text-[13.5px] font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+                        >
+                          {resendStatus === 'loading' ? 'Sending…' : 'Resend Email'}
+                        </button>
+                      </form>
+                    )
+                  )}
+
                   <Link
                     to={config.cta.to}
                     className="inline-flex h-12 items-center rounded-full bg-neutral-950 px-8 text-[14.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
