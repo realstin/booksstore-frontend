@@ -62,7 +62,6 @@ function Signup() {
   const [agreed,           setAgreed]           = useState(false);
   const [googleLoading,    setGoogleLoading]    = useState(false);
   const [googleError,      setGoogleError]      = useState('');
-  const [emailSentTo,      setEmailSentTo]      = useState(''); // non-empty = show success screen
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
     { name: '', email: '', password: '' },
@@ -71,21 +70,11 @@ function Signup() {
       const validation = validateSignupForm(formData.name, formData.email, formData.password);
       if (!validation.valid) { setError(validation.error); return; }
       const data = await registerUser(formData);
-
-      // Backend now returns EMAIL_VERIFICATION_REQUIRED — show the check-email screen
-      if (data?.code === 'EMAIL_VERIFICATION_REQUIRED') {
-        setEmailSentTo(formData.email);
-        return;
-      }
-
-      // Legacy path: backend returned a user object (no email verification required)
       if (data?.user) {
         login(data);
         navigate('/home');
         return;
       }
-
-      // Any other success shape — go to login
       navigate('/login');
     }
   );
@@ -106,62 +95,6 @@ function Signup() {
   }
 
   const isBusy = loading || googleLoading;
-
-  // ── Email-sent success screen ─────────────────────────────────────────────
-  if (emailSentTo) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-white px-6 py-12" style={{ fontFamily: 'var(--font-sans)' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="flex w-full max-w-md flex-col items-center gap-6 text-center"
-        >
-          {/* Icon */}
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0f1419" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-            </svg>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <h1 className="text-[1.6rem] font-bold tracking-tight text-neutral-950">
-              Check your inbox.
-            </h1>
-            <p className="text-[15px] leading-[1.75] text-neutral-500">
-              We sent a 6-digit verification code to{' '}
-              <strong className="font-semibold text-neutral-700">{emailSentTo}</strong>.
-              Enter the code to activate your account.
-            </p>
-            <p className="mt-1 text-[13.5px] text-neutral-400">
-              The code expires in 24 hours. Check your spam folder if you don&apos;t see it.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/verify-email?email=${encodeURIComponent(emailSentTo)}`)}
-              className="inline-flex h-12 items-center rounded-full bg-neutral-950 px-8 text-[14.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-            >
-              Enter Verification Code
-            </button>
-            <p className="text-[13px] text-neutral-400">
-              Wrong email?{' '}
-              <button
-                type="button"
-                onClick={() => setEmailSentTo('')}
-                className="font-medium text-neutral-700 underline underline-offset-4 transition hover:text-neutral-950 focus:outline-none"
-              >
-                Sign up again
-              </button>
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen w-full bg-white" style={{ fontFamily: 'var(--font-sans)' }}>

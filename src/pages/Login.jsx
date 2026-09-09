@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser, googleLogin, resendVerification } from '../services/api';
+import { loginUser, googleLogin } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateLoginForm } from '../utils/validation';
@@ -77,38 +77,17 @@ function Login() {
   const [showPassword,  setShowPassword]  = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError,   setGoogleError]   = useState('');
-  const [unverifiedEmail, setUnverifiedEmail] = useState('');
-  const [resendStatus,    setResendStatus]    = useState('idle'); // idle | loading | sent
 
   const { form, error, loading, handleChange, handleSubmit, setError } = useForm(
     { email: '', password: '' },
     async (formData) => {
       const validation = validateLoginForm(formData.email, formData.password);
       if (!validation.valid) { setError(validation.error); return; }
-      try {
-        const data = await loginUser(formData);
-        login(data);
-        navigate('/home');
-      } catch (err) {
-        if (err.message?.toLowerCase().includes('not verified') ||
-            err.message?.toLowerCase().includes('email_not_verified')) {
-          setUnverifiedEmail(formData.email);
-        }
-        throw err; // let useForm handle the error display
-      }
+      const data = await loginUser(formData);
+      login(data);
+      navigate('/home');
     }
   );
-
-  async function handleResend() {
-    if (resendStatus === 'loading' || !unverifiedEmail) return;
-    setResendStatus('loading');
-    try {
-      await resendVerification(unverifiedEmail);
-      setResendStatus('sent');
-    } catch {
-      setResendStatus('idle');
-    }
-  }
 
   async function handleGoogleSuccess(credential) {
     if (googleLoading) return;
@@ -162,29 +141,6 @@ function Login() {
           {/* Email/password error */}
           <div className="mb-5">
             <ErrorBanner message={error} />
-            {unverifiedEmail && error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-2 text-[13px] text-neutral-500"
-              >
-                {resendStatus === 'sent'
-                  ? '✓ A new verification email has been sent.'
-                  : (
-                    <>
-                      Didn&apos;t get the email?{' '}
-                      <button
-                        type="button"
-                        onClick={handleResend}
-                        disabled={resendStatus === 'loading'}
-                        className="font-semibold text-neutral-700 underline underline-offset-4 transition hover:text-neutral-950 focus:outline-none disabled:opacity-50"
-                      >
-                        {resendStatus === 'loading' ? 'Sending…' : 'Resend verification email'}
-                      </button>
-                    </>
-                  )}
-              </motion.p>
-            )}
           </div>
 
           {/* Form */}
@@ -210,17 +166,9 @@ function Login() {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
-                  Password
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-[13px] font-medium text-neutral-500 underline underline-offset-4 transition hover:text-neutral-950 focus:outline-none"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <label htmlFor="login-password" className="text-[13px] font-semibold text-neutral-700">
+                Password
+              </label>
               <div className="relative">
                 <input
                   id="login-password"

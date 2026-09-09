@@ -224,23 +224,15 @@ export async function getStats() {
 // ========== EMAIL VERIFICATION ==========
 
 /**
- * Verify email using the 6-digit code sent to the user's inbox.
- * POST /api/auth/verify-email
- * Body: { email, code }
+ * Verify an email address using the token from the verification link.
+ * GET /api/auth/verify-email?token=<token>
  */
-export async function verifyEmail(email, code) {
+export async function verifyEmail(token) {
   const response = await fetch(
-    `${API_URL}/api/auth/verify-email`,
-    {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, code }),
-    }
+    `${API_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+    { credentials: 'include' }
   );
-
   const data = await response.json().catch(() => ({}));
-
-  // Always return the parsed data — the page decides what to show
   return { ok: response.ok, status: response.status, ...data };
 }
 
@@ -525,53 +517,3 @@ export async function unsubscribeNewsletter(email) {
   return data;
 }
 
-// ========== PASSWORD RESET ==========
-
-/**
- * Request a password reset email.
- * POST /api/auth/forgot-password
- * Body: { email }
- * Always returns success — server never reveals whether email exists.
- */
-export async function forgotPassword(email) {
-  const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ email }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || 'Request failed.');
-  return data;
-}
-
-/**
- * Reset password using the token from the email link.
- * POST /api/auth/reset-password
- * Body: { token, password }
- */
-export async function resetPassword(token, password) {
-  const response = await fetch(`${API_URL}/api/auth/reset-password`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ token, password }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || 'Reset failed.');
-  return data;
-}
-
-/**
- * Resend verification email.
- * POST /api/auth/resend-verification
- * Body: { email }
- */
-export async function resendVerification(email) {
-  const response = await fetch(`${API_URL}/api/auth/resend-verification`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ email }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || 'Request failed.');
-  return data;
-}
