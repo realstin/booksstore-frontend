@@ -130,22 +130,22 @@ function Signup() {
               Check your inbox.
             </h1>
             <p className="text-[15px] leading-[1.75] text-neutral-500">
-              We sent a verification link to{' '}
+              We sent a 6-digit verification code to{' '}
               <strong className="font-semibold text-neutral-700">{emailSentTo}</strong>.
-              Click the link in the email to activate your account.
+              Enter the code to activate your account.
             </p>
             <p className="mt-1 text-[13.5px] text-neutral-400">
-              The link expires in 24 hours. Check your spam folder if you don&apos;t see it.
+              The code expires in 24 hours. Check your spam folder if you don&apos;t see it.
             </p>
           </div>
 
           <div className="flex flex-col items-center gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(`/verify-email?email=${encodeURIComponent(emailSentTo)}`)}
               className="inline-flex h-12 items-center rounded-full bg-neutral-950 px-8 text-[14.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
             >
-              Go to Login
+              Enter Verification Code
             </button>
             <p className="text-[13px] text-neutral-400">
               Wrong email?{' '}

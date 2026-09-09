@@ -1,143 +1,182 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  CheckCircle2, XCircle, Clock, AlertCircle,
-  Loader2, Mail,
-} from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
 import { verifyEmail, resendVerification } from '../services/api';
 
-/* ─────────────────────────────────────────
-   Shared easing
-───────────────────────────────────────── */
 const ease = [0.22, 1, 0.36, 1];
 
 /* ─────────────────────────────────────────
-   Map backend codes to UI states
-───────────────────────────────────────── */
-const STATES = {
-  loading:          'loading',
-  verified:         'verified',
-  alreadyVerified:  'alreadyVerified',
-  invalidToken:     'invalidToken',
-  expiredToken:     'expiredToken',
-  missingToken:     'missingToken',
-  unknownError:     'unknownError',
-};
-
-function codeToState(code, ok) {
-  if (!code && ok)  return STATES.verified;
-  switch (code) {
-    case 'EMAIL_VERIFIED':              return STATES.verified;
-    case 'EMAIL_ALREADY_VERIFIED':      return STATES.alreadyVerified;
-    case 'INVALID_VERIFICATION_TOKEN':  return STATES.invalidToken;
-    case 'VERIFICATION_TOKEN_EXPIRED':  return STATES.expiredToken;
-    default:                            return STATES.unknownError;
-  }
-}
-
-/* ─────────────────────────────────────────
-   State config — icon, heading, body, cta
-───────────────────────────────────────── */
-const STATE_CONFIG = {
-  [STATES.verified]: {
-    icon:    CheckCircle2,
-    colour:  'text-neutral-950',
-    heading: 'Email verified',
-    body:    'Your email has been successfully verified. Your BookStore account is ready to use.',
-    cta:     { label: 'Continue to Login', to: '/login' },
-  },
-  [STATES.alreadyVerified]: {
-    icon:    CheckCircle2,
-    colour:  'text-neutral-950',
-    heading: 'Email already verified',
-    body:    'Your email address is already verified. You can sign in to your account.',
-    cta:     { label: 'Continue to Login', to: '/login' },
-  },
-  [STATES.invalidToken]: {
-    icon:    XCircle,
-    colour:  'text-neutral-500',
-    heading: 'Verification link is invalid',
-    body:    'This verification link may be incorrect or has already been used. Please check your email for the correct link.',
-    cta:     { label: 'Go to Login', to: '/login' },
-  },
-  [STATES.expiredToken]: {
-    icon:    Clock,
-    colour:  'text-neutral-500',
-    heading: 'Verification link expired',
-    body:    'This verification link is no longer valid. Enter your email below to receive a new one.',
-    cta:     { label: 'Go to Login', to: '/login' },
-  },
-  [STATES.missingToken]: {
-    icon:    Mail,
-    colour:  'text-neutral-500',
-    heading: 'Verification link is missing',
-    body:    'This page requires the verification link sent to your email. Please check your inbox and click the link in the email from BookStore.',
-    cta:     { label: 'Go to Login', to: '/login' },
-  },
-  [STATES.unknownError]: {
-    icon:    AlertCircle,
-    colour:  'text-neutral-500',
-    heading: 'Verification failed',
-    body:    'We were unable to verify your email address. Please try again or contact support if the problem continues.',
-    cta:     { label: 'Go to Login', to: '/login' },
-  },
-};
-
-/* ─────────────────────────────────────────
    VerifyEmail page
+   Reads ?email= from the URL (set by Signup.jsx).
+   User types their 6-digit code and submits.
 ───────────────────────────────────────── */
 function VerifyEmail() {
-  const [searchParams]  = useSearchParams();
-  const token           = searchParams.get('token');
-  const [state, setState] = useState(token ? STATES.loading : STATES.missingToken);
-  const [resendEmail,  setResendEmail]  = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate       = useNavigate();
+
+  // Pre-fill email from URL param set by Signup; user can also type it manually
+  const urlEmail = searchParams.get('email') || '';
+
+  const [email,        setEmail]        = useState(urlEmail);
+  const [digits,       setDigits]       = useState(['', '', '', '', '', '']);
+  const [status,       setStatus]       = useState('idle'); // idle | loading | success | error
+  const [errorMsg,     setErrorMsg]     = useState('');
   const [resendStatus, setResendStatus] = useState('idle'); // idle | loading | sent
 
-  async function handleResend(e) {
+  const inputRefs = [
+    useRef(null), useRef(null), useRef(null),
+    useRef(null), useRef(null), useRef(null),
+  ];
+
+  /* ── Digit input handling ── */
+  function handleDigitChange(index, value) {
+    const v = value.replace(/\D/g, '').slice(-1); // only last digit, only numbers
+    const next = [...digits];
+    next[index] = v;
+    setDigits(next);
+    setErrorMsg('');
+
+    // Auto-advance to next box
+    if (v && index < 5) {
+      inputRefs[index + 1].current?.focus();
+    }
+  }
+
+  function handleDigitKeyDown(index, e) {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+      inputRefs[index - 1].current?.focus();
+    }
+  }
+
+  function handleDigitPaste(e) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) {
+      setDigits(pasted.split(''));
+      inputRefs[5].current?.focus();
+    }
     e.preventDefault();
-    if (!resendEmail.trim() || resendStatus === 'loading') return;
-    setResendStatus('loading');
+  }
+
+  const code = digits.join('');
+
+  /* ── Submit ── */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (status === 'loading') return;
+
+    if (!email.trim()) {
+      setErrorMsg('Please enter your email address.');
+      return;
+    }
+    if (code.length < 6) {
+      setErrorMsg('Please enter all 6 digits of your verification code.');
+      return;
+    }
+
+    setStatus('loading');
+    setErrorMsg('');
+
     try {
-      await resendVerification(resendEmail.trim());
+      const result = await verifyEmail(email.trim(), code);
+
+      if (result.code === 'EMAIL_VERIFIED') {
+        setStatus('success');
+        return;
+      }
+      if (result.code === 'EMAIL_ALREADY_VERIFIED') {
+        setStatus('success');
+        return;
+      }
+      if (result.code === 'CODE_EXPIRED') {
+        setStatus('idle');
+        setErrorMsg('This code has expired. Request a new one below.');
+        return;
+      }
+
+      // INVALID_CODE or anything else
+      setStatus('idle');
+      setErrorMsg(result.message || 'Incorrect code. Please try again.');
+    } catch {
+      setStatus('idle');
+      setErrorMsg('Something went wrong. Please try again.');
+    }
+  }
+
+  /* ── Resend ── */
+  async function handleResend() {
+    if (resendStatus === 'loading' || !email.trim()) return;
+    setResendStatus('loading');
+    setErrorMsg('');
+    try {
+      await resendVerification(email.trim());
       setResendStatus('sent');
+      // Reset the digit inputs
+      setDigits(['', '', '', '', '', '']);
+      inputRefs[0].current?.focus();
     } catch {
       setResendStatus('idle');
     }
   }
 
-  useEffect(() => {
-    if (!token) return; // missingToken already set above
+  /* ── Success screen ── */
+  if (status === 'success') {
+    return (
+      <div
+        className="flex min-h-screen flex-col items-center justify-center bg-neutral-50 px-4 py-16"
+        style={{ fontFamily: 'var(--font-sans)' }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease }}
+          className="w-full max-w-md"
+        >
+          <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.07)]">
+            <div className="flex items-center justify-center border-b border-neutral-100 px-8 py-6">
+              <Link to="/" className="flex items-center gap-2.5 focus:outline-none" aria-label="BookStore">
+                <img src={bookstoreLogo} alt="BookStore" className="h-6 w-6" />
+                <span className="text-[18px] font-semibold tracking-tight text-neutral-950">BookStore</span>
+              </Link>
+            </div>
+            <div className="flex flex-col items-center gap-6 px-8 py-10 text-center">
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.45, ease }}
+                className="flex h-16 w-16 items-center justify-center rounded-full border border-neutral-100 bg-neutral-50"
+              >
+                <CheckCircle2 size={28} strokeWidth={1.75} className="text-neutral-950" aria-hidden="true" />
+              </motion.div>
+              <div className="flex flex-col gap-2">
+                <h1 className="text-[1.15rem] font-bold tracking-tight text-neutral-950">Email verified</h1>
+                <p className="text-[14px] leading-[1.75] text-neutral-500">
+                  Your BookStore account is ready. You can now log in.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="inline-flex h-12 items-center rounded-full bg-neutral-950 px-8 text-[14.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+              >
+                Continue to Login
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const result = await verifyEmail(token);
-        if (cancelled) return;
-        setState(codeToState(result.code, result.ok));
-      } catch {
-        if (!cancelled) setState(STATES.unknownError);
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [token]);
-
-  const config = STATE_CONFIG[state];
-
+  /* ── Code entry form ── */
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center bg-neutral-50 px-4 py-16"
       style={{ fontFamily: 'var(--font-sans)' }}
     >
-      {/* Dot-grid background */}
-      <svg
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 h-full w-full opacity-[0.03]"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      {/* Dot grid */}
+      <svg aria-hidden="true" className="pointer-events-none fixed inset-0 h-full w-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="ve-dot-grid" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
             <circle cx="1.5" cy="1.5" r="1.5" fill="#0f1419" />
@@ -152,138 +191,132 @@ function VerifyEmail() {
         transition={{ duration: 0.65, ease }}
         className="relative z-10 w-full max-w-md"
       >
-        {/* Card */}
         <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.07)]">
 
-          {/* Top band */}
+          {/* Logo band */}
           <div className="flex items-center justify-center border-b border-neutral-100 px-8 py-6">
-            <Link
-              to="/"
-              className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-              aria-label="BookStore — go to homepage"
-            >
+            <Link to="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2" aria-label="BookStore">
               <img src={bookstoreLogo} alt="BookStore" className="h-6 w-6" />
-              <span className="text-[18px] font-semibold tracking-tight text-neutral-950">
-                BookStore
-              </span>
+              <span className="text-[18px] font-semibold tracking-tight text-neutral-950">BookStore</span>
             </Link>
           </div>
 
-          {/* Content */}
-          <div className="flex flex-col items-center gap-6 px-8 py-10 text-center">
+          {/* Form */}
+          <div className="px-8 py-10">
+            <h1 className="mb-2 text-[1.15rem] font-bold tracking-tight text-neutral-950">
+              Enter your verification code
+            </h1>
+            <p className="mb-8 text-[14px] leading-[1.75] text-neutral-500">
+              We sent a 6-digit code to your email address.
+              Enter it below to activate your account.
+            </p>
 
-            {state === STATES.loading ? (
-              <>
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-neutral-100 bg-neutral-50">
-                  <Loader2
-                    size={28}
-                    strokeWidth={1.75}
-                    className="animate-spin text-neutral-600"
-                    aria-hidden="true"
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+
+              {/* Email field — shown only if not pre-filled from URL */}
+              {!urlEmail && (
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="ve-email" className="text-[13px] font-semibold text-neutral-700">
+                    Email address
+                  </label>
+                  <input
+                    id="ve-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="h-11 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[14px] text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
                   />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <h1 className="text-[1.15rem] font-bold tracking-tight text-neutral-950">
-                    Verifying your email…
-                  </h1>
-                  <p className="text-[14px] leading-relaxed text-neutral-500">
-                    Please wait while we confirm your email address.
-                  </p>
+              )}
+
+              {/* 6-digit code boxes */}
+              <div className="flex flex-col gap-2">
+                <p className="text-[13px] font-semibold text-neutral-700">Verification code</p>
+                <div
+                  className="flex items-center justify-between gap-2"
+                  onPaste={handleDigitPaste}
+                  role="group"
+                  aria-label="6-digit verification code"
+                >
+                  {digits.map((d, i) => (
+                    <input
+                      key={i}
+                      ref={inputRefs[i]}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={1}
+                      value={d}
+                      onChange={(e) => handleDigitChange(i, e.target.value)}
+                      onKeyDown={(e) => handleDigitKeyDown(i, e)}
+                      disabled={status === 'loading'}
+                      aria-label={`Digit ${i + 1}`}
+                      className={[
+                        'h-14 w-full rounded-xl border text-center text-[22px] font-bold text-neutral-950 outline-none transition-all duration-150',
+                        'focus:border-neutral-950 focus:bg-white focus:shadow-[0_0_0_3px_rgba(15,20,25,0.08)] focus-visible:outline-none',
+                        d ? 'border-neutral-950 bg-neutral-50' : 'border-neutral-200 bg-neutral-50',
+                        status === 'loading' ? 'cursor-not-allowed opacity-60' : '',
+                      ].join(' ')}
+                    />
+                  ))}
                 </div>
-              </>
-            ) : (
-              <>
-                {/* Result icon */}
-                <motion.div
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.45, ease }}
-                  className="flex h-16 w-16 items-center justify-center rounded-full border border-neutral-100 bg-neutral-50"
-                >
-                  <config.icon
-                    size={28}
-                    strokeWidth={1.75}
-                    className={config.colour}
-                    aria-hidden="true"
-                  />
-                </motion.div>
+              </div>
 
-                {/* Heading + body */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+              {/* Error message */}
+              {errorMsg && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1, ease }}
-                  className="flex flex-col gap-2"
+                  className="text-[13px] text-red-500"
+                  role="alert"
                 >
-                  <h1 className="text-[1.15rem] font-bold tracking-tight text-neutral-950">
-                    {config.heading}
-                  </h1>
-                  <p className="text-[14px] leading-[1.75] text-neutral-500">
-                    {config.body}
-                  </p>
-                </motion.div>
+                  {errorMsg}
+                </motion.p>
+              )}
 
-                {/* CTA button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.2, ease }}
-                  className="flex w-full flex-col items-center gap-3"
-                >
-                  {/* Resend form — only shown for expired token */}
-                  {state === STATES.expiredToken && (
-                    resendStatus === 'sent' ? (
-                      <p className="text-[13.5px] font-medium text-neutral-600">
-                        ✓ A new verification email has been sent.
-                      </p>
-                    ) : (
-                      <form
-                        onSubmit={handleResend}
-                        className="flex w-full flex-col gap-2 sm:flex-row"
-                        aria-label="Resend verification email"
-                      >
-                        <label htmlFor="resend-email" className="sr-only">Your email address</label>
-                        <input
-                          id="resend-email"
-                          type="email"
-                          value={resendEmail}
-                          onChange={(e) => setResendEmail(e.target.value)}
-                          placeholder="Enter your email"
-                          required
-                          disabled={resendStatus === 'loading'}
-                          className="h-11 flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[13.5px] text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:opacity-60"
-                        />
-                        <button
-                          type="submit"
-                          disabled={resendStatus === 'loading'}
-                          className="h-11 shrink-0 rounded-xl bg-neutral-950 px-5 text-[13.5px] font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-                        >
-                          {resendStatus === 'loading' ? 'Sending…' : 'Resend Email'}
-                        </button>
-                      </form>
-                    )
-                  )}
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={status === 'loading' || code.length < 6}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neutral-950 text-[14.5px] font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+                aria-busy={status === 'loading'}
+              >
+                {status === 'loading'
+                  ? <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Verifying…</>
+                  : 'Verify Email'
+                }
+              </button>
 
-                  <Link
-                    to={config.cta.to}
-                    className="inline-flex h-12 items-center rounded-full bg-neutral-950 px-8 text-[14.5px] font-semibold text-white transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+            </form>
+
+            {/* Resend */}
+            <div className="mt-6 text-center">
+              {resendStatus === 'sent' ? (
+                <p className="text-[13px] text-neutral-500">
+                  ✓ A new code has been sent to your email.
+                </p>
+              ) : (
+                <p className="text-[13px] text-neutral-500">
+                  Didn&apos;t receive the code?{' '}
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendStatus === 'loading' || !email.trim()}
+                    className="font-semibold text-neutral-700 underline underline-offset-4 transition hover:text-neutral-950 focus:outline-none disabled:opacity-50"
                   >
-                    {config.cta.label}
-                  </Link>
-                </motion.div>
-              </>
-            )}
-
+                    {resendStatus === 'loading' ? 'Sending…' : 'Resend code'}
+                  </button>
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Footer note */}
         <p className="mt-6 text-center text-[12.5px] text-neutral-400">
           Need help?{' '}
-          <Link
-            to="/contact"
-            className="font-medium text-neutral-600 underline underline-offset-4 transition hover:text-neutral-950"
-          >
+          <Link to="/contact" className="font-medium text-neutral-600 underline underline-offset-4 transition hover:text-neutral-950">
             Contact support
           </Link>
         </p>
