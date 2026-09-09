@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Container from "../Container";
 import bookstoreLogo from '../../assets/bookstorelogo.svg';
+import { subscribeNewsletter } from '../../services/api';
 
 /* ─────────────────────────────────────────
    Footer link data
@@ -78,17 +79,45 @@ function FooterLink({ label, href, internal }) {
 }
 
 /* ─────────────────────────────────────────
-   Newsletter form
+   Newsletter form — wired to real API
+   States: idle → loading → success | error
 ───────────────────────────────────────── */
 function NewsletterForm() {
-  const [email, setEmail] = useState("");
-  const [sent,  setSent]  = useState(false);
+  const [email,   setEmail]   = useState('');
+  const [status,  setStatus]  = useState('idle'); // idle | loading | success | error
+  const [message, setMessage] = useState('');
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSent(true);
-    setEmail("");
+    if (!email.trim() || status === 'loading') return;
+
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      await subscribeNewsletter(email.trim());
+      setStatus('success');
+      setEmail('');
+    } catch (err) {
+      setStatus('error');
+      setMessage(err.message || 'Something went wrong. Please try again.');
+    }
+  }
+
+  /* Success state */
+  if (status === 'success') {
+    return (
+      <motion.p
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-6 flex items-center gap-2 text-[13.5px] font-medium text-neutral-600"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-950 text-[10px] text-white">
+          ✓
+        </span>
+        You&apos;re subscribed. Thank you!
+      </motion.p>
+    );
   }
 
   return (
@@ -97,39 +126,49 @@ function NewsletterForm() {
       className="mt-6 flex w-full max-w-70 flex-col gap-2.5"
       aria-label="Newsletter subscription"
     >
-      {sent ? (
-        <p className="text-[13.5px] font-medium text-neutral-600">
-          ✓ You&apos;re subscribed.
-        </p>
-      ) : (
-        <>
-          <label htmlFor="footer-email" className="sr-only">
-            Your email address
-          </label>
-          <input
-            id="footer-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Your email address"
-            required
-            className="h-11 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[13.5px] text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+      <label htmlFor="footer-email" className="sr-only">Your email address</label>
+      <input
+        id="footer-email"
+        type="email"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          if (status === 'error') setStatus('idle');
+        }}
+        placeholder="Your email address"
+        required
+        disabled={status === 'loading'}
+        className="h-11 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-[13.5px] text-neutral-900 placeholder-neutral-400 outline-none transition-all duration-200 focus:border-neutral-400 focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      />
+      <motion.button
+        type="submit"
+        disabled={status === 'loading'}
+        whileHover={status !== 'loading' ? { scale: 1.02 } : {}}
+        whileTap={status !== 'loading' ? { scale: 0.97 } : {}}
+        transition={{ duration: 0.18 }}
+        className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 text-[13.5px] font-semibold text-white transition-colors duration-200 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-busy={status === 'loading'}
+      >
+        {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
+        {status !== 'loading' && (
+          <ArrowRight
+            size={14}
+            className="transition-transform duration-200 group-hover:translate-x-0.5"
+            aria-hidden="true"
           />
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.18 }}
-            className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 text-[13.5px] font-semibold text-white transition-colors duration-200 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          >
-            Subscribe
-            <ArrowRight
-              size={14}
-              className="transition-transform duration-200 group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
-          </motion.button>
-        </>
+        )}
+      </motion.button>
+
+      {/* Inline error message */}
+      {status === 'error' && message && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-[12px] text-red-500"
+          role="alert"
+        >
+          {message}
+        </motion.p>
       )}
     </form>
   );

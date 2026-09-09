@@ -473,3 +473,56 @@ export async function deleteNote(noteId) {
   if (!response.ok) throw new Error(data.message || "Your note couldn't be deleted. Please try again.");
   return data;
 }
+
+// ========== NEWSLETTER ==========
+
+/**
+ * Subscribe an email to the BookStore newsletter.
+ * POST /api/newsletter/subscribe
+ *
+ * No authentication required — works for both visitors and
+ * logged-in users. The backend handles duplicate detection
+ * and reactivation of previously unsubscribed emails.
+ */
+export async function subscribeNewsletter(email) {
+  const response = await fetch(`${API_URL}/api/newsletter/subscribe`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || `Subscription failed (status ${response.status})`
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Unsubscribe an email from the BookStore newsletter.
+ * POST /api/newsletter/unsubscribe
+ *
+ * No authentication required — supports one-click unsubscribe
+ * from email links without needing a session cookie.
+ */
+export async function unsubscribeNewsletter(email) {
+  const response = await fetch(`${API_URL}/api/newsletter/unsubscribe`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || `Unsubscribe failed (status ${response.status})`
+    );
+  }
+
+  return data;
+}
