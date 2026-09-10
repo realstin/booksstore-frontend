@@ -3,6 +3,7 @@ import { registerUser, googleLogin } from '../services/api';
 import { IconEye, IconEyeOff } from '../components/Icons';
 import { AUTH_MESSAGES } from '../constants/messages';
 import { validateSignupForm } from '../utils/validation';
+import { friendlyAuthError } from '../utils/authErrors';
 import { useForm } from '../hooks/useForm';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
@@ -10,50 +11,8 @@ import { motion } from 'framer-motion';
 import bookstoreLogo from '../assets/bookstorelogo.svg';
 import libraryImage  from '../assets/library.svg';
 import GoogleSignInButton from '../components/Auth/GoogleSignInButton';
-
-function friendlyAuthError(raw) {
-  if (!raw) return 'Something went wrong. Please try again.';
-  const msg = raw.toLowerCase();
-  if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch'))
-    return 'Network connection problem. Please check your internet connection and try again.';
-  if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('email already'))
-    return 'This email is already registered. Please sign in instead.';
-  if (msg.includes('invalid credential') || msg.includes('invalid token') || msg.includes('could not verify'))
-    return 'This Google account could not be verified. Please try again.';
-  if (raw.length < 120 && !raw.includes('Error:') && !raw.includes('JWT') && !raw.includes('mongoose'))
-    return raw;
-  return "We couldn't sign you up with Google. Please try again.";
-}
-
-function ErrorBanner({ message }) {
-  if (!message) return null;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      role="alert"
-      className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-[13.5px] text-red-700"
-    >
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
-        <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4" />
-        <line x1="7" y1="4.5" x2="7" y2="7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        <circle cx="7" cy="9.5" r="0.75" fill="currentColor" />
-      </svg>
-      <span>{message}</span>
-    </motion.div>
-  );
-}
-
-function OrDivider() {
-  return (
-    <div className="flex items-center gap-3" aria-hidden="true">
-      <div className="h-px flex-1 bg-neutral-200" />
-      <span className="text-[12px] font-semibold uppercase tracking-widest text-neutral-400">or</span>
-      <div className="h-px flex-1 bg-neutral-200" />
-    </div>
-  );
-}
+import ErrorBanner        from '../components/Auth/ErrorBanner';
+import OrDivider          from '../components/Auth/OrDivider';
 
 function Signup() {
   const navigate = useNavigate();
@@ -69,13 +28,19 @@ function Signup() {
       if (!agreed) { setError(AUTH_MESSAGES.SIGNUP_AGREE_ERROR); return; }
       const validation = validateSignupForm(formData.name, formData.email, formData.password);
       if (!validation.valid) { setError(validation.error); return; }
+
       const data = await registerUser(formData);
-      if (data?.user) {
-        login(data);
-        navigate('/home');
-        return;
+
+      // Guard against an unexpected response shape from the server.
+      // registerUser() throws on HTTP errors, so if we reach here the
+      // request succeeded — but if user is somehow missing, surface it
+      // rather than silently redirecting to login with no explanation.
+      if (!data?.user) {
+        throw new Error('Account created but sign-in failed. Please sign in manually.');
       }
-      navigate('/login');
+
+      login(data);
+      navigate('/home');
     }
   );
 
@@ -88,7 +53,7 @@ function Signup() {
       login(data);
       navigate('/home');
     } catch (err) {
-      setGoogleError(friendlyAuthError(err.message));
+      setGoogleError(friendlyAuthError(err.message, 'google'));
     } finally {
       setGoogleLoading(false);
     }
