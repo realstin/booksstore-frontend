@@ -1,16 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Newspaper, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import Container from "../../components/Container";
 import { NewsCard } from "../../components/News/NewsCard";
 import { FeaturedCard } from "../../components/News/FeaturedCard";
-import {
-  getFeaturedArticle,
-  getRegularArticles,
-  getAllCategories,
-  getAllArticles,
-} from "../../data/news";
+import { getArticles } from "../../services/api";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -70,24 +65,51 @@ function EmptyState({ category }) {
 ───────────────────────────────────────── */
 function News() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const categories = getAllCategories();
-  const featured   = getFeaturedArticle();
-  const all        = getAllArticles();
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const heroRef    = useRef(null);
   const heroInView = useInView(heroRef, { once: true });
 
+  // Load articles from API
+  useEffect(() => {
+    loadArticles();
+  }, []);
+
+  async function loadArticles() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getArticles();
+      setArticles(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Compute categories from articles
+  const categories = [
+    'All',
+    ...new Set(articles.map((a) => a.category)),
+  ];
+
+  // Find featured article
+  const featured = articles.find((a) => a.featured) || null;
+
   /* Filter logic */
   const filtered =
     activeCategory === "All"
-      ? all
-      : all.filter((a) => a.category === activeCategory);
+      ? articles
+      : articles.filter((a) => a.category === activeCategory);
 
   /* When a category is active, skip the featured card separation */
   const showFeatured = activeCategory === "All" && featured;
   const gridArticles =
     activeCategory === "All"
-      ? getRegularArticles()
+      ? articles.filter((a) => !a.featured)
       : filtered;
 
   return (
@@ -184,44 +206,69 @@ function News() {
       <section className="py-16 lg:py-24" aria-label="News articles">
         <Container>
 
-          {/* Featured article */}
-          {showFeatured && (
-            <div className="mb-14">
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, ease }}
-                className="mb-6 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
+          {/* Loading state */}
+          {loading && (
+            <div className="flex items-center justify-center py-20">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-950" />
+            </div>
+          )}
+
+          {/* Error state */}
+          {error && (
+            <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <p className="text-sm font-medium text-red-900">{error}</p>
+              <button
+                onClick={loadArticles}
+                className="mt-4 rounded-full bg-red-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
               >
-                Featured
-              </motion.p>
-              <FeaturedCard article={featured} />
+                Try Again
+              </button>
             </div>
           )}
 
-          {/* Section label for the grid */}
-          {showFeatured && getRegularArticles().length > 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease }}
-              className="mb-8 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
-            >
-              More from BookStore
-            </motion.p>
-          )}
+          {/* Content */}
+          {!loading && !error && (
+            <>
+              {/* Featured article */}
+              {showFeatured && (
+                <div className="mb-14">
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, ease }}
+                    className="mb-6 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
+                  >
+                    Featured
+                  </motion.p>
+                  <FeaturedCard article={featured} />
+                </div>
+              )}
 
-          {/* Grid */}
-          {filtered.length === 0 ? (
-            <EmptyState category={activeCategory} />
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {(showFeatured ? gridArticles : filtered).map((article, i) => (
-                <NewsCard key={article.id} article={article} index={i} />
-              ))}
-            </div>
+              {/* Section label for the grid */}
+              {showFeatured && gridArticles.length > 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, ease }}
+                  className="mb-8 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400"
+                >
+                  More from BookStore
+                </motion.p>
+              )}
+
+              {/* Grid */}
+              {filtered.length === 0 ? (
+                <EmptyState category={activeCategory} />
+              ) : (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {(showFeatured ? gridArticles : filtered).map((article, i) => (
+                    <NewsCard key={article._id} article={article} index={i} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
         </Container>

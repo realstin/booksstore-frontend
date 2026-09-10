@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, MapPin, Clock, ArrowRight, Newspaper } from "lucide-react";
 import Container from "../../components/Container";
 import { AuthorCard } from "../../components/News/AuthorCard";
 import { NewsCard } from "../../components/News/NewsCard";
-import { getArticleBySlug, getRelatedArticles } from "../../data/news";
+import { getArticleBySlug, getArticles } from "../../services/api";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -110,7 +111,7 @@ function ContentBlock({ block, index }) {
 
   if (block.type === "image") {
     return (
-      <ArticleImage src={block.src} alt={block.alt} caption={block.caption} />
+      <ArticleImage src={block.content} alt={block.alt} caption={block.caption} />
     );
   }
 
@@ -128,6 +129,18 @@ function ContentBlock({ block, index }) {
     );
   }
 
+  if (block.type === "divider") {
+    return (
+      <motion.hr
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease }}
+        className="my-8 border-neutral-200"
+      />
+    );
+  }
+
   return null;
 }
 
@@ -136,11 +149,61 @@ function ContentBlock({ block, index }) {
 ───────────────────────────────────────── */
 function NewsArticle() {
   const { slug } = useParams();
-  const article  = getArticleBySlug(slug);
+  
+  const [article, setArticle] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!article) return <NotFound />;
+  // Load article and related articles
+  useEffect(() => {
+    loadArticle();
+  }, [slug]);
 
-  const related = getRelatedArticles(slug, 3);
+  async function loadArticle() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Load current article
+      const articleData = await getArticleBySlug(slug);
+      setArticle(articleData);
+
+      // Load all articles to find related ones
+      const allArticles = await getArticles();
+      
+      // Get related articles (same category, excluding current)
+      const sameCategory = allArticles.filter(
+        (a) => a.slug !== slug && a.category === articleData.category
+      );
+      
+      if (sameCategory.length >= 3) {
+        setRelated(sameCategory.slice(0, 3));
+      } else {
+        // Fill remaining with other articles
+        const others = allArticles.filter(
+          (a) => a.slug !== slug && a.category !== articleData.category
+        );
+        setRelated([...sameCategory, ...others].slice(0, 3));
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load article');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ fontFamily: "var(--font-sans)" }}>
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-950" />
+      </div>
+    );
+  }
+
+  // Error or not found
+  if (error || !article) return <NotFound />;
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
@@ -319,7 +382,7 @@ function NewsArticle() {
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((a, i) => (
-                  <NewsCard key={a.id} article={a} index={i} />
+                  <NewsCard key={a._id} article={a} index={i} />
                 ))}
               </div>
             </section>

@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import ceoImage from "../../assets/ceo.png";
+import { getTeamMembers } from "../../services/api";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -25,6 +25,14 @@ function GitHubIcon() {
   );
 }
 
+function LinkedInIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/>
+    </svg>
+  );
+}
+
 function GlobeIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -34,26 +42,143 @@ function GlobeIcon() {
   );
 }
 
+function EmailIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="1" y="3" width="14" height="10" rx="2" />
+      <path d="M1 5l7 4 7-4" />
+    </svg>
+  );
+}
+
+// Icon mapper
+function getIconComponent(iconType) {
+  switch (iconType) {
+    case 'x':
+      return XIcon;
+    case 'github':
+      return GitHubIcon;
+    case 'linkedin':
+      return LinkedInIcon;
+    case 'email':
+      return EmailIcon;
+    case 'globe':
+    default:
+      return GlobeIcon;
+  }
+}
+
 /* ─────────────────────────────────────────
-   Team member data
+   Team member card component
 ───────────────────────────────────────── */
-const member = {
-  name:    "IRATUZI M. Justin",
-  role:    "CEO & Founder",
-  bio:     "Builder and visionary behind BookStore. Passionate about helping learners discover trusted technology resources — faster and smarter.",
-  socials: [
-    { label: "X (Twitter)", href: "https://x.com/irmjustin",            Icon: XIcon     },
-    { label: "GitHub",      href: "https://github.com/realstin",        Icon: GitHubIcon },
-    { label: "Website",     href: "https://irmjustin.github.io/",       Icon: GlobeIcon  },
-  ],
-};
+function TeamMemberCard({ member, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.28 + index * 0.1, ease }}
+      className="flex flex-col items-start gap-10 sm:flex-row sm:items-center sm:gap-14"
+      aria-label={`${member.name}, ${member.role}`}
+    >
+      {/* Circular photo */}
+      <div className="relative shrink-0">
+        {/* Outer decorative ring */}
+        <div
+          className="absolute -inset-[3px] rounded-full"
+          style={{
+            background: "linear-gradient(135deg, #0f1419 0%, rgba(15,20,25,0.12) 60%, transparent 100%)",
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative h-44 w-44 overflow-hidden rounded-full ring-4 ring-white">
+          {member.photo ? (
+            <img
+              src={member.photo}
+              alt={`${member.name} — ${member.role}`}
+              className="h-full w-full object-cover object-top"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-[3rem] font-bold text-neutral-400">
+              {member.name.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-[1.35rem] font-bold tracking-tight text-neutral-950">
+            {member.name}
+          </h2>
+          <p className="mt-1 text-[13.5px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+            {member.role}
+          </p>
+        </div>
+
+        <p className="max-w-sm text-[14.5px] leading-[1.75] text-neutral-500">
+          {member.bio}
+        </p>
+
+        {/* Socials */}
+        {member.socials && member.socials.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            <span className="mr-2 text-[12.5px] font-medium text-neutral-400">
+              Follow on
+            </span>
+            {member.socials.map((social, idx) => {
+              const Icon = getIconComponent(social.icon);
+              return (
+                <motion.a
+                  key={idx}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.12, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.18 }}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+                  aria-label={`${member.name} on ${social.label}`}
+                >
+                  <Icon />
+                </motion.a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 /* ─────────────────────────────────────────
    Team Page
 ───────────────────────────────────────── */
 function Team() {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const pageRef = useRef(null);
   const inView  = useInView(pageRef, { once: true });
+
+  // Load team members from API
+  useEffect(() => {
+    loadTeam();
+  }, []);
+
+  async function loadTeam() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getTeamMembers();
+      setMembers(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load team members');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div
@@ -128,71 +253,40 @@ function Team() {
           making trusted learning resources easier to find for every developer.
         </motion.p>
 
-        {/* ── Member row — free layout, no card ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.28, ease }}
-          className="flex flex-col items-start gap-10 sm:flex-row sm:items-center sm:gap-14"
-          aria-label={`${member.name}, ${member.role}`}
-        >
-          {/* Circular photo — medium size, clean */}
-          <div className="relative shrink-0">
-            {/* Outer decorative ring */}
-            <div
-              className="absolute -inset-[3px] rounded-full"
-              style={{
-                background: "linear-gradient(135deg, #0f1419 0%, rgba(15,20,25,0.12) 60%, transparent 100%)",
-              }}
-              aria-hidden="true"
-            />
-            <div className="relative h-44 w-44 overflow-hidden rounded-full ring-4 ring-white">
-              <img
-                src={ceoImage}
-                alt={`${member.name} — ${member.role}`}
-                className="h-full w-full object-cover object-top"
-              />
-            </div>
+        {/* Loading state */}
+        {loading && (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-950" />
           </div>
+        )}
 
-          {/* Info — free, no box */}
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2 className="text-[1.35rem] font-bold tracking-tight text-neutral-950">
-                {member.name}
-              </h2>
-              <p className="mt-1 text-[13.5px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-                {member.role}
-              </p>
-            </div>
-
-            <p className="max-w-sm text-[14.5px] leading-[1.75] text-neutral-500">
-              {member.bio}
-            </p>
-
-            {/* Socials — inline, label + icon buttons */}
-            <div className="flex items-center gap-1.5">
-              <span className="mr-2 text-[12.5px] font-medium text-neutral-400">
-                Follow on
-              </span>
-              {member.socials.map(({ label, href, Icon }) => (
-                <motion.a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.12, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.18 }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-                  aria-label={`${member.name} on ${label}`}
-                >
-                  <Icon />
-                </motion.a>
-              ))}
-            </div>
+        {/* Error state */}
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-sm font-medium text-red-900">{error}</p>
+            <button
+              onClick={loadTeam}
+              className="mt-4 rounded-full bg-red-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+            >
+              Try Again
+            </button>
           </div>
-        </motion.div>
+        )}
+
+        {/* Team members */}
+        {!loading && !error && members.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-neutral-400">No team members to display yet.</p>
+          </div>
+        )}
+
+        {!loading && !error && members.length > 0 && (
+          <div className="flex flex-col gap-16">
+            {members.map((member, index) => (
+              <TeamMemberCard key={member._id} member={member} index={index} />
+            ))}
+          </div>
+        )}
 
         {/* ── Thin divider ── */}
         <div className="my-24 h-px bg-neutral-100" aria-hidden="true" />

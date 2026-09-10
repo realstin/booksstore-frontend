@@ -536,3 +536,62 @@ export async function unsubscribeNewsletter(email) {
   return data;
 }
 
+
+// ========== ARTICLES ==========
+
+/**
+ * Get all published articles (public endpoint)
+ * @returns {Promise<Array>}
+ */
+export async function getArticles() {
+  const response = await fetch(`${API_URL}/api/articles`, {
+    credentials: 'include',
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to load articles');
+  }
+
+  return data;
+}
+
+/**
+ * Get a single article by slug (public endpoint)
+ * @param {string} slug
+ * @returns {Promise<Object>}
+ */
+export async function getArticleBySlug(slug) {
+  const response = await fetch(`${API_URL}/api/articles/${slug}`, {
+    credentials: 'include',
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Article not found');
+  }
+
+  return data;
+}
+
+// ========== TEAM ==========
+
+/**
+ * Get all active team members (public endpoint)
+ * @returns {Promise<Array>}
+ */
+export async function getTeamMembers() {
+  const response = await fetch(`${API_URL}/api/team`, {
+    credentials: 'include',
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to load team members');
+  }
+
+  return data;
+}
