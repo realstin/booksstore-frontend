@@ -84,7 +84,10 @@ function News() {
       const data = await getArticles();
       setArticles(data);
     } catch (err) {
-      setError(err.message || 'Failed to load articles');
+      console.error('Failed to load articles from API:', err);
+      // Silently fail - just show empty state instead of error
+      setArticles([]);
+      setError(null);
     } finally {
       setLoading(false);
     }

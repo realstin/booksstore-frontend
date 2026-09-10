@@ -174,7 +174,10 @@ function Team() {
       const data = await getTeamMembers();
       setMembers(data);
     } catch (err) {
-      setError(err.message || 'Failed to load team members');
+      console.error('Failed to load team members from API:', err);
+      // Silently fail - just show empty state instead of error
+      setMembers([]);
+      setError(null);
     } finally {
       setLoading(false);
     }
