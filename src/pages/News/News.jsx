@@ -6,6 +6,12 @@ import Container from "../../components/Container";
 import { NewsCard } from "../../components/News/NewsCard";
 import { FeaturedCard } from "../../components/News/FeaturedCard";
 import { getArticles } from "../../services/api";
+import {
+  getFeaturedArticle,
+  getRegularArticles,
+  getAllCategories,
+  getAllArticles,
+} from "../../data/news";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -82,11 +88,19 @@ function News() {
       setLoading(true);
       setError(null);
       const data = await getArticles();
-      setArticles(data);
+      
+      // If API returns data, use it
+      if (data && data.length > 0) {
+        setArticles(data);
+      } else {
+        // Fallback to hardcoded data
+        console.warn('API returned no articles, using fallback data');
+        setArticles(getAllArticles());
+      }
     } catch (err) {
-      console.error('Failed to load articles from API:', err);
-      // Silently fail - just show empty state instead of error
-      setArticles([]);
+      console.error('Failed to load articles from API, using fallback data:', err);
+      // Use hardcoded data as fallback
+      setArticles(getAllArticles());
       setError(null);
     } finally {
       setLoading(false);

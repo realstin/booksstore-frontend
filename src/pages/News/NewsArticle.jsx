@@ -6,6 +6,7 @@ import Container from "../../components/Container";
 import { AuthorCard } from "../../components/News/AuthorCard";
 import { NewsCard } from "../../components/News/NewsCard";
 import { getArticleBySlug, getArticles } from "../../services/api";
+import { getArticleBySlug as getHardcodedArticle, getRelatedArticles } from "../../data/news";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -165,26 +166,38 @@ function NewsArticle() {
       setLoading(true);
       setError(null);
 
-      // Load current article
-      const articleData = await getArticleBySlug(slug);
-      setArticle(articleData);
+      // Try API first
+      try {
+        const articleData = await getArticleBySlug(slug);
+        setArticle(articleData);
 
-      // Load all articles to find related ones
-      const allArticles = await getArticles();
-      
-      // Get related articles (same category, excluding current)
-      const sameCategory = allArticles.filter(
-        (a) => a.slug !== slug && a.category === articleData.category
-      );
-      
-      if (sameCategory.length >= 3) {
-        setRelated(sameCategory.slice(0, 3));
-      } else {
-        // Fill remaining with other articles
-        const others = allArticles.filter(
-          (a) => a.slug !== slug && a.category !== articleData.category
+        // Load all articles to find related ones
+        const allArticles = await getArticles();
+        
+        // Get related articles (same category, excluding current)
+        const sameCategory = allArticles.filter(
+          (a) => a.slug !== slug && a.category === articleData.category
         );
-        setRelated([...sameCategory, ...others].slice(0, 3));
+        
+        if (sameCategory.length >= 3) {
+          setRelated(sameCategory.slice(0, 3));
+        } else {
+          // Fill remaining with other articles
+          const others = allArticles.filter(
+            (a) => a.slug !== slug && a.category !== articleData.category
+          );
+          setRelated([...sameCategory, ...others].slice(0, 3));
+        }
+      } catch (apiError) {
+        // Fallback to hardcoded data
+        console.warn('API failed, using fallback data:', apiError);
+        const hardcodedArticle = getHardcodedArticle(slug);
+        if (hardcodedArticle) {
+          setArticle(hardcodedArticle);
+          setRelated(getRelatedArticles(slug, 3));
+        } else {
+          setError('Article not found');
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to load article');

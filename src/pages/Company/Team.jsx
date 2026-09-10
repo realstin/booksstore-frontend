@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { getTeamMembers } from "../../services/api";
+import ceoImage from "../../assets/ceo.png";
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -172,11 +173,41 @@ function Team() {
       setLoading(true);
       setError(null);
       const data = await getTeamMembers();
-      setMembers(data);
+      
+      // If API returns data, use it
+      if (data && data.length > 0) {
+        setMembers(data);
+      } else {
+        // Fallback to hardcoded single member
+        console.warn('API returned no team members, using fallback data');
+        setMembers([{
+          _id: '1',
+          name: "IRATUZI M. Justin",
+          role: "CEO & Founder",
+          bio: "Builder and visionary behind BookStore. Passionate about helping learners discover trusted technology resources — faster and smarter.",
+          photo: ceoImage,
+          socials: [
+            { label: "X (Twitter)", href: "https://x.com/irmjustin", icon: "x" },
+            { label: "GitHub", href: "https://github.com/realstin", icon: "github" },
+            { label: "Website", href: "https://irmjustin.github.io/", icon: "globe" },
+          ],
+        }]);
+      }
     } catch (err) {
-      console.error('Failed to load team members from API:', err);
-      // Silently fail - just show empty state instead of error
-      setMembers([]);
+      console.error('Failed to load team members from API, using fallback data:', err);
+      // Use hardcoded single member as fallback
+      setMembers([{
+        _id: '1',
+        name: "IRATUZI M. Justin",
+        role: "CEO & Founder",
+        bio: "Builder and visionary behind BookStore. Passionate about helping learners discover trusted technology resources — faster and smarter.",
+        photo: ceoImage,
+        socials: [
+          { label: "X (Twitter)", href: "https://x.com/irmjustin", icon: "x" },
+          { label: "GitHub", href: "https://github.com/realstin", icon: "github" },
+          { label: "Website", href: "https://irmjustin.github.io/", icon: "globe" },
+        ],
+      }]);
       setError(null);
     } finally {
       setLoading(false);
