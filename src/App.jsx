@@ -11,7 +11,6 @@ import Homepage from './pages/Homepage';
 /* ─── Lazily loaded — public ─── */
 const Login       = lazy(() => import('./pages/Login'));
 const Signup      = lazy(() => import('./pages/Signup'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Team        = lazy(() => import('./pages/Company/Team'));
 const Contact     = lazy(() => import('./pages/Company/Contact'));
 const News        = lazy(() => import('./pages/News/News'));
