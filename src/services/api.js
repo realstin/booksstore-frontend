@@ -2,13 +2,32 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 // ========== SESSION HELPERS ==========
 
-export function getUser() {
-  const raw = localStorage.getItem('bookstowa_user');
-  return raw ? JSON.parse(raw) : null;
+const SESSION_KEY = 'bookstowa_user';
+
+// Write the user object to localStorage so the app can hydrate instantly
+// on the next page load without waiting for the /api/auth/me round-trip.
+export function saveSession(user) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  } catch {
+    // localStorage can be blocked in some private-browsing modes — fail silently.
+  }
 }
 
+// Read the cached user from localStorage. Returns null if nothing is stored
+// or if the stored value is not valid JSON.
+export function getUser() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Remove the cached user from localStorage (called on logout).
 export function clearSession() {
-  localStorage.removeItem('bookstowa_user');
+  localStorage.removeItem(SESSION_KEY);
 }
 
 // ========== BACKEND STATUS CHECK ==========
