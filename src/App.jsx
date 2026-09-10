@@ -118,7 +118,6 @@ function App() {
           <Route path="/"           element={<HomepageGuard />} />
           <Route path="/login"         element={<Login />} />
           <Route path="/signup"        element={<Signup />} />
-          <Route path="/verify-email"      element={<VerifyEmail />} />
           <Route path="/team"       element={<Team />} />
           <Route path="/contact"    element={<Contact />} />
           <Route path="/news"       element={<News />} />
