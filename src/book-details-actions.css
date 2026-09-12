@@ -1,0 +1,10 @@
+/* Book details action row
+ * Keep the Save button from changing width when its label changes
+ * from "Save Book" to "Saved". The selector is intentionally scoped
+ * to the Book Details action group so other buttons are unaffected.
+ */
+
+.mx-auto.max-w-5xl > .grid > .flex.flex-col.gap-6 > .flex.flex-wrap.gap-3 > div:first-of-type > button {
+  width: auto !important;
+  min-width: 140px;
+}
