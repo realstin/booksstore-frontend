@@ -1,16 +1,43 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_REGEX = /^[\p{L}\p{M} .'-]+$/u;
+const COMMON_PASSWORDS = new Set([
+  '123456', '12345678', '123456789', '1234567890',
+  'password', 'password1', 'password123', 'qwerty', 'qwerty123',
+  'abcdef', 'abcdefgh', 'letmein', 'welcome', 'admin', 'admin123'
+]);
+
 // ========== EMAIL VALIDATION ==========
 export function validateEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
-  if (!email.trim()) {
+  const value = email.trim();
+
+  if (!value) {
     return { valid: false, error: 'Email is required' };
   }
-  
-  if (!emailRegex.test(email)) {
-    return { valid: false, error: 'Please enter a valid email address' };
+
+  if (value.length > 254) {
+    return { valid: false, error: 'Email is too long' };
   }
-  
+
+  if (!EMAIL_REGEX.test(value)) {
+    return { valid: false, error: 'Enter a valid email' };
+  }
+
   return { valid: true, error: '' };
+}
+
+// ========== PASSWORD REQUIREMENTS ==========
+export function getPasswordRequirements(password) {
+  const value = password || '';
+  const byteLength = new TextEncoder().encode(value).length;
+
+  return [
+    { label: '8+ characters', valid: value.length >= 8 },
+    { label: '1 letter', valid: /[A-Za-z]/.test(value) },
+    { label: '1 number', valid: /\d/.test(value) },
+    { label: '1 symbol', valid: /[\p{P}\p{S}]/u.test(value) },
+    { label: '72 bytes max', valid: byteLength <= 72 },
+    { label: 'Not a common password', valid: !COMMON_PASSWORDS.has(value.toLowerCase()) },
+  ];
 }
 
 // ========== PASSWORD VALIDATION ==========
@@ -18,24 +45,45 @@ export function validatePassword(password) {
   if (!password) {
     return { valid: false, error: 'Password is required' };
   }
-  
-  if (password.length < 6) {
-    return { valid: false, error: 'Password must be at least 6 characters' };
+
+  const requirements = getPasswordRequirements(password);
+  const failed = requirements.find((requirement) => !requirement.valid);
+
+  if (failed) {
+    return { valid: false, error: failed.label };
   }
-  
+
+  if (/^(.)\1+$/.test(password)) {
+    return { valid: false, error: 'Avoid repeated characters' };
+  }
+
   return { valid: true, error: '' };
 }
 
 // ========== NAME VALIDATION ==========
 export function validateName(name) {
-  if (!name.trim()) {
+  const value = name.trim();
+
+  if (!value) {
     return { valid: false, error: 'Name is required' };
   }
-  
-  if (name.trim().length < 2) {
-    return { valid: false, error: 'Name must be at least 2 characters' };
+
+  if (value.length < 2) {
+    return { valid: false, error: 'Name is too short' };
   }
-  
+
+  if (value.length > 80) {
+    return { valid: false, error: 'Name is too long' };
+  }
+
+  if (!NAME_REGEX.test(value)) {
+    return { valid: false, error: 'Use letters and common name punctuation' };
+  }
+
+  if (value.split(/\s+/).length > 6) {
+    return { valid: false, error: 'Name is too long' };
+  }
+
   return { valid: true, error: '' };
 }
 
@@ -45,12 +93,12 @@ export function validateLoginForm(email, password) {
   if (!emailValidation.valid) {
     return emailValidation;
   }
-  
+
   const passwordValidation = validatePassword(password);
   if (!passwordValidation.valid) {
     return passwordValidation;
   }
-  
+
   return { valid: true, error: '' };
 }
 
@@ -60,16 +108,16 @@ export function validateSignupForm(name, email, password) {
   if (!nameValidation.valid) {
     return nameValidation;
   }
-  
+
   const emailValidation = validateEmail(email);
   if (!emailValidation.valid) {
     return emailValidation;
   }
-  
+
   const passwordValidation = validatePassword(password);
   if (!passwordValidation.valid) {
     return passwordValidation;
   }
-  
+
   return { valid: true, error: '' };
 }
