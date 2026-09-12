@@ -4,7 +4,6 @@ import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/Dashboard/DashboardLayout';
 import './App.css';
-import './book-details-actions.css';
 
 /* ─── Eagerly loaded ─── */
 import Homepage from './pages/Homepage';
@@ -29,22 +28,16 @@ const DashboardProfile  = lazy(() => import('./pages/Dashboard/Profile'));
 const DashboardSettings = lazy(() => import('./pages/Dashboard/Settings'));
 const BookDetails       = lazy(() => import('./pages/Dashboard/BookDetails'));
 const BookReader        = lazy(() => import('./pages/Dashboard/BookReader'));
-// Phase 1 experimental — only activated via ?v=2 query param
 const BookReaderV2      = lazy(() => import('./pages/Dashboard/BookReaderV2'));
 
-/* ─── Spinner shown while a lazy chunk loads ─── */
 function PageLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
-      <div
-        className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900"
-        aria-label="Loading…"
-      />
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900" aria-label="Loading…" />
     </div>
   );
 }
 
-/* ─── Scrolls to top on route change; preserves #hash targets ─── */
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -52,9 +45,7 @@ function ScrollToTop() {
       const id = hash.replace('#', '');
       const el = document.getElementById(id);
       if (el) {
-        const timer = setTimeout(() => {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 80);
+        const timer = setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
         return () => clearTimeout(timer);
       }
     } else {
@@ -64,31 +55,12 @@ function ScrollToTop() {
   return null;
 }
 
-/* ─── Redirects authenticated users away from / to /home ─── */
-//
-// The homepage is public — it renders immediately without waiting for the
-// /api/auth/me round-trip. Authentication detection runs in the background:
-//
-//   • isInitialized === false  → auth check still in flight; render homepage
-//     now so visitors never see a blocking spinner on the public page.
-//
-//   • isInitialized === true && user exists  → we confirmed the user is logged
-//     in; redirect to /home. Because React batches the state update and
-//     re-render before the browser paints, a fast /api/auth/me response means
-//     the logged-in user is redirected before the homepage is ever visible.
-//
-//   • isInitialized === true && no user  → confirmed unauthenticated; keep
-//     rendering the homepage normally.
 function HomepageGuard() {
   const { user, isInitialized } = useAuth();
   if (isInitialized && user) return <Navigate to="/home" replace />;
   return <Homepage />;
 }
 
-/* ─── Backward-compatibility redirect for parameterised book routes ───
- * <Navigate> cannot forward :id automatically, so we use a tiny wrapper
- * that reads the param and builds the new URL.
- */
 function RedirectBookDetails() {
   const { id } = useParams();
   return <Navigate to={`/books/${id}`} replace />;
@@ -99,10 +71,6 @@ function RedirectBookReader() {
   const qs = searchParams.toString();
   return <Navigate to={`/books/${id}/read${qs ? `?${qs}` : ''}`} replace />;
 }
-/* ─── Reader switcher — ?v=2 activates the Phase 1 experimental PDF.js reader ───
- * Default (?v absent or anything other than "2"): original BookReader (iframe).
- * With ?v=2: BookReaderV2 (PDF.js via react-pdf) — Phase 1 experimental only.
- */
 function BookReaderSwitcher() {
   const [searchParams] = useSearchParams();
   return searchParams.get('v') === '2' ? <BookReaderV2 /> : <BookReader />;
@@ -114,45 +82,34 @@ function App() {
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* ── Public routes ── */}
-          <Route path="/"           element={<HomepageGuard />} />
-          <Route path="/login"         element={<Login />} />
-          <Route path="/signup"        element={<Signup />} />
-          <Route path="/team"       element={<Team />} />
-          <Route path="/contact"    element={<Contact />} />
-          <Route path="/news"       element={<News />} />
+          <Route path="/" element={<HomepageGuard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/news" element={<News />} />
           <Route path="/news/:slug" element={<NewsArticle />} />
-          <Route path="/about"      element={<About />} />
-          <Route path="/help"       element={<Help />} />
-          <Route path="/privacy"    element={<Privacy />} />
-          <Route path="/terms"      element={<Terms />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
 
-          {/* ── Backward-compatibility redirects (old /dashboard/* URLs) ── */}
-          <Route path="/dashboard"          element={<Navigate to="/home"     replace />} />
-          <Route path="/dashboard/explore"  element={<Navigate to="/explore"  replace />} />
-          <Route path="/dashboard/library"  element={<Navigate to="/library"  replace />} />
-          <Route path="/dashboard/profile"  element={<Navigate to="/profile"  replace />} />
+          <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+          <Route path="/dashboard/explore" element={<Navigate to="/explore" replace />} />
+          <Route path="/dashboard/library" element={<Navigate to="/library" replace />} />
+          <Route path="/dashboard/profile" element={<Navigate to="/profile" replace />} />
           <Route path="/dashboard/settings" element={<Navigate to="/settings" replace />} />
-          <Route path="/dashboard/books/:id"      element={<RedirectBookDetails />} />
+          <Route path="/dashboard/books/:id" element={<RedirectBookDetails />} />
           <Route path="/dashboard/books/:id/read" element={<RedirectBookReader />} />
 
-          {/* ── Protected app — nested so layout persists ── */}
-          {/* The parent Route has no path — it acts purely as a layout wrapper.
-              Each child uses an absolute path so URLs are /home, /explore, etc. */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/home"              element={<Dashboard />} />
-            <Route path="/explore"           element={<DashboardExplore />} />
-            <Route path="/library"           element={<DashboardLibrary />} />
-            <Route path="/profile"           element={<DashboardProfile />} />
-            <Route path="/settings"          element={<DashboardSettings />} />
-            <Route path="/books/:id"         element={<BookDetails />} />
-            <Route path="/books/:id/read"    element={<BookReaderSwitcher />} />
+          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route path="/home" element={<Dashboard />} />
+            <Route path="/explore" element={<DashboardExplore />} />
+            <Route path="/library" element={<DashboardLibrary />} />
+            <Route path="/profile" element={<DashboardProfile />} />
+            <Route path="/settings" element={<DashboardSettings />} />
+            <Route path="/books/:id" element={<BookDetails />} />
+            <Route path="/books/:id/read" element={<BookReaderSwitcher />} />
           </Route>
         </Routes>
       </Suspense>
