@@ -73,11 +73,13 @@ function Signup() {
   const emailValidation = form.email ? validateEmail(form.email) : null;
   const passwordValidation = form.password ? validatePassword(form.password) : null;
   const passwordRequirements = getPasswordRequirements(form.password);
-  const signupValid =
+  const nextPasswordRequirement = passwordRequirements.find((requirement) => !requirement.valid && !requirement.hidden);
+  const signupValid = Boolean(
     nameValidation?.valid &&
     emailValidation?.valid &&
     passwordValidation?.valid &&
-    agreed;
+    agreed
+  );
 
   const fieldClass = (validation) =>
     `h-12 w-full rounded-xl border bg-neutral-50 px-4 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none transition-all focus:bg-white focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 ${
@@ -182,7 +184,7 @@ function Signup() {
                   maxLength={72}
                   required
                   aria-invalid={passwordValidation ? !passwordValidation.valid : undefined}
-                  aria-describedby="signup-password-requirements"
+                  aria-describedby="signup-password-guidance"
                   className={`${fieldClass(passwordValidation)} pr-12`}
                 />
                 <button
@@ -195,27 +197,15 @@ function Signup() {
                 </button>
               </div>
 
-              {form.password && (
-                <div id="signup-password-requirements" className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1.5" aria-live="polite">
-                  {passwordRequirements.map((requirement) => (
-                    <div
-                      key={requirement.label}
-                      className={`flex items-center gap-1.5 text-[12px] ${
-                        requirement.valid ? 'text-emerald-600' : 'text-neutral-400'
-                      }`}
-                    >
-                      <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border text-[9px] leading-none">
-                        {requirement.valid ? '✓' : ''}
-                      </span>
-                      <span>{requirement.label}</span>
-                    </div>
-                  ))}
-                </div>
+              {form.password && nextPasswordRequirement && (
+                <p id="signup-password-guidance" className="text-[12px] text-neutral-500" aria-live="polite">
+                  {nextPasswordRequirement.label}
+                </p>
               )}
 
-              {passwordValidation && !passwordValidation.valid && !passwordRequirements.some((item) => !item.valid) && (
-                <p role="alert" className="text-[12px] text-red-600">
-                  {passwordValidation.error}
+              {form.password && !nextPasswordRequirement && (
+                <p id="signup-password-guidance" className="text-[12px] text-emerald-600" aria-live="polite">
+                  Password looks good.
                 </p>
               )}
             </div>
