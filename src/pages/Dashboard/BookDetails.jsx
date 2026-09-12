@@ -231,7 +231,7 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
         whileTap={!isLoading ? { scale: 0.97 } : {}}
         transition={{ duration: 0.18 }}
         className={[
-          'inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-60',
+          'inline-flex w-[154px] shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-60',
           saved
             ? 'border border-neutral-950 bg-neutral-950 text-white hover:bg-neutral-800 hover:border-neutral-800'
             : 'border border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50',
