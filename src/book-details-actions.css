@@ -1,10 +1,17 @@
-/* Book details action row
- * Keep the Save button from changing width when its label changes
- * from "Save Book" to "Saved". The selector is intentionally scoped
- * to the Book Details action group so other buttons are unaffected.
+/* Book Details action row only.
+ * All three primary actions keep the same footprint, so changing
+ * Save Book -> Saved (or loading text) cannot resize or move Read Online.
  */
 
-.mx-auto.max-w-5xl > .grid > .flex.flex-col.gap-6 > .flex.flex-wrap.gap-3 > div:first-of-type > button {
-  width: auto !important;
-  min-width: 140px;
+#b6z9gh > a,
+#b6z9gh > div {
+  flex: 0 0 154px;
+  width: 154px;
+  min-width: 154px;
+}
+
+#b6z9gh > div > button {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
 }
