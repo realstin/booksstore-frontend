@@ -16,35 +16,37 @@ export function validateEmail(email) {
   return { valid: true, error: '' };
 }
 
+// These are signup requirements only. They are deliberately kept separate
+// from login validation so existing passwords are never judged by new rules.
 export function getPasswordRequirements(password) {
   const value = password || '';
   const byteLength = new TextEncoder().encode(value).length;
 
   return [
-    { label: '8+ characters', valid: value.length >= 8 },
-    { label: '1 letter', valid: /[A-Za-z]/.test(value) },
-    { label: '1 number', valid: /\d/.test(value) },
-    { label: '1 symbol', valid: /[\p{P}\p{S}]/u.test(value) },
-    { label: '72 bytes max', valid: byteLength <= 72 },
-    { label: 'Not common', valid: !COMMON_PASSWORDS.has(value.toLowerCase()) },
+    { label: 'Use at least 8 characters', valid: value.length >= 8 },
+    { label: 'Add at least 1 letter', valid: /[A-Za-z]/.test(value) },
+    { label: 'Add at least 1 number', valid: /\d/.test(value) },
+    { label: 'Add at least 1 symbol', valid: /[\p{P}\p{S}]/u.test(value) },
+    { label: 'Choose a less common password', valid: !COMMON_PASSWORDS.has(value.toLowerCase()) },
+    { label: 'Password is too long', valid: byteLength <= 72, hidden: true },
   ];
 }
 
-// Used for SIGNUP only. Existing passwords are not judged by these rules during login.
 export function validateSignupPassword(password) {
   if (!password) return { valid: false, error: 'Password is required' };
 
   const requirements = getPasswordRequirements(password);
   const failed = requirements.find((requirement) => !requirement.valid);
 
-  if (failed) return { valid: false, error: failed.label };
-  if (/^(.)\1+$/.test(password)) return { valid: false, error: 'Avoid repeated characters' };
+  if (failed) {
+    return { valid: false, error: failed.hidden ? 'Password is too long' : failed.label };
+  }
 
   return { valid: true, error: '' };
 }
 
-// Login only checks that the user actually entered a password.
-// It must NOT enforce signup-era password requirements on existing accounts.
+// Login only verifies that the user entered a password. It does not enforce
+// signup requirements on passwords that may have been created in the past.
 export function validateLoginPassword(password) {
   if (!password) return { valid: false, error: 'Password is required' };
   return { valid: true, error: '' };
