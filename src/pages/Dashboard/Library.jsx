@@ -137,8 +137,7 @@ function LibraryListRow({ book, onRemove }) {
     if (removeStatus === 'loading') return;
     setRemoveStatus('loading');
     try {
-      await removeBook(book._id);
-      onRemove(book._id);
+      await onRemove(book._id);
     } catch {
       setRemoveStatus('error');
       setTimeout(() => setRemoveStatus('idle'), 3000);
@@ -216,8 +215,7 @@ function LibraryBookCard({ book, index, onRemove }) {
     if (removeStatus === 'loading') return;
     setRemoveStatus('loading');
     try {
-      await removeBook(book._id);
-      onRemove(book._id); // tell parent to remove from list
+      await onRemove(book._id);
     } catch (err) {
       console.error('Remove failed:', err);
       setRemoveStatus('error');
@@ -285,7 +283,7 @@ function Library() {
 
   /* ── Bookmarks ── */
   const [bmarks,    setBmarks]    = useState([]);
-  const [bmStatus,  setBmStatus]  = useState('loading');
+  const [bmStatus,  setBmStatus  ] = useState('loading');
 
   const fetchBookmarks = useCallback(async () => {
     setBmStatus('loading');
