@@ -1,55 +1,150 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Bookmark, BookmarkCheck, Download, Loader2, Star, Wifi, WifiOff } from 'lucide-react';
-import { getBook, downloadBook } from '../../services/api';
+import {
+  ArrowLeft, BookOpen, Bookmark, BookmarkCheck,
+  Download, Star, Languages, Building2, Calendar,
+  Hash, FileText, RefreshCw, Wifi, WifiOff,
+  AlertCircle, Loader2,
+} from 'lucide-react';
+import { getBookById, downloadBook } from '../../services/api';
 import { useLibrary } from '../../context/LibraryContext';
-import './BookDetails.css';
 
-/* ─────────────────────────────────────────
-   Helpers
-───────────────────────────────────────── */
+const ease = [0.22, 1, 0.36, 1];
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay, ease },
+});
+
+function formatCount(n) {
+  if (!n && n !== 0) return null;
+  if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}K`;
+  return String(n);
+}
+
 function formatAuthors(authors) {
-  if (!authors) return '';
-  if (Array.isArray(authors)) return authors.join(', ');
-  return String(authors);
+  if (!authors) return null;
+  const arr = Array.isArray(authors) ? authors : [String(authors)];
+  if (arr.length === 0) return null;
+  if (arr.length === 1) return arr[0];
+  const last = arr[arr.length - 1];
+  return arr.slice(0, -1).join(', ') + ' & ' + last;
 }
 
 function formatCategories(categories) {
   if (!categories) return [];
-  if (Array.isArray(categories)) return categories;
+  if (Array.isArray(categories)) return categories.filter(Boolean);
   return String(categories).split(',').map((c) => c.trim()).filter(Boolean);
 }
 
-function formatCount(n) {
-  if (n == null) return '';
-  const num = Number(n);
-  if (!Number.isFinite(num)) return '';
-  return num.toLocaleString();
+function formatDate(raw) {
+  if (!raw) return null;
+  try {
+    return new Date(raw).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+    });
+  } catch {
+    return raw;
+  }
 }
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, delay },
-});
+function titleInitials(title = '') {
+  return title.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+}
 
 function FallbackCover({ title }) {
+  const initials = titleInitials(title);
   return (
-    <div className="flex h-full min-h-[300px] items-center justify-center bg-neutral-100 p-8 text-center">
-      <span className="text-sm font-semibold text-neutral-400">{title}</span>
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-neutral-900 p-6">
+      <BookOpen size={36} strokeWidth={1.25} className="text-neutral-600" aria-hidden="true" />
+      {initials && (
+        <span className="text-[1.4rem] font-bold tracking-tight text-neutral-500">{initials}</span>
+      )}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   Save button
-───────────────────────────────────────── */
+function SkeletonDetail() {
+  return (
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]">
+      <div className="flex justify-center lg:justify-start">
+        <div className="aspect-3/4 w-56 animate-pulse rounded-2xl bg-neutral-100 lg:w-full" />
+      </div>
+      <div className="flex flex-col gap-5">
+        <div className="flex gap-2">
+          <div className="h-5 w-20 animate-pulse rounded-full bg-neutral-100" />
+          <div className="h-5 w-16 animate-pulse rounded-full bg-neutral-100" />
+        </div>
+        <div className="h-9 w-3/4 animate-pulse rounded-lg bg-neutral-100" />
+        <div className="h-5 w-1/3 animate-pulse rounded bg-neutral-100" />
+        <div className="space-y-2">
+          <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
+          <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
+          <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
+        </div>
+        <div className="flex gap-3 pt-2">
+          <div className="h-12 w-36 animate-pulse rounded-full bg-neutral-100" />
+          <div className="h-12 w-36 animate-pulse rounded-full bg-neutral-100" />
+          <div className="h-12 w-32 animate-pulse rounded-full bg-neutral-100" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ notFound, onRetry, onBack }) {
+  return (
+    <div className="flex flex-col items-center gap-5 rounded-2xl border border-neutral-200 bg-white px-8 py-16 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50">
+        <AlertCircle size={24} strokeWidth={1.5} className="text-neutral-400" aria-hidden="true" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[1rem] font-bold text-neutral-950">
+          {notFound ? 'Book not found.' : "We couldn't load this book."}
+        </p>
+        <p className="max-w-xs text-[13.5px] leading-relaxed text-neutral-500">
+          {notFound
+            ? 'This book may have been removed or the link may no longer be available.'
+            : 'Something went wrong. Please try again.'}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-[13.5px] font-medium text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
+          <ArrowLeft size={14} aria-hidden="true" />Back to Explore
+        </button>
+        {!notFound && onRetry && (
+          <button type="button" onClick={onRetry} className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-medium text-white transition hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
+            <RefreshCw size={13} aria-hidden="true" />Try Again
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MetaRow({ icon: Icon, label, value }) {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-3">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-neutral-50 text-neutral-500">
+        <Icon size={13} strokeWidth={2} aria-hidden="true" />
+      </span>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">{label}</span>
+        <span className="text-[13.5px] text-neutral-700">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
-  const [saved,      setSaved]      = useState(initialSaved);
+  const [saved, setSaved] = useState(initialSaved);
   const [savesCount, setSavesCount] = useState(initialCount);
   const [saveStatus, setSaveStatus] = useState('idle');
-  const [saveError,  setSaveError]  = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => { setSaved(initialSaved); }, [initialSaved]);
   useEffect(() => { setSavesCount(initialCount); }, [initialCount]);
@@ -74,11 +169,7 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
     } catch (err) {
       console.error('Save toggle failed:', err);
       setSaveStatus('error');
-      setSaveError(
-        saved
-          ? 'Unable to remove book. Please try again.'
-          : 'Unable to save book. Please try again.'
-      );
+      setSaveError(saved ? 'Unable to remove book. Please try again.' : 'Unable to save book. Please try again.');
     }
   }
 
@@ -93,48 +184,27 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
         whileHover={!isLoading ? { scale: 1.02 } : {}}
         whileTap={!isLoading ? { scale: 0.97 } : {}}
         transition={{ duration: 0.18 }}
-        className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-3 text-[14px] font-semibold text-neutral-700 shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
-        aria-label={
-          isLoading
-            ? saved ? 'Removing from library…' : 'Saving to library…'
-            : saved ? 'Remove from library' : 'Save to library'
-        }
+        className={[
+          'inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-60',
+          saved ? 'border border-neutral-950 bg-neutral-950 text-white hover:bg-neutral-800 hover:border-neutral-800' : 'border border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50',
+        ].join(' ')}
+        aria-label={isLoading ? saved ? 'Removing from library…' : 'Saving to library…' : saved ? 'Remove from library' : 'Save to library'}
         aria-pressed={saved}
         aria-busy={isLoading}
       >
         {isLoading ? (
-          <>
-            <Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />
-            {saved ? 'Removing…' : 'Saving…'}
-          </>
+          <><Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />{saved ? 'Removing…' : 'Saving…'}</>
         ) : saved ? (
-          <>
-            <BookmarkCheck size={16} strokeWidth={2} aria-hidden="true" />
-            Saved
-          </>
+          <><BookmarkCheck size={16} strokeWidth={2} aria-hidden="true" />Saved</>
         ) : (
-          <>
-            <Bookmark size={16} strokeWidth={2} aria-hidden="true" />
-            Save Book
-          </>
+          <><Bookmark size={16} strokeWidth={2} aria-hidden="true" />Save Book</>
         )}
       </motion.button>
 
       {saveStatus === 'error' && (
-        <motion.p
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-[12.5px] text-red-500"
-          role="alert"
-        >
+        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[12.5px] text-red-500" role="alert">
           {saveError}
-          <button
-            type="button"
-            onClick={() => setSaveStatus('idle')}
-            className="ml-2 underline underline-offset-4 transition hover:text-red-700 focus:outline-none"
-          >
-            Dismiss
-          </button>
+          <button type="button" onClick={() => setSaveStatus('idle')} className="ml-2 underline underline-offset-4 transition hover:text-red-700 focus:outline-none">Dismiss</button>
         </motion.p>
       )}
 
@@ -147,19 +217,11 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   Download button
-───────────────────────────────────────── */
 function DownloadButton({ bookId, bookTitle }) {
   const [dlStatus, setDlStatus] = useState('idle');
 
   function safeFilename(title) {
-    return (title ?? 'book')
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-      .slice(0, 80) + '.pdf';
+    return (title ?? 'book').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 80) + '.pdf';
   }
 
   async function handleDownload() {
@@ -167,7 +229,7 @@ function DownloadButton({ bookId, bookTitle }) {
     setDlStatus('downloading');
     try {
       const blob = await downloadBook(bookId);
-      const url  = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = safeFilename(bookTitle);
@@ -184,45 +246,13 @@ function DownloadButton({ bookId, bookTitle }) {
 
   return (
     <div className="flex w-[154px] min-w-[154px] shrink-0 flex-col gap-1.5">
-      <motion.button
-        type="button"
-        onClick={handleDownload}
-        disabled={dlStatus === 'downloading'}
-        whileHover={dlStatus !== 'downloading' ? { scale: 1.02 } : {}}
-        whileTap={dlStatus !== 'downloading' ? { scale: 0.97 } : {}}
-        transition={{ duration: 0.18 }}
-        className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-6 py-3 text-[14px] font-semibold text-neutral-700 shadow-sm transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-        aria-label={dlStatus === 'downloading' ? 'Preparing download…' : 'Download book as PDF'}
-        aria-busy={dlStatus === 'downloading'}
-      >
-        {dlStatus === 'downloading' ? (
-          <>
-            <Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />
-            Preparing download…
-          </>
-        ) : (
-          <>
-            <Download size={16} strokeWidth={2} aria-hidden="true" />
-            Download
-          </>
-        )}
+      <motion.button type="button" onClick={handleDownload} disabled={dlStatus === 'downloading'} whileHover={dlStatus !== 'downloading' ? { scale: 1.02 } : {}} whileTap={dlStatus !== 'downloading' ? { scale: 0.97 } : {}} transition={{ duration: 0.18 }} className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-6 py-3 text-[14px] font-semibold text-neutral-700 shadow-sm transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label={dlStatus === 'downloading' ? 'Preparing download…' : 'Download book as PDF'} aria-busy={dlStatus === 'downloading'}>
+        {dlStatus === 'downloading' ? <><Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />Preparing download…</> : <><Download size={16} strokeWidth={2} aria-hidden="true" />Download</>}
       </motion.button>
-
       {dlStatus === 'error' && (
-        <motion.p
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-[12.5px] text-red-500"
-          role="alert"
-        >
+        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[12.5px] text-red-500" role="alert">
           Unable to download this book. Please try again.
-          <button
-            type="button"
-            onClick={() => setDlStatus('idle')}
-            className="ml-2 underline underline-offset-4 transition hover:text-red-700 focus:outline-none"
-          >
-            Dismiss
-          </button>
+          <button type="button" onClick={() => setDlStatus('idle')} className="ml-2 underline underline-offset-4 transition hover:text-red-700 focus:outline-none">Dismiss</button>
         </motion.p>
       )}
     </div>
@@ -232,21 +262,26 @@ function DownloadButton({ bookId, bookTitle }) {
 function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isSaved, saveBook: ctxSaveBook, removeBook: ctxRemoveBook, libStatus } = useLibrary();
-  const libraryReady = libStatus === 'success';
+  const { libStatus, isSaved: isBookSaved, saveBook: ctxSaveBook, removeBook: ctxRemoveBook } = useLibrary();
+  const isSaved = isBookSaved(id);
+  const libraryReady = libStatus !== 'loading';
   const [book, setBook] = useState(null);
   const [status, setStatus] = useState('loading');
 
+  const goToExplore = () => navigate('/explore');
+
   const fetchBook = useCallback(async () => {
-    if (!id) return;
     setStatus('loading');
+    setBook(null);
     try {
-      const data = await getBook(id);
-      setBook(data.book ?? data);
+      const data = await getBookById(id);
+      const b = data?.book ?? data;
+      setBook(b);
       setStatus('success');
     } catch (err) {
-      console.error('Failed to fetch book:', err);
-      setStatus(err?.response?.status === 404 ? 'notfound' : 'error');
+      console.error('BookDetails fetch error:', err);
+      if (err.status === 404) setStatus('notfound');
+      else setStatus('error');
     }
   }, [id]);
 
@@ -258,61 +293,29 @@ function BookDetails() {
   const hasCover = Boolean(book?.coverImage);
   const hasPdf = Boolean(book?.pdfUrl);
 
-  const goToExplore = () => navigate('/explore');
-
   return (
     <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8 lg:px-10">
-      <motion.button
-        type="button"
-        onClick={goToExplore}
-        {...fadeUp(0)}
-        whileHover={{ x: -2 }}
-        transition={{ duration: 0.18 }}
-        className="mb-8 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13.5px] font-medium text-neutral-600 shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
-        aria-label="Back to Explore"
-      >
-        <ArrowLeft size={14} aria-hidden="true" />
-        Back to Explore
+      <motion.button type="button" onClick={goToExplore} {...fadeUp(0)} whileHover={{ x: -2 }} transition={{ duration: 0.18 }} className="mb-8 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13.5px] font-medium text-neutral-600 shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label="Back to Explore">
+        <ArrowLeft size={14} aria-hidden="true" />Back to Explore
       </motion.button>
 
-      {status === 'loading' && <div className="h-80 animate-pulse rounded-2xl bg-neutral-50" />}
+      {status === 'loading' && <SkeletonDetail />}
 
-      {(status === 'notfound' || status === 'error') && (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-          <p className="text-sm text-neutral-500">
-            {status === 'notfound' ? 'Book not found.' : 'Unable to load this book.'}
-          </p>
-          {status === 'error' && (
-            <button type="button" onClick={fetchBook} className="mt-4 rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white">
-              Try again
-            </button>
-          )}
-        </div>
-      )}
+      {(status === 'notfound' || status === 'error') && <ErrorState notFound={status === 'notfound'} onRetry={status === 'error' ? fetchBook : undefined} onBack={goToExplore} />}
 
       {status === 'success' && book && (
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr] xl:grid-cols-[300px_1fr]">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]">
           <motion.div {...fadeUp(0.04)} className="flex justify-center lg:justify-start">
             <div className="w-56 overflow-hidden rounded-2xl border border-neutral-200 shadow-[0_8px_32px_rgba(0,0,0,0.12)] lg:w-full">
-              {hasCover ? (
-                <motion.img src={book.coverImage} alt={`Cover of ${book.title}`} loading="lazy" className="aspect-3/4 w-full object-cover" whileHover={{ scale: 1.03 }} transition={{ duration: 0.35 }} />
-              ) : (
-                <div className="aspect-3/4 w-full"><FallbackCover title={book.title} /></div>
-              )}
+              {hasCover ? <motion.img src={book.coverImage} alt={`Cover of ${book.title}`} loading="lazy" className="aspect-3/4 w-full object-cover" whileHover={{ scale: 1.03 }} transition={{ duration: 0.35 }} /> : <div className="aspect-3/4 w-full"><FallbackCover title={book.title} /></div>}
             </div>
           </motion.div>
 
           <div className="flex flex-col gap-6">
             <motion.div {...fadeUp(0.08)} className="flex flex-wrap items-center gap-2">
-              {categories.map((cat) => (
-                <span key={cat} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11.5px] font-semibold uppercase tracking-widest text-neutral-500">{cat}</span>
-              ))}
-              {book.featured && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-950 px-3 py-1 text-[11.5px] font-semibold text-white"><Star size={10} fill="white" strokeWidth={0} aria-hidden="true" />Community Favorite</span>
-              )}
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-semibold ${hasPdf ? 'border border-neutral-200 bg-white text-neutral-600' : 'border border-neutral-100 bg-neutral-50 text-neutral-400'}`}>
-                {hasPdf ? <><Wifi size={10} strokeWidth={2} aria-hidden="true" /> Available online</> : <><WifiOff size={10} strokeWidth={2} aria-hidden="true" /> Online reading unavailable</>}
-              </span>
+              {categories.map((cat) => <span key={cat} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11.5px] font-semibold uppercase tracking-widest text-neutral-500">{cat}</span>)}
+              {book.featured && <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-950 px-3 py-1 text-[11.5px] font-semibold text-white"><Star size={10} fill="white" strokeWidth={0} aria-hidden="true" />Community Favorite</span>}
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] font-semibold ${hasPdf ? 'border border-neutral-200 bg-white text-neutral-600' : 'border border-neutral-100 bg-neutral-50 text-neutral-400'}`}>{hasPdf ? <><Wifi size={10} strokeWidth={2} aria-hidden="true" />Available online</> : <><WifiOff size={10} strokeWidth={2} aria-hidden="true" />Online reading unavailable</>}</span>
             </motion.div>
 
             <motion.h1 {...fadeUp(0.12)} className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-bold leading-[1.1] tracking-[-0.02em] text-neutral-950">{book.title}</motion.h1>
@@ -329,7 +332,7 @@ function BookDetails() {
               <p className="text-[14.5px] leading-[1.85] text-neutral-600">{book.description?.trim() ? book.description : 'No description is available for this book yet.'}</p>
             </motion.div>
 
-            <motion.div {...fadeUp(0.3)} id="b6z9gh" className="flex flex-wrap gap-3">
+            <motion.div {...fadeUp(0.3)} className="flex flex-wrap items-start gap-3">
               {hasPdf ? (
                 <Link to={`/books/${id}/read`} className="inline-flex w-[154px] min-w-[154px] shrink-0 items-center justify-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label={`Read ${book.title} online`}>
                   <BookOpen size={16} strokeWidth={2} aria-hidden="true" />Read Online
@@ -340,19 +343,9 @@ function BookDetails() {
                 </button>
               )}
 
-              {libraryReady ? (
-                <SaveButton bookId={id} initialSaved={isSaved(id)} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} />
-              ) : (
-                <div className="h-12 w-[154px] min-w-[154px] shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />
-              )}
+              {libraryReady ? <SaveButton bookId={id} initialSaved={isSaved} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} /> : <div className="h-12 w-[154px] min-w-[154px] shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />}
 
-              {hasPdf ? (
-                <DownloadButton bookId={id} bookTitle={book.title} />
-              ) : (
-                <button type="button" disabled className="inline-flex w-[154px] min-w-[154px] shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true">
-                  <Download size={16} strokeWidth={2} aria-hidden="true" />Download
-                </button>
-              )}
+              {hasPdf ? <DownloadButton bookId={id} bookTitle={book.title} /> : <button type="button" disabled className="inline-flex w-[154px] min-w-[154px] shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true"><Download size={16} strokeWidth={2} aria-hidden="true" />Download</button>}
             </motion.div>
 
             {!hasPdf && <motion.p {...fadeUp(0.34)} className="text-[12.5px] text-neutral-400">This book is not available to read online yet.</motion.p>}
@@ -360,12 +353,14 @@ function BookDetails() {
             <motion.div {...fadeUp(0.36)}>
               <div className="rounded-2xl border border-neutral-200 bg-white p-6">
                 <p className="mb-4 text-[11.5px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Book Details</p>
-                <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {book.publisher && <div><dt className="text-xs text-neutral-400">Publisher</dt><dd className="mt-1 text-sm text-neutral-700">{book.publisher}</dd></div>}
-                  {book.publishedDate && <div><dt className="text-xs text-neutral-400">Published</dt><dd className="mt-1 text-sm text-neutral-700">{book.publishedDate}</dd></div>}
-                  {book.pages && <div><dt className="text-xs text-neutral-400">Pages</dt><dd className="mt-1 text-sm text-neutral-700">{book.pages}</dd></div>}
-                  {categories.length > 0 && <div><dt className="text-xs text-neutral-400">Categories</dt><dd className="mt-1 text-sm text-neutral-700">{categories.join(', ')}</dd></div>}
-                </dl>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <MetaRow icon={Languages} label="Language" value={book.language} />
+                  <MetaRow icon={Building2} label="Publisher" value={book.publisher} />
+                  <MetaRow icon={Calendar} label="Published" value={formatDate(book.publishedDate)} />
+                  <MetaRow icon={Hash} label="ISBN" value={book.isbn} />
+                  <MetaRow icon={FileText} label="Pages" value={book.pages ? `${book.pages} pages` : null} />
+                  <MetaRow icon={BookOpen} label="Edition" value={book.edition ? `${book.edition} edition` : null} />
+                </div>
               </div>
             </motion.div>
           </div>
