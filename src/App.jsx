@@ -4,6 +4,7 @@ import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/Dashboard/DashboardLayout';
 import './App.css';
+import './book-details-actions.css';
 
 /* ─── Eagerly loaded ─── */
 import Homepage from './pages/Homepage';
@@ -78,7 +79,6 @@ function ScrollToTop() {
 //
 //   • isInitialized === true && no user  → confirmed unauthenticated; keep
 //     rendering the homepage normally.
-//
 function HomepageGuard() {
   const { user, isInitialized } = useAuth();
   if (isInitialized && user) return <Navigate to="/home" replace />;
