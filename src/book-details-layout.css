@@ -1,0 +1,9 @@
+/* Keep the Book Details action labels on one line.
+ * The action buttons already have stable widths in BookDetails.jsx;
+ * this only prevents a label from wrapping when its flex content is tight.
+ */
+.mx-auto.max-w-5xl .flex.flex-wrap.items-start.gap-3 > a,
+.mx-auto.max-w-5xl .flex.flex-wrap.items-start.gap-3 > button,
+.mx-auto.max-w-5xl .flex.flex-wrap.items-start.gap-3 > div > button {
+  white-space: nowrap;
+}
