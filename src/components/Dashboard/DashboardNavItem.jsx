@@ -5,16 +5,19 @@ import { motion } from 'framer-motion';
  * A single sidebar navigation link.
  * Uses NavLink so the `isActive` class is applied automatically.
  */
-function DashboardNavItem({ to, icon: Icon, label, onClick, end = false }) {
+function DashboardNavItem({ to, icon: Icon, label, onClick, end = false, collapsed = false }) {
   return (
     <NavLink
       to={to}
       end={end}
       onClick={onClick}
       aria-current={undefined} /* NavLink sets aria-current="page" automatically */
+      aria-label={collapsed ? label : undefined}
+      title={collapsed ? label : undefined}
       className={({ isActive }) =>
         [
-          'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2',
+          'group flex items-center rounded-xl py-2.5 text-[14px] font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2',
+          collapsed ? 'justify-center px-2' : 'gap-3 px-3',
           isActive
             ? 'bg-neutral-950 text-white'
             : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950',
@@ -31,7 +34,7 @@ function DashboardNavItem({ to, icon: Icon, label, onClick, end = false }) {
           >
             <Icon size={17} strokeWidth={isActive ? 2.2 : 1.9} />
           </motion.span>
-          <span>{label}</span>
+          {!collapsed && <span>{label}</span>}
         </>
       )}
     </NavLink>
