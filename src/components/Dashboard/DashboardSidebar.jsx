@@ -115,12 +115,12 @@ function DashboardSidebar() {
 
       {/* ── Primary nav ── */}
       <nav
-        className={`flex-1 overflow-y-auto py-5 ${collapsed ? 'px-2' : 'px-3'}`}
+        className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto py-5 ${collapsed ? 'px-2' : 'px-3'}`}
         aria-label="Main navigation"
       >
-        <ul className="flex flex-col gap-1" role="list">
+        <ul className="flex min-w-0 flex-col gap-1" role="list">
           {primaryNav.map((item) => (
-            <li key={item.to}>
+            <li key={item.to} className="min-w-0">
               <DashboardNavItem
                 to={item.to}
                 icon={item.icon}
@@ -187,10 +187,10 @@ function DashboardSidebar() {
                 {user?.email && (
                   <p className="truncate text-[11.5px] text-neutral-400">
                     {user.email}
-                  </p>
-                )}
-              </div>
-            )}
+                </p>
+              )}
+            </div>
+          )}
           </Link>
           {collapsed && (
             <span
