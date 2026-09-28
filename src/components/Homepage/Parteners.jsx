@@ -80,33 +80,13 @@ const partners = [
     ),
   },
   {
-    name: "GitHub Education",
-    Icon: () => (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-        <path
-          d="M9 1.5a7.5 7.5 0 0 0-2.372 14.615c.375.07.512-.163.512-.361 0-.178-.007-.773-.01-1.397-2.086.453-2.526-.888-2.526-.888-.341-.866-.833-1.097-.833-1.097-.68-.465.052-.455.052-.455.752.053 1.147.772 1.147.772.668 1.145 1.753.814 2.18.623.068-.484.261-.815.475-1.002-1.664-.19-3.414-.832-3.414-3.703 0-.818.292-1.486.771-2.01-.077-.19-.334-.95.073-1.98 0 0 .63-.201 2.062.768A7.18 7.18 0 0 1 9 5.908c.637.003 1.279.086 1.878.252 1.43-.97 2.059-.769 2.059-.769.408 1.031.151 1.791.074 1.98.48.524.77 1.192.77 2.01 0 2.879-1.753 3.512-3.422 3.697.269.232.508.69.508 1.39 0 1.003-.009 1.812-.009 2.058 0 .2.135.434.515.361A7.5 7.5 0 0 0 9 1.5z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: "LeetCode",
+    name: "Internet Archive",
     Icon: () => (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
         <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
         <rect x="4" y="5" width="3" height="8" rx="1" fill="currentColor" />
         <rect x="9"  y="5" width="5" height="2" rx="1" fill="currentColor" />
         <rect x="9"  y="9" width="4" height="2" rx="1" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    name: "CodeChef",
-    Icon: () => (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-        <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M7 6.5l5 2.5-5 2.5V6.5z" fill="currentColor" />
       </svg>
     ),
   },    
