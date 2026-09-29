@@ -12,7 +12,7 @@ const ease = [0.22, 1, 0.36, 1];
 ───────────────────────────────────────── */
 const partners = [
   {
-    name: "MIT",
+    name: "MIT OpenCourseWare",
     Icon: () => (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
         <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
