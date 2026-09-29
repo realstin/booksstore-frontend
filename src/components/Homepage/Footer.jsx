@@ -24,7 +24,7 @@ const columns = [
       { label: "Team",     href: "/team",    internal: true },
       { label: "Careers",  href: "#" },
       { label: "Contact",  href: "/contact", internal: true },
-      { label: "News",     href: "/news",    internal: true },
+      { label: "News & Articles",     href: "/news",    internal: true },
     ],
   },
   {
