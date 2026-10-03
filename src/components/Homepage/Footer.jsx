@@ -13,8 +13,8 @@ const columns = [
   {
     heading: "Product",
     links: [
-      { label: "Books",          href: "#" },
-      { label: "Reader",         href: "#" },
+      { label: "Books",  href: "/#explore", internal: true },
+      { label: "Reader", href: "/#reader",  internal: true },
     ],
   },
   {

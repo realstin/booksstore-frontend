@@ -369,8 +369,9 @@ function ReadingExperience() {
 
   return (
     <section
+      id="reader"
       ref={ref}
-      className="relative overflow-hidden bg-neutral-50/60 py-28 lg:py-32"
+      className="relative overflow-hidden bg-neutral-50/60 py-28 lg:py-32 scroll-mt-20"
       aria-labelledby="reading-heading"
     >
       {/* Dot-grid */}
