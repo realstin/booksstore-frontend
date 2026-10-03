@@ -22,7 +22,6 @@ const columns = [
     links: [
       { label: "About",    href: "/about",   internal: true },
       { label: "Team",     href: "/team",    internal: true },
-      { label: "Careers",  href: "#" },
       { label: "Contact",  href: "/contact", internal: true },
       { label: "News & Articles",     href: "/news",    internal: true },
     ],

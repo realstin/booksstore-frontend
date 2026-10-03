@@ -240,21 +240,6 @@ export async function getStats() {
   return response.json();
 }
 
-// ========== EMAIL VERIFICATION ==========
-
-/**
- * Verify an email address using the token from the verification link.
- * GET /api/auth/verify-email?token=<token>
- */
-export async function verifyEmail(token) {
-  const response = await fetch(
-    `${API_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`,
-    { credentials: 'include' }
-  );
-  const data = await response.json().catch(() => ({}));
-  return { ok: response.ok, status: response.status, ...data };
-}
-
 // ========== GOOGLE AUTH ==========
 
 // Send Google ID token to backend for verification and session creation
