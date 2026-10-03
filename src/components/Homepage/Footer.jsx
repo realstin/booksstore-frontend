@@ -38,9 +38,9 @@ const columns = [
   {
     heading: "Community",
     links: [
-      { label: "GitHub",      href: "https://github.com/realstin" },
+      { label: "GitHub",      href: "https://github.com/irmjustin" },
       { label: "Discord",     href: "https://discord.com/users/1528631236824928326" },
-      { label: "LinkedIn",    href: "https://www.linkedin.com/in/iratuzi-justin-400a55405/" },
+      { label: "LinkedIn",    href: "https://www.linkedin.com/in/irmjustin" },
       { label: "X (Twitter)", href: "https://x.com/irmjustin" },
     ],
   },
