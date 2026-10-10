@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import {
   Bookmark,
@@ -190,7 +191,12 @@ function Stars({ rating = 0 }) {
 /* ─────────────────────────────────────────
    Book card
 
-   Uses REAL book data from MongoDB
+   Uses REAL book data from MongoDB.
+
+   The whole card is one link to the book's page (/books/:id). The link is
+   the book title; the "after:" classes stretch its clickable area over the
+   entire card, so there is a real <a href> for crawlers and a large click
+   target for visitors, without nesting interactive elements.
 ───────────────────────────────────────── */
 
 function BookCard({ book, index }) {
@@ -235,8 +241,7 @@ function BookCard({ book, index }) {
       }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="group relative flex cursor-default flex-col gap-5 overflow-hidden rounded-3xl border border-neutral-200 bg-white p-7 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]"
-      aria-label={`${book.title} by ${author}`}
+      className="group relative flex flex-col gap-5 overflow-hidden rounded-3xl border border-neutral-200 bg-white p-7 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]"
     >
       {/* Favorite badge */}
 
@@ -294,7 +299,13 @@ function BookCard({ book, index }) {
         </span>
 
         <h3 className="text-[14.5px] font-bold leading-snug tracking-tight text-neutral-950 transition-colors group-hover:text-neutral-700">
-          {book.title}
+          <Link
+            to={`/books/${book._id}`}
+            aria-label={`${book.title} by ${author}`}
+            className="after:absolute after:inset-0 after:rounded-3xl focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-neutral-900 focus-visible:after:ring-offset-2"
+          >
+            {book.title}
+          </Link>
         </h3>
 
         <p className="text-[12.5px] text-neutral-400">
@@ -330,7 +341,7 @@ function BookCard({ book, index }) {
         </div>
       </div>
 
-      {/* Read more */}
+      {/* View book (visual hint only; the whole card is the link) */}
 
       <motion.div
         initial={{
@@ -353,27 +364,11 @@ function BookCard({ book, index }) {
           ease: "easeOut",
         }}
         className="overflow-hidden"
+        aria-hidden="true"
       >
-        {book.pdfUrl ? (
-          <a
-            href={book.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Read ${book.title} online`}
-            className="mt-1 block w-full rounded-xl bg-neutral-950 py-2.5 text-center text-[13px] font-semibold text-white transition hover:bg-neutral-800 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          >
-            Read More
-          </a>
-        ) : (
-          <button
-            type="button"
-            disabled
-            className="mt-1 w-full cursor-not-allowed rounded-xl bg-neutral-200 py-2.5 text-[13px] font-semibold text-neutral-400"
-            aria-label="PDF not available for this book"
-          >
-            Not Available
-          </button>
-        )}
+        <div className="mt-1 block w-full rounded-xl bg-neutral-950 py-2.5 text-center text-[13px] font-semibold text-white">
+          View book
+        </div>
       </motion.div>
     </motion.article>
   );
