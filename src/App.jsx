@@ -3,6 +3,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/Dashboard/DashboardLayout';
+import BookPageLayout from './components/BookPageLayout';
 import './App.css';
 
 /* ─── Eagerly loaded ─── */
@@ -102,13 +103,19 @@ function App() {
           <Route path="/dashboard/books/:id" element={<RedirectBookDetails />} />
           <Route path="/dashboard/books/:id/read" element={<RedirectBookReader />} />
 
+          {/* Public: anyone can view a book's page. Logged-in users get the
+              dashboard frame, guests get a simple public header. */}
+          <Route element={<BookPageLayout />}>
+            <Route path="/books/:id" element={<BookDetails />} />
+          </Route>
+
+          {/* Protected: requires an account. */}
           <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route path="/home" element={<Dashboard />} />
             <Route path="/explore" element={<DashboardExplore />} />
             <Route path="/library" element={<DashboardLibrary />} />
             <Route path="/profile" element={<DashboardProfile />} />
             <Route path="/settings" element={<DashboardSettings />} />
-            <Route path="/books/:id" element={<BookDetails />} />
             <Route path="/books/:id/read" element={<BookReaderSwitcher />} />
           </Route>
         </Routes>
