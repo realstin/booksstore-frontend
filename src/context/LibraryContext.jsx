@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import {
   getLibrary,
   saveBook   as apiSaveBook,
@@ -17,16 +18,24 @@ import {
    round-trips per session and three separate snapshots that could
    show inconsistent counts/states to the user.
 
-   This context fetches once when the dashboard mounts, keeps the list
-   in shared state, and exposes typed actions (saveBook / removeBook)
-   that update both the backend and the shared list atomically, so
-   every consumer stays in sync with zero extra fetches.
+   This context fetches once, keeps the list in shared state, and exposes
+   typed actions (saveBook / removeBook) that update both the backend and
+   the shared list atomically, so every consumer stays in sync with zero
+   extra fetches.
+
+   GUESTS
+   ──────
+   The library belongs to a logged-in user. When nobody is logged in, this
+   provider makes NO network request: it reports libStatus 'guest' with an
+   empty list. This lets public pages (such as a book's details page) use
+   the same context without triggering a failing 401 request.
 
    SHAPE EXPOSED TO CONSUMERS
    ──────────────────────────
    {
      savedBooks : Book[]          – the user's current library (full Book documents)
-     libStatus  : 'loading'
+     libStatus  : 'loading'       – session check or library fetch in progress
+                | 'guest'         – session check finished, nobody is logged in
                 | 'success'
                 | 'error'         – fetch lifecycle state
      isSaved    : (id) => bool    – true if bookId is in savedBooks
@@ -34,17 +43,21 @@ import {
                                   – calls API, adds book to local list
      removeBook : (bookId) => { savesCount }
                                   – calls API, removes book from local list
-     refresh    : () => void      – re-fetches from backend (escape hatch)
+     refresh    : () => void      – re-fetches from backend (escape hatch);
+                                    does nothing when nobody is logged in
    }
 ─────────────────────────────────────────────────────────────────────────────── */
 
 const LibraryContext = createContext(null);
 
 export function LibraryProvider({ children }) {
+  const { user, isInitialized } = useAuth();
+  const isLoggedIn = Boolean(user);
+
   const [savedBooks, setSavedBooks] = useState([]);
   const [libStatus,  setLibStatus]  = useState('loading');
 
-  /* ── Initial fetch ───────────────────────────────────────────────────────── */
+  /* ── Fetch the library (logged-in users only) ───────────────────────────── */
   const fetchLibrary = useCallback(async () => {
     setLibStatus('loading');
     try {
@@ -61,7 +74,29 @@ export function LibraryProvider({ children }) {
     }
   }, []);
 
-  useEffect(() => { fetchLibrary(); }, [fetchLibrary]);
+  /* ── React to the session state ──────────────────────────────────────────── */
+  /*
+     1. Session check still running  -> do nothing, stay in 'loading'.
+     2. Check finished, no user      -> guest: empty list, no network request.
+     3. Check finished, user exists  -> fetch their library.
+     Re-runs whenever the user logs in or out.
+  */
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    if (!isLoggedIn) {
+      setSavedBooks([]);
+      setLibStatus('guest');
+      return;
+    }
+
+    fetchLibrary();
+  }, [isInitialized, isLoggedIn, fetchLibrary]);
+
+  /* Manual re-fetch. A guest has no library, so there is nothing to refresh. */
+  const refresh = useCallback(() => {
+    if (isLoggedIn) fetchLibrary();
+  }, [isLoggedIn, fetchLibrary]);
 
   /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -121,7 +156,7 @@ export function LibraryProvider({ children }) {
     isSaved,
     saveBook,
     removeBook,
-    refresh: fetchLibrary,
+    refresh,
   };
 
   return (
