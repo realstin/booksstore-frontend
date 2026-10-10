@@ -176,7 +176,7 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
   const isLoading = saveStatus === 'loading';
 
   return (
-    <div className="flex w-[154px] min-w-[154px] shrink-0 flex-col gap-1.5">
+    <div className="flex w-38.5 min-w-38.5 shrink-0 flex-col gap-1.5">
       <motion.button
         type="button"
         onClick={handleToggle}
@@ -245,7 +245,7 @@ function DownloadButton({ bookId, bookTitle }) {
   }
 
   return (
-    <div className="flex w-[154px] min-w-[154px] shrink-0 flex-col gap-1.5">
+    <div className="flex w-38.5 min-w-38.5 shrink-0 flex-col gap-1.5">
       <motion.button type="button" onClick={handleDownload} disabled={dlStatus === 'downloading'} whileHover={dlStatus !== 'downloading' ? { scale: 1.02 } : {}} whileTap={dlStatus !== 'downloading' ? { scale: 0.97 } : {}} transition={{ duration: 0.18 }} className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-6 py-3 text-[14px] font-semibold text-neutral-700 shadow-sm transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label={dlStatus === 'downloading' ? 'Preparing download…' : 'Download book as PDF'} aria-busy={dlStatus === 'downloading'}>
         {dlStatus === 'downloading' ? <><Loader2 size={16} strokeWidth={2} className="animate-spin" aria-hidden="true" />Preparing download…</> : <><Download size={16} strokeWidth={2} aria-hidden="true" />Download</>}
       </motion.button>
@@ -334,18 +334,18 @@ function BookDetails() {
 
             <motion.div {...fadeUp(0.3)} className="flex flex-wrap items-start gap-3">
               {hasPdf ? (
-                <Link to={`/books/${id}/read`} className="inline-flex w-[154px] min-w-[154px] shrink-0 items-center justify-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label={`Read ${book.title} online`}>
+                <Link to={`/books/${id}/read`} className="inline-flex w-38.5 min-w-38.5 shrink-0 items-center justify-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:bg-black hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900" aria-label={`Read ${book.title} online`}>
                   <BookOpen size={16} strokeWidth={2} aria-hidden="true" />Read Online
                 </Link>
               ) : (
-                <button type="button" disabled className="inline-flex w-[154px] min-w-[154px] shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-label="Online reading not available" aria-disabled="true">
+                <button type="button" disabled className="inline-flex w-38.5 min-w-38.5 shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-label="Online reading not available" aria-disabled="true">
                   <BookOpen size={16} strokeWidth={2} aria-hidden="true" />Read Online
                 </button>
               )}
 
-              {libraryReady ? <SaveButton bookId={id} initialSaved={isSaved} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} /> : <div className="h-12 w-[154px] min-w-[154px] shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />}
+              {libraryReady ? <SaveButton bookId={id} initialSaved={isSaved} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} /> : <div className="h-12 w-38.5 min-w-38.5 shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />}
 
-              {hasPdf ? <DownloadButton bookId={id} bookTitle={book.title} /> : <button type="button" disabled className="inline-flex w-[154px] min-w-[154px] shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true"><Download size={16} strokeWidth={2} aria-hidden="true" />Download</button>}
+              {hasPdf ? <DownloadButton bookId={id} bookTitle={book.title} /> : <button type="button" disabled className="inline-flex w-38.5 min-w-38.5 shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true"><Download size={16} strokeWidth={2} aria-hidden="true" />Download</button>}
             </motion.div>
 
             {!hasPdf && <motion.p {...fadeUp(0.34)} className="text-[12.5px] text-neutral-400">This book is not available to read online yet.</motion.p>}
