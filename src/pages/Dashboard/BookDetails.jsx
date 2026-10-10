@@ -10,6 +10,7 @@ import {
 import { getBookById, downloadBook } from '../../services/api';
 import { useLibrary } from '../../context/LibraryContext';
 import { useAuth } from '../../hooks/useAuth';
+import { usePageMeta } from '../../hooks/usePageMeta';
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -54,6 +55,21 @@ function formatDate(raw) {
 
 function titleInitials(title = '') {
   return title.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+}
+
+/**
+ * Builds the meta description for a book page: the start of the book's own
+ * description, cut at a word boundary to about 155 characters (longer text is
+ * truncated by search engines). Falls back to a plain line when the book has
+ * no description.
+ */
+function buildDescription(book) {
+  const raw = book.description?.replace(/\s+/g, ' ').trim();
+  if (!raw) return `Details and description for ${book.title} on BookStore.`;
+  if (raw.length <= 155) return raw;
+  const cut = raw.slice(0, 155);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${cut.slice(0, lastSpace > 100 ? lastSpace : 155).trimEnd()}…`;
 }
 
 function FallbackCover({ title }) {
@@ -374,6 +390,13 @@ function BookDetails() {
   const savesLabel = book ? formatCount(book.savesCount) : null;
   const hasCover = Boolean(book?.coverImage);
   const hasPdf = Boolean(book?.pdfUrl);
+
+  // Give this page its own title and description for the browser tab and for
+  // search results. Both stay null (and nothing changes) until the book loads.
+  usePageMeta({
+    title: book ? `${book.title}${authors ? ` by ${authors}` : ''} | BookStore` : null,
+    description: book ? buildDescription(book) : null,
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8 lg:px-10">
