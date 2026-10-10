@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, BookOpen, Bookmark, BookmarkCheck,
   Download, Star, Languages, Building2, Calendar,
   Hash, FileText, RefreshCw, Wifi, WifiOff,
-  AlertCircle, Loader2,
+  AlertCircle, Loader2, Lock, X,
 } from 'lucide-react';
 import { getBookById, downloadBook } from '../../services/api';
 import { useLibrary } from '../../context/LibraryContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const ease = [0.22, 1, 0.36, 1];
 
@@ -140,7 +141,67 @@ function MetaRow({ icon: Icon, label, value }) {
   );
 }
 
-function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
+/**
+ * GuestPrompt
+ *
+ * Shown when a visitor without an account tries an action that needs one
+ * (saving or downloading). Explains what is needed and offers the two ways
+ * forward. `from` is passed along in router state so the login/signup pages
+ * can send the visitor back to this book afterwards.
+ */
+function GuestPrompt({ action, from, onDismiss }) {
+  const message =
+    action === 'download'
+      ? 'Create a free account or log in to download this book.'
+      : 'Create a free account or log in to save this book to your library.';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease }}
+      role="status"
+      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-neutral-50 text-neutral-500">
+          <Lock size={14} strokeWidth={2} aria-hidden="true" />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <p className="text-[14px] font-semibold text-neutral-900">An account is needed</p>
+          <p className="text-[13px] leading-relaxed text-neutral-500">{message}</p>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-3">
+        <Link
+          to="/signup"
+          state={{ from }}
+          className="inline-flex items-center justify-center rounded-full bg-neutral-950 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+        >
+          Create account
+        </Link>
+        <Link
+          to="/login"
+          state={{ from }}
+          className="inline-flex items-center justify-center rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-[13.5px] font-semibold text-neutral-700 transition hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
+        >
+          Log in
+        </Link>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+          aria-label="Dismiss"
+        >
+          <X size={15} aria-hidden="true" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove, isGuest, onRequireLogin }) {
   const [saved, setSaved] = useState(initialSaved);
   const [savesCount, setSavesCount] = useState(initialCount);
   const [saveStatus, setSaveStatus] = useState('idle');
@@ -151,6 +212,14 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
 
   async function handleToggle() {
     if (saveStatus === 'loading' || !bookId) return;
+
+    // A visitor without an account cannot save. Do not send a request that is
+    // certain to fail with 401; explain what is needed instead.
+    if (isGuest) {
+      onRequireLogin('save');
+      return;
+    }
+
     setSaveStatus('loading');
     setSaveError('');
     try {
@@ -217,7 +286,7 @@ function SaveButton({ bookId, initialSaved, initialCount, onSave, onRemove }) {
   );
 }
 
-function DownloadButton({ bookId, bookTitle }) {
+function DownloadButton({ bookId, bookTitle, isGuest, onRequireLogin }) {
   const [dlStatus, setDlStatus] = useState('idle');
 
   function safeFilename(title) {
@@ -226,6 +295,14 @@ function DownloadButton({ bookId, bookTitle }) {
 
   async function handleDownload() {
     if (dlStatus === 'downloading') return;
+
+    // Downloading needs an account. Explain instead of sending a request that
+    // would fail with 401.
+    if (isGuest) {
+      onRequireLogin('download');
+      return;
+    }
+
     setDlStatus('downloading');
     try {
       const blob = await downloadBook(bookId);
@@ -262,11 +339,16 @@ function DownloadButton({ bookId, bookTitle }) {
 function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const { libStatus, isSaved: isBookSaved, saveBook: ctxSaveBook, removeBook: ctxRemoveBook } = useLibrary();
   const isSaved = isBookSaved(id);
   const libraryReady = libStatus !== 'loading';
+  const isGuest = !user;
   const [book, setBook] = useState(null);
   const [status, setStatus] = useState('loading');
+  // Which action a guest tried ('save' | 'download'), or null when no prompt is shown.
+  const [guestAction, setGuestAction] = useState(null);
 
   const goToExplore = () => navigate('/explore');
 
@@ -343,10 +425,18 @@ function BookDetails() {
                 </button>
               )}
 
-              {libraryReady ? <SaveButton bookId={id} initialSaved={isSaved} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} /> : <div className="h-12 w-38.5 min-w-38.5 shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />}
+              {libraryReady ? <SaveButton bookId={id} initialSaved={isSaved} initialCount={book.savesCount ?? 0} onSave={ctxSaveBook} onRemove={ctxRemoveBook} isGuest={isGuest} onRequireLogin={setGuestAction} /> : <div className="h-12 w-38.5 min-w-38.5 shrink-0 animate-pulse rounded-full bg-neutral-100" aria-hidden="true" />}
 
-              {hasPdf ? <DownloadButton bookId={id} bookTitle={book.title} /> : <button type="button" disabled className="inline-flex w-38.5 min-w-38.5 shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true"><Download size={16} strokeWidth={2} aria-hidden="true" />Download</button>}
+              {hasPdf ? <DownloadButton bookId={id} bookTitle={book.title} isGuest={isGuest} onRequireLogin={setGuestAction} /> : <button type="button" disabled className="inline-flex w-38.5 min-w-38.5 shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-neutral-100 bg-neutral-50 px-6 py-3 text-[14px] font-semibold text-neutral-400" aria-disabled="true"><Download size={16} strokeWidth={2} aria-hidden="true" />Download</button>}
             </motion.div>
+
+            {guestAction && (
+              <GuestPrompt
+                action={guestAction}
+                from={location.pathname}
+                onDismiss={() => setGuestAction(null)}
+              />
+            )}
 
             {!hasPdf && <motion.p {...fadeUp(0.34)} className="text-[12.5px] text-neutral-400">This book is not available to read online yet.</motion.p>}
 
