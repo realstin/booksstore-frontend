@@ -10,6 +10,7 @@ import './App.css';
 import Homepage from './pages/Homepage';
 
 /* ─── Lazily loaded — public ─── */
+const NotFound    = lazy(() => import('./pages/NotFound'));
 const Login       = lazy(() => import('./pages/Login'));
 const Signup      = lazy(() => import('./pages/Signup'));
 const Team        = lazy(() => import('./pages/Company/Team'));
@@ -118,6 +119,9 @@ function App() {
             <Route path="/settings" element={<DashboardSettings />} />
             <Route path="/books/:id/read" element={<BookReaderSwitcher />} />
           </Route>
+
+          {/* Catch-all — any URL that didn't match above */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
