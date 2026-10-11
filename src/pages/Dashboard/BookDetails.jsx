@@ -389,7 +389,10 @@ function BookDetails() {
   const categories = book ? formatCategories(book.categories) : [];
   const savesLabel = book ? formatCount(book.savesCount) : null;
   const hasCover = Boolean(book?.coverImage);
-  const hasPdf = Boolean(book?.pdfUrl);
+  // The API sends a hasPdf flag to visitors who are not logged in (the file
+  // link itself is only sent to logged-in users). Fall back to the link when
+  // the flag is absent, so this works before and after that backend change.
+  const hasPdf = Boolean(book?.hasPdf ?? book?.pdfUrl);
 
   // Give this page its own title and description for the browser tab and for
   // search results. Both stay null (and nothing changes) until the book loads.
