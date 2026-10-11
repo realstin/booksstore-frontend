@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Container from "../Container";
 import { getBooks } from "../../services/api";
+import featuredSnapshot from "../../data/featured-books.json";
 
 /*    Shared easing    */
 
@@ -516,25 +517,52 @@ function CommunityFavorites() {
   const catRef = useRef(null);
   const catInView = useInView(catRef, { once: true, margin: "-60px" });
 
+  /*
+    Saved copy of the featured books, written at build time by
+    scripts/fetch-featured-books.mjs and bundled into the page. It lets the
+    cards render on the very first paint, even while the backend (which
+    sleeps on Render's free plan) is still waking up.
+  */
+  const hasSnapshot =
+    Array.isArray(featuredSnapshot) &&
+    featuredSnapshot.length > 0;
+
   /*    Real database books   */
 
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState(
+    hasSnapshot ? featuredSnapshot : []
+  );
 
-  const [loading, setLoading] = useState(true);
+  /* No skeleton when there is already something to show. */
+  const [loading, setLoading] = useState(!hasSnapshot);
 
   const [error, setError] = useState("");
 
-  /*    Fetch books from backend   */
+  /*
+    Fetch books from backend.
 
-  const fetchCommunityBooks = async () => {
+    silent = true  -> a saved copy is already on screen: do not show the
+                      skeleton, and if the request fails keep the saved copy
+                      and show no error.
+    silent = false -> nothing is on screen: show the skeleton, and show the
+                      error box if the request fails.
+  */
+
+  const fetchCommunityBooks = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
-      setError("");
+      if (!silent) {
+        setLoading(true);
+        setError("");
+      }
 
       /*
         Ask backend for featured books.
-                 Sort by savesCount descending,  so books saved by the most readers appear first.
-        Limit to 6 books for the homepage.
+        Sort by savesCount descending, so books saved by the most readers
+        appear first.
+
+        IMPORTANT: keep this query in sync with the one in
+        scripts/fetch-featured-books.mjs, or the saved copy will not match
+        what the live request returns.
       */
 
       const data = await getBooks({
@@ -548,27 +576,31 @@ function CommunityFavorites() {
           ? data
           : []
       );
-      // NOTE: limit: 6 matches the 6 cards rendered below.
-      // All books in the response are displayed — no slicing.
+      setError("");
     } catch (err) {
       console.error(
         "Failed to load community books:",
         err
       );
 
-      setError(
-        err.message ||
-          "Unable to load books from the server."
-      );
+      if (!silent) {
+        setError(
+          err.message ||
+            "Unable to load books from the server."
+        );
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
-  /*  Load books when component mounts   */
+  /*  Refresh the saved copy with live data when the section mounts   */
 
   useEffect(() => {
-    fetchCommunityBooks();
+    fetchCommunityBooks({ silent: hasSnapshot });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // All fetched books are displayed — no item is skipped.
@@ -680,7 +712,7 @@ function CommunityFavorites() {
           {!loading && error && (
             <BooksError
               message={error}
-              onRetry={fetchCommunityBooks}
+              onRetry={() => fetchCommunityBooks()}
             />
           )}
 

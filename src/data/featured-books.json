@@ -1,0 +1,65 @@
+[
+  {
+    "_id": "6a5f49117925a5c95462899b",
+    "title": "Deep learning",
+    "authors": [
+      "Ian Goodfellow",
+      "Yoshua Bengio",
+      "Aaron Courville"
+    ],
+    "categories": [
+      "Programming",
+      "Software Development",
+      "AI"
+    ],
+    "coverImage": "https://ia902809.us.archive.org/view_archive.php?archive=/18/items/l_covers_0008/l_covers_0008_08.zip&file=0008086288-L.jpg",
+    "rating": 4.9,
+    "savesCount": 3,
+    "pages": 801,
+    "featured": true
+  },
+  {
+    "_id": "6a5f58eb51bdcefa21f0ab97",
+    "title": "Think Python",
+    "authors": [
+      "Allen B. Downey"
+    ],
+    "categories": [
+      "Programming",
+      "Software Development",
+      "AI",
+      "Python"
+    ],
+    "coverImage": "https://m.media-amazon.com/images/I/91YM5zb5QgL._SL1500_.jpg",
+    "rating": 4.7,
+    "savesCount": 3,
+    "pages": 244,
+    "featured": true
+  },
+  {
+    "_id": "6a85de3713081ddbf765a18f",
+    "title": "Introduction to Information Retrieval",
+    "authors": [
+      " Christopher D. Manning",
+      " Prabhakar Raghavan",
+      " Hinrich Schütze"
+    ],
+    "categories": [
+      "Web Search",
+      "Search Engine",
+      "Artificial intelligence",
+      "AI",
+      "Machine Learning",
+      "Natural Language Processing",
+      "NLP",
+      "Data Science",
+      "Computer Science",
+      "Information Retrieval"
+    ],
+    "coverImage": "https://m.media-amazon.com/images/I/6125K5SkgSL._SL1360_.jpg",
+    "rating": 4.5,
+    "savesCount": 3,
+    "pages": 581,
+    "featured": true
+  }
+]
