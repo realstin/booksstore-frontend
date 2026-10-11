@@ -410,9 +410,15 @@ function BookDetails() {
 
       {status === 'success' && book && (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]">
-          <motion.div {...fadeUp(0.04)} className="flex justify-center lg:justify-start">
+          {/*
+            Cover column. self-start / items-start stop the grid and flex
+            defaults from stretching this column (and the bordered card inside
+            it) to the height of the long right-hand column, so the card is
+            exactly as tall as the cover it holds.
+          */}
+          <motion.div {...fadeUp(0.04)} className="flex items-start justify-center self-start lg:justify-start">
             <div className="w-56 overflow-hidden rounded-2xl border border-neutral-200 shadow-[0_8px_32px_rgba(0,0,0,0.12)] lg:w-full">
-              {hasCover ? <motion.img src={book.coverImage} alt={`Cover of ${book.title}`} loading="lazy" className="aspect-3/4 w-full object-cover" whileHover={{ scale: 1.03 }} transition={{ duration: 0.35 }} /> : <div className="aspect-3/4 w-full"><FallbackCover title={book.title} /></div>}
+              {hasCover ? <motion.img src={book.coverImage} alt={`Cover of ${book.title}`} loading="lazy" className="block h-auto w-full" whileHover={{ scale: 1.03 }} transition={{ duration: 0.35 }} /> : <div className="aspect-3/4 w-full"><FallbackCover title={book.title} /></div>}
             </div>
           </motion.div>
 
