@@ -6,7 +6,6 @@ import Container from "../../components/Container";
 import { AuthorCard } from "../../components/News/AuthorCard";
 import { NewsCard } from "../../components/News/NewsCard";
 import { getArticleBySlug, getArticles } from "../../services/api";
-import { getArticleBySlug as getHardcodedArticle, getRelatedArticles } from "../../data/news";
 
 const ease = [0.22, 1, 0.36, 1];
 
