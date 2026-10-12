@@ -472,6 +472,12 @@ function BookDetails() {
 
             {!hasPdf && <motion.p {...fadeUp(0.34)} className="text-[12.5px] text-neutral-400">This book is not available to read online yet.</motion.p>}
 
+            {hasPdf && (
+              <motion.p {...fadeUp(0.34)} className="border-l-2 border-red-400 pl-3 text-[12.5px] leading-[1.65] text-neutral-400">
+                If online reading is slow or fails, try downloading instead. We&apos;re working on it — thanks for your patience.
+              </motion.p>
+            )}
+
             <motion.div {...fadeUp(0.36)}>
               <div className="rounded-2xl border border-neutral-200 bg-white p-6">
                 <p className="mb-4 text-[11.5px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Book Details</p>
