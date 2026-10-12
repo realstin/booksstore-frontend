@@ -497,17 +497,17 @@ export async function subscribeNewsletter(email) {
 }
 
 /**
- * Unsubscribe an email from the BookStore newsletter.
+ * Unsubscribe the currently logged-in user from the BookStore newsletter.
  * POST /api/newsletter/unsubscribe
  *
- * No authentication required — supports one-click unsubscribe
- * from email links without needing a session cookie.
+ * Requires authentication — the backend reads the email from the session
+ * cookie, so no email needs to be passed in the request body.
  */
-export async function unsubscribeNewsletter(email) {
+export async function unsubscribeNewsletter() {
   const response = await fetch(`${API_URL}/api/newsletter/unsubscribe`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ email }),
+    method:      'POST',
+    credentials: 'include',
+    headers:     { 'Content-Type': 'application/json' },
   });
 
   const data = await response.json().catch(() => ({}));
