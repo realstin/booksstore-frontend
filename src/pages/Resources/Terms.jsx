@@ -259,7 +259,7 @@ function TermsSection({ section, index }) {
 ───────────────────────────────────────── */
 function Terms() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="h-20" aria-hidden="true" />
 
@@ -313,7 +313,6 @@ function Terms() {
               id="terms-heading"
               {...fadeUp(0.12)}
               className="mb-4 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               Terms of Service
             </motion.h1>

@@ -240,7 +240,7 @@ function ContactForm() {
 ───────────────────────────────────────── */
 function Contact() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
 
       {/* Dot-grid background */}
       <svg

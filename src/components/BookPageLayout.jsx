@@ -43,7 +43,6 @@ function BookPageLayout() {
     <LibraryProvider>
       <div
         className="min-h-screen bg-neutral-50"
-        style={{ fontFamily: 'var(--font-sans)' }}
       >
         <header className="border-b border-neutral-100 bg-white">
           <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-16">

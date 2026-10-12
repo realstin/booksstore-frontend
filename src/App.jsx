@@ -4,7 +4,6 @@ import { useAuth } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/Dashboard/DashboardLayout';
 import BookPageLayout from './components/BookPageLayout';
-import './App.css';
 
 /* ─── Eagerly loaded ─── */
 import Homepage from './pages/Homepage';

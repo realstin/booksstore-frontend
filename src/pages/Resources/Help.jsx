@@ -203,8 +203,7 @@ function Hero({ query, onQuery, heroRef, heroInView }) {
 
           {/* Heading */}
           <motion.h1 id="help-heading" {...fadeUp(0.13)}
-            className="mb-5 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.07] tracking-tight text-neutral-950"
-            style={{ fontFamily: "var(--font-sans)" }}>
+            className="mb-5 text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[1.07] tracking-tight text-neutral-950">
             How can we help?
           </motion.h1>
 
@@ -338,8 +337,7 @@ function PopularTopics() {
         <motion.div {...inFadeUp(0)} className="mb-12 text-center">
           <p className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Browse Topics</p>
           <h2 id="topics-heading"
-            className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950"
-            style={{ fontFamily: "var(--font-sans)" }}>
+            className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950">
             Popular Topics
           </h2>
         </motion.div>
@@ -400,8 +398,7 @@ function GettingStarted() {
         <motion.div {...inFadeUp(0)} className="mb-14 text-center">
           <p className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Step by step</p>
           <h2 id="gs-heading"
-            className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950"
-            style={{ fontFamily: "var(--font-sans)" }}>
+            className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950">
             Getting Started with BookStore
           </h2>
         </motion.div>
@@ -499,8 +496,7 @@ function FAQ() {
           <motion.div {...inFadeUp(0)} className="mb-12 text-center">
             <p className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-neutral-400">FAQ</p>
             <h2 id="faq-heading"
-              className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}>
+              className="text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950">
               Frequently Asked Questions
             </h2>
           </motion.div>
@@ -553,7 +549,6 @@ function StillNeedHelp() {
             <h2
               id="still-help-heading"
               className="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               Still need help?
             </h2>
@@ -590,7 +585,7 @@ function Help() {
   const isSearching = query.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="h-20" aria-hidden="true" />
 

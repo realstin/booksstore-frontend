@@ -138,7 +138,6 @@ function Hero() {
               animate="show"
               transition={transition(0.15, 0.75)}
               className="mb-6 text-[clamp(2.8rem,5.5vw,4.2rem)] font-bold leading-[1.07] tracking-[-0.03em] text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               Discover books
               <br />

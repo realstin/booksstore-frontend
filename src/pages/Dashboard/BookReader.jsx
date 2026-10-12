@@ -655,7 +655,7 @@ function BookReader() {
   /* Error/notfound — bare layout */
   if (status === 'notfound' || status === 'error') {
     return (
-      <div className="flex h-screen flex-col bg-[#121212]" style={{ fontFamily: 'var(--font-sans)' }}>
+      <div className="flex h-screen flex-col bg-[#121212]">
         <ReaderToolbar
           book={null} visible tc={THEMES.dark}
           prefs={prefs} onPrefsChange={updatePref}
@@ -678,7 +678,6 @@ function BookReader() {
     <div
       ref={containerRef}
       className={`flex h-screen flex-col overflow-hidden transition-colors duration-300 ${tc.reader}`}
-      style={{ fontFamily: 'var(--font-sans)' }}
       onMouseMove={handleActivity}
       onTouchStart={handleActivity}
       onClick={handleActivity}

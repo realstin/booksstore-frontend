@@ -172,7 +172,6 @@ function WhyBookStore() {
           <h2
             id="why-heading"
             className="mb-5 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold tracking-tight text-neutral-950"
-            style={{ fontFamily: "var(--font-sans)" }}
           >
             Why Choose BookStore?
           </h2>

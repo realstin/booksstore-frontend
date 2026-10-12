@@ -442,7 +442,6 @@ function ReadingExperience() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.12, ease }}
               className="mb-6 text-[clamp(1.75rem,3.5vw,2.6rem)] font-bold leading-[1.1] tracking-tight text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               A reading experience
               <br />designed for focus.

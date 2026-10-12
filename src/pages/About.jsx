@@ -92,8 +92,7 @@ function Hero() {
             initial={{ opacity: 0, y: 28 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.78, delay: 0.1, ease }}
-            className="mb-8 max-w-3xl text-[clamp(2.6rem,5.5vw,4.2rem)] leading-[1.06] tracking-[-0.02em] text-white"
-            style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 300 }}
+            className="mb-8 max-w-3xl text-[clamp(2.6rem,5.5vw,4.2rem)] font-light leading-[1.06] tracking-[-0.02em] text-white"
           >
             Building a trusted place
             <br />
@@ -423,8 +422,7 @@ function FinalCTA() {
             initial={{ opacity: 0, y: 24 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.75, delay: 0.08, ease }}
-            className="mb-6 text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.07] tracking-[-0.02em] text-white"
-            style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 300 }}
+            className="mb-6 text-[clamp(2rem,4.5vw,3.2rem)] font-light leading-[1.07] tracking-[-0.02em] text-white"
           >
             Find your next book.
             <br />
@@ -477,7 +475,7 @@ function FinalCTA() {
 ───────────────────────────────────────── */
 function About() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="h-20" aria-hidden="true" />
       <Hero />

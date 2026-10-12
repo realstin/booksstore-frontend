@@ -123,7 +123,6 @@ function CTA() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.75, delay: 0.1, ease }}
           className="mb-7 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-[1.06] tracking-[-0.03em] text-white"
-          style={{ fontFamily: "var(--font-sans)" }}
         >
           Start discovering books
           <br className="hidden sm:block" /> you can trust.

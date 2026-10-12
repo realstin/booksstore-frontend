@@ -20,8 +20,7 @@ const fadeUp = (delay = 0) => ({
 ───────────────────────────────────────── */
 function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center"
-         style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
       <Newspaper size={44} className="text-neutral-300" strokeWidth={1.25} aria-hidden="true" />
       <div className="flex flex-col gap-2">
         <h1 className="text-[1.5rem] font-bold tracking-tight text-neutral-950">
@@ -208,7 +207,7 @@ function NewsArticle() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ fontFamily: "var(--font-sans)" }}>
+      <div className="flex min-h-screen items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-950" />
       </div>
     );
@@ -218,7 +217,7 @@ function NewsArticle() {
   if (error || !article) return <NotFound />;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
 
       {/* Dot-grid */}
       <svg aria-hidden="true" className="pointer-events-none fixed inset-0 h-full w-full opacity-[0.025]" xmlns="http://www.w3.org/2000/svg">

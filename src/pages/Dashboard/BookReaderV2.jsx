@@ -781,7 +781,6 @@ function BookReaderV2() {
     <div
       ref={containerRef}
       className={`flex h-screen flex-col overflow-hidden transition-colors duration-300 ${tc.bg}`}
-      style={{ fontFamily: 'var(--font-sans)' }}
       onMouseMove={resetHideTimer}
       onTouchStart={resetHideTimer}
     >

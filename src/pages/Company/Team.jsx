@@ -218,7 +218,6 @@ function Team() {
     <div
       ref={pageRef}
       className="min-h-screen bg-white"
-      style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Subtle dot grid */}
       <svg

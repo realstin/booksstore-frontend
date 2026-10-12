@@ -124,7 +124,7 @@ function News() {
       : filtered;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
 
       {/* Dot-grid */}
       <svg aria-hidden="true" className="pointer-events-none fixed inset-0 h-full w-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">

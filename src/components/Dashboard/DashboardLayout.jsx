@@ -21,7 +21,6 @@ function DashboardLayout() {
     <LibraryProvider>
       <div
         className="flex h-screen overflow-hidden bg-neutral-50"
-        style={{ fontFamily: 'var(--font-sans)' }}
       >
         {/* Desktop sidebar — hidden below lg */}
         <div className="hidden lg:flex lg:shrink-0">

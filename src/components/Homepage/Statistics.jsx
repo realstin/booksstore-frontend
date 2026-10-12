@@ -232,7 +232,6 @@ function Statistics() {
           <h2
             id="stats-heading"
             className="mb-3 text-[clamp(1.6rem,3vw,2.25rem)] font-bold tracking-[-0.02em] text-neutral-950"
-            style={{ fontFamily: "var(--font-sans)" }}
           >
             Trusted by thousands of learners
           </h2>

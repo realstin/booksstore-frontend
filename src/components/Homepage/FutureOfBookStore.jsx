@@ -158,7 +158,6 @@ function FutureOfBookStore() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.72, delay: 0.1, ease }}
               className="mb-7 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               Books are only
               <br />the beginning.

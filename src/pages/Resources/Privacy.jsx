@@ -228,7 +228,7 @@ function PolicySection({ section, index }) {
 ───────────────────────────────────────── */
 function Privacy() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="h-20" aria-hidden="true" />
 
@@ -282,7 +282,6 @@ function Privacy() {
               id="privacy-heading"
               {...fadeUp(0.12)}
               className="mb-4 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-[1.08] tracking-tight text-neutral-950"
-              style={{ fontFamily: "var(--font-sans)" }}
             >
               Privacy Policy
             </motion.h1>
