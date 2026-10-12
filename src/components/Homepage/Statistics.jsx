@@ -4,30 +4,71 @@ import { BookOpen, Users, Folder, Bookmark, Star } from "lucide-react";
 import Container from "../Container";
 import { STATS } from "../../constants/stats";
 import { useStats } from "../../hooks/useStats";
+import statsSnapshot from "../../data/stats-snapshot.json";
+
+/* ─────────────────────────────────────────
+   Stats validation + starting values
+
+   The numbers shown come from, in this order:
+     1. live data from /api/stats (once it answers)
+     2. the build-time snapshot (src/data/stats-snapshot.json), written by
+        scripts/fetch-stats.mjs, so the real numbers are part of the page
+        itself and do not depend on the backend being awake
+     3. the constants in constants/stats.js (last resort)
+───────────────────────────────────────── */
+const STAT_FIELDS = ["totalBooks", "totalUsers", "totalSavedBooks", "averageRating"];
+
+function isValidStats(data) {
+  return (
+    data !== null &&
+    typeof data === "object" &&
+    STAT_FIELDS.every((field) => Number.isFinite(data[field]))
+  );
+}
+
+/* The snapshot is an empty {} until the first successful prebuild. */
+const BASELINE = isValidStats(statsSnapshot) ? statsSnapshot : STATS;
 
 /* ─────────────────────────────────────────
    Animated Counter Hook
+
+   The number starts at its REAL value, so the page content is correct even
+   if the animation never runs (for example when a search engine renders the
+   page without scrolling). When the section scrolls into view the count-up
+   plays from 0. The cards are invisible until then, so nobody sees the
+   real number jump to 0.
+
+   If the target changes later (live data arriving and differing from the
+   snapshot), the number glides from the value currently shown to the new
+   one instead of replaying from 0.
 ───────────────────────────────────────── */
 function useCounter(target, duration = 1800, started = false) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(target);
+  const shownRef = useRef(null); // value currently shown once animation has begun
 
   useEffect(() => {
-    if (!started) return;
+    if (!started) return undefined;
+
+    const from = shownRef.current ?? 0;
     let startTime = null;
     let frame;
+
     const step = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+      if (startTime === null) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * target));
+      const value = progress === 1 ? target : from + (target - from) * eased;
+      shownRef.current = value;
+      setCount(Math.floor(value));
       if (progress < 1) frame = requestAnimationFrame(step);
     };
+
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
   }, [target, duration, started]);
 
-  return count;
+  /* Before the section is in view, show the real value. */
+  return started ? count : target;
 }
 
 /* ─────────────────────────────────────────
@@ -38,12 +79,11 @@ function formatNumber(n) {
 }
 
 /* ─────────────────────────────────────────
-   Build the cards array from live (or fallback) data.
+   Build the cards array from the stats to display.
    Technology Categories (42) is kept static — no backend
    value is available for it yet.
 ───────────────────────────────────────── */
-function buildStatCards(liveStats) {
-  const s = liveStats ?? STATS; // fall back to constants if fetch failed
+function buildStatCards(s) {
   return [
     {
       icon:        BookOpen,
@@ -96,6 +136,9 @@ function StatCard({ stat, index, started }) {
     ? (rawCount / 10).toFixed(1)
     : formatNumber(rawCount);
 
+  /* The accessible label always uses the real value, never a mid-count one. */
+  const finalValue = isDecimal ? value.toFixed(1) : formatNumber(value);
+
   return (
     <motion.article
       variants={{
@@ -116,7 +159,7 @@ function StatCard({ stat, index, started }) {
         transition: { duration: 0.25, ease: "easeOut" },
       }}
       className="group flex cursor-default flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:border-neutral-300 hover:shadow-[0_8px_28px_rgba(0,0,0,0.07)]"
-      aria-label={`${displayValue}${suffix} ${label} — ${description}`}
+      aria-label={`${finalValue}${suffix} ${label} — ${description}`}
     >
       <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-700 transition-colors duration-300 group-hover:border-neutral-200 group-hover:bg-neutral-100">
         <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
@@ -142,46 +185,21 @@ function StatCard({ stat, index, started }) {
 }
 
 /* ─────────────────────────────────────────
-   StatCardSkeleton — shown while fetching
-───────────────────────────────────────── */
-function StatCardSkeleton({ index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
-      className="flex flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-      aria-hidden="true"
-    >
-      {/* icon placeholder */}
-      <div className="h-11 w-11 animate-pulse rounded-xl bg-neutral-100" />
-      {/* value placeholder */}
-      <div className="h-10 w-24 animate-pulse rounded-lg bg-neutral-100" />
-      {/* label + description placeholders */}
-      <div className="flex flex-col gap-2">
-        <div className="h-4 w-3/4 animate-pulse rounded bg-neutral-100" />
-        <div className="h-3.5 w-full animate-pulse rounded bg-neutral-100" />
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────
    Statistics Section
 ───────────────────────────────────────── */
 function Statistics() {
   const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
-  const { stats, loading } = useStats();
-
   /*
-   * Build the cards only once stats have resolved (or failed).
-   * While loading → render skeletons.
-   * On error      → stats is null; buildStatCards falls back to STATS constants.
-   * On success    → stats holds live data from /api/stats.
+   * The live request refreshes the numbers silently. While it is pending,
+   * or if it fails or hangs, the snapshot (or the constants) stay on screen,
+   * so there is never an empty state to wait for. `loading` and `error` are
+   * deliberately ignored.
    */
-  const statCards = loading ? null : buildStatCards(stats);
+  const { stats } = useStats();
+  const current   = isValidStats(stats) ? stats : BASELINE;
+  const statCards = buildStatCards(current);
 
   return (
     <section
@@ -224,25 +242,17 @@ function Statistics() {
           </p>
         </motion.div>
 
-        {/* Cards grid — skeletons while fetching, real cards once ready */}
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <StatCardSkeleton key={i} index={i} />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-            initial="hidden"
-            animate={inView ? "show" : "hidden"}
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5"
-          >
-            {statCards.map((stat, i) => (
-              <StatCard key={stat.label} stat={stat} index={i} started={inView} />
-            ))}
-          </motion.div>
-        )}
+        {/* Cards grid */}
+        <motion.div
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+          initial="hidden"
+          animate={inView ? "show" : "hidden"}
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5"
+        >
+          {statCards.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} index={i} started={inView} />
+          ))}
+        </motion.div>
       </Container>
     </section>
   );
