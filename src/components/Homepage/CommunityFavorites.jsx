@@ -556,38 +556,29 @@ function CommunityFavorites() {
       }
 
       /*
-        Ask backend for featured books.
-        Sort by savesCount descending, so books saved by the most readers
-        appear first.
+        Fetch the books with the most saves across the whole library.
+        No featured filter — any book the community is actually saving
+        qualifies, regardless of whether an admin has toggled "featured".
+
+        Sort by savesCount descending so the most-loved books always
+        rise to the top.  If savesCount is tied (e.g. all zeros when the
+        library is brand new), Mongo will maintain insertion order.
 
         IMPORTANT: keep this query in sync with the one in
         scripts/fetch-featured-books.mjs, or the saved copy will not match
         what the live request returns.
       */
-
       const data = await getBooks({
-        featured: true,
         limit: 3,
         sort: "-savesCount",
       });
 
-      setBooks(
-        Array.isArray(data)
-          ? data
-          : []
-      );
+      setBooks(Array.isArray(data) ? data : []);
       setError("");
     } catch (err) {
-      console.error(
-        "Failed to load community books:",
-        err
-      );
-
+      console.error("Failed to load community books:", err);
       if (!silent) {
-        setError(
-          err.message ||
-            "Unable to load books from the server."
-        );
+        setError(err.message || "Unable to load books from the server.");
       }
     } finally {
       if (!silent) {

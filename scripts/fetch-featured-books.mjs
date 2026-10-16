@@ -65,8 +65,8 @@ async function main() {
   }
 
   // The same query the homepage sends when it loads its books.
+  // No featured filter — we show the most-saved books across the whole library.
   const query = new URLSearchParams({
-    featured: 'true',
     limit: '3',
     sort: '-savesCount',
   });

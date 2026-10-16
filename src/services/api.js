@@ -165,6 +165,29 @@ export async function getBooks(params = {}) {
   return response.json();
 }
 
+// ========== TRENDING BOOKS ==========
+
+/**
+ * GET /api/books/trending
+ *
+ * Returns the books users have been saving the most, using a time-window
+ * cascade: today → this week → this month → all-time → recently added.
+ *
+ * Response shape: { books: Book[], window: 'today'|'week'|'month'|'all-time'|'recent' }
+ */
+export async function getTrendingBooks(limit = 4) {
+  const query = new URLSearchParams({ limit });
+  const response = await fetch(`${API_URL}/api/books/trending?${query}`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch trending books (status ${response.status})`);
+  }
+
+  return response.json(); // { books, window }
+}
+
 // ========== SINGLE BOOK ==========
 
 // Fetch one book by MongoDB _id

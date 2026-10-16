@@ -6,7 +6,7 @@ import {
   BookOpen, Clock, Compass,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { getBooks } from '../../services/api';
+import { getBooks, getTrendingBooks } from '../../services/api';
 import DashboardBookCard from '../../components/Dashboard/DashboardBookCard';
 import BookCardSkeleton from '../../components/Dashboard/BookCardSkeleton';
 import { getMostRecentBook, formatLastRead } from '../../utils/readingProgress';
@@ -271,22 +271,26 @@ function Dashboard() {
   /* ── Data state ── */
   const [recentBooks,    setRecentBooks]    = useState([]);
   const [trendingBooks,  setTrendingBooks]  = useState([]);
-  const [featuredBooks,  setFeaturedBooks]  = useState([]);
+  const [trendingWindow, setTrendingWindow] = useState('');   // 'today'|'week'|'month'|'all-time'|'recent'
+  const [communityBooks, setCommunityBooks] = useState([]);
 
   const [recentStatus,   setRecentStatus]   = useState('loading');
   const [trendingStatus, setTrendingStatus] = useState('loading');
-  const [featuredStatus, setFeaturedStatus] = useState('loading');
+  const [communityStatus,setCommunityStatus]= useState('loading');
 
   /* ── Fetch all three sections concurrently ── */
   const fetchAllBooks = useCallback(async () => {
     setRecentStatus('loading');
     setTrendingStatus('loading');
-    setFeaturedStatus('loading');
+    setCommunityStatus('loading');
 
-    const [recentResult, trendingResult, featuredResult] = await Promise.allSettled([
-      getBooks({ sort: '-createdAt',  limit: 4 }),
+    const [recentResult, trendingResult, communityResult] = await Promise.allSettled([
+      // Recently Added — newest books first
+      getBooks({ sort: '-createdAt', limit: 4 }),
+      // Trending — time-window cascade (today → week → month → all-time → recent)
+      getTrendingBooks(4),
+      // Community Favorites — most saved books across the whole library
       getBooks({ sort: '-savesCount', limit: 4 }),
-      getBooks({ featured: true,      limit: 4 }),
     ]);
 
     /* Recently Added */
@@ -302,7 +306,9 @@ function Dashboard() {
     /* Trending */
     if (trendingResult.status === 'fulfilled') {
       const data = trendingResult.value;
+      // getTrendingBooks returns { books, window }
       setTrendingBooks(Array.isArray(data) ? data : data.books ?? []);
+      setTrendingWindow(data.window ?? '');
       setTrendingStatus('success');
     } else {
       console.error('Trending fetch failed:', trendingResult.reason);
@@ -310,13 +316,13 @@ function Dashboard() {
     }
 
     /* Community Favorites */
-    if (featuredResult.status === 'fulfilled') {
-      const data = featuredResult.value;
-      setFeaturedBooks(Array.isArray(data) ? data : data.books ?? []);
-      setFeaturedStatus('success');
+    if (communityResult.status === 'fulfilled') {
+      const data = communityResult.value;
+      setCommunityBooks(Array.isArray(data) ? data : data.books ?? []);
+      setCommunityStatus('success');
     } else {
-      console.error('Community Favorites fetch failed:', featuredResult.reason);
-      setFeaturedStatus('error');
+      console.error('Community Favorites fetch failed:', communityResult.reason);
+      setCommunityStatus('error');
     }
   }, []);
 
@@ -340,8 +346,9 @@ function Dashboard() {
   const retryTrending = useCallback(async () => {
     setTrendingStatus('loading');
     try {
-      const data = await getBooks({ sort: '-savesCount', limit: 4 });
+      const data = await getTrendingBooks(4);
       setTrendingBooks(Array.isArray(data) ? data : data.books ?? []);
+      setTrendingWindow(data.window ?? '');
       setTrendingStatus('success');
     } catch (err) {
       console.error('Trending retry failed:', err);
@@ -349,15 +356,15 @@ function Dashboard() {
     }
   }, []);
 
-  const retryFeatured = useCallback(async () => {
-    setFeaturedStatus('loading');
+  const retryCommunity = useCallback(async () => {
+    setCommunityStatus('loading');
     try {
-      const data = await getBooks({ featured: true, limit: 4 });
-      setFeaturedBooks(Array.isArray(data) ? data : data.books ?? []);
-      setFeaturedStatus('success');
+      const data = await getBooks({ sort: '-savesCount', limit: 4 });
+      setCommunityBooks(Array.isArray(data) ? data : data.books ?? []);
+      setCommunityStatus('success');
     } catch (err) {
-      console.error('Featured retry failed:', err);
-      setFeaturedStatus('error');
+      console.error('Community retry failed:', err);
+      setCommunityStatus('error');
     }
   }, []);
 
@@ -407,6 +414,14 @@ function Dashboard() {
 
         {/* Trending Books */}
         <Section id="trending-books" title="Trending Books" icon={TrendingUp} delay={0.3}>
+          {trendingWindow && trendingWindow !== 'recent' && trendingStatus === 'success' && (
+            <p className="mb-3 text-[11.5px] font-medium text-neutral-400">
+              {trendingWindow === 'today' && 'Saved the most today'}
+              {trendingWindow === 'week'  && 'Most saved this week'}
+              {trendingWindow === 'month' && 'Most saved this month'}
+              {trendingWindow === 'all-time' && 'Most saved of all time'}
+            </p>
+          )}
           <BookSection
             books={trendingBooks}
             status={trendingStatus}
@@ -418,10 +433,10 @@ function Dashboard() {
         {/* Community Favorites */}
         <Section id="community-favorites" title="Community Favorites" icon={StarIcon} delay={0.36}>
           <BookSection
-            books={featuredBooks}
-            status={featuredStatus}
-            emptyMessage="Community favorites will appear here once books are featured."
-            onRetry={retryFeatured}
+            books={communityBooks}
+            status={communityStatus}
+            emptyMessage="Community favorites will appear here once readers start saving books."
+            onRetry={retryCommunity}
           />
         </Section>
 
